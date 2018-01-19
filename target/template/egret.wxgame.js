@@ -3540,23 +3540,8 @@ if (true) {
          * @private
          */
         function getOption(key) {
-            if (window.location) {
-                var search = location.search;
-                if (search == "") {
-                    return "";
-                }
-                search = search.slice(1);
-                var searchArr = search.split("&");
-                var length_1 = searchArr.length;
-                for (var i = 0; i < length_1; i++) {
-                    var str = searchArr[i];
-                    var arr = str.split("=");
-                    if (arr[0] == key) {
-                        return arr[1];
-                    }
-                }
-            }
-            return "";
+            var launchOptions = wx.getLaunchOptionsSync();
+            return launchOptions.query[key] || launchOptions[key];
         }
         wxapp.getOption = getOption;
         egret.getOption = getOption;
@@ -6384,8 +6369,8 @@ egret.DeviceOrientation = egret.wxapp.WebDeviceOrientation;
                     if (renderBufferPool.length > 6) {
                         renderBufferPool.length = 6;
                     }
-                    var length_2 = renderBufferPool.length;
-                    for (var i = 0; i < length_2; i++) {
+                    var length_1 = renderBufferPool.length;
+                    for (var i = 0; i < length_1; i++) {
                         renderBufferPool[i].resize(0, 0);
                     }
                 }
@@ -6448,8 +6433,8 @@ egret.DeviceOrientation = egret.wxapp.WebDeviceOrientation;
                 }
                 var children = displayObject.$children;
                 if (children) {
-                    var length_3 = children.length;
-                    for (var i = 0; i < length_3; i++) {
+                    var length_2 = children.length;
+                    for (var i = 0; i < length_2; i++) {
                         var child = children[i];
                         var offsetX2 = void 0;
                         var offsetY2 = void 0;
@@ -6875,8 +6860,8 @@ egret.DeviceOrientation = egret.wxapp.WebDeviceOrientation;
                 }
                 var children = displayObject.$children;
                 if (children) {
-                    var length_4 = children.length;
-                    for (var i = 0; i < length_4; i++) {
+                    var length_3 = children.length;
+                    for (var i = 0; i < length_3; i++) {
                         var child = children[i];
                         switch (child.$renderMode) {
                             case 1 /* NONE */:
