@@ -1,0 +1,19 @@
+{
+    "projectType": "wxgame",
+    "version": "1.0.8",
+    "args": [
+        {
+            "name": "appid",
+            "default": "wx6ac3f5090a6b99c5",
+            "files": [
+                "project.config.json"
+            ]
+        },
+        {
+            "name": "projectname",
+            "files": [
+                "project.config.json"
+            ]
+        }
+    ]
+}
