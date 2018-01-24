@@ -28,22 +28,6 @@
 //////////////////////////////////////////////////////////////////////////////////////
 
 namespace egret.wxapp {
-
-    /**
-     * 创建一个canvas。
-     */
-    function createCanvas(width?: number, height?: number): HTMLCanvasElement {
-        
-        //let canvas: HTMLCanvasElement = document.createElement("canvas");
-        let canvas = window['canvas']; 
-
-        if (!isNaN(width) && !isNaN(height)) {
-            canvas.width = width;
-            canvas.height = height;
-        }
-        return canvas;
-    }
-
     /**
      * @private
      * WebGL上下文对象，提供简单的绘图接口
@@ -183,7 +167,7 @@ namespace egret.wxapp {
 
         public constructor(width?: number, height?: number) {
 
-            this.surface = createCanvas(width, height);
+            this.surface = window['canvas'];
 
             this.initWebGL();
 

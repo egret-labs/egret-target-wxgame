@@ -3124,7 +3124,7 @@ if (window['HTMLVideoElement'] == undefined) {
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "1.0.11";
+        wxgame.version = "1.0.12";
         /**
          * 运行环境是否为子域
          */
@@ -5072,18 +5072,6 @@ egret.DeviceOrientation = egret.wxapp.WebDeviceOrientation;
     var wxapp;
     (function (wxapp) {
         /**
-         * 创建一个canvas。
-         */
-        function createCanvas(width, height) {
-            //let canvas: HTMLCanvasElement = document.createElement("canvas");
-            var canvas = window['canvas'];
-            if (!isNaN(width) && !isNaN(height)) {
-                canvas.width = width;
-                canvas.height = height;
-            }
-            return canvas;
-        }
-        /**
          * @private
          * WebGL上下文对象，提供简单的绘图接口
          * 抽象出此类，以实现共用一个context
@@ -5096,7 +5084,7 @@ egret.DeviceOrientation = egret.wxapp.WebDeviceOrientation;
                 this.contextLost = false;
                 this.$scissorState = false;
                 this.vertSize = 5;
-                this.surface = createCanvas(width, height);
+                this.surface = window['canvas'];
                 this.initWebGL();
                 this.$bufferStack = [];
                 var gl = this.context;
