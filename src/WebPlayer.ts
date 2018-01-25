@@ -186,8 +186,8 @@ namespace egret.wxapp {
             }
             let screenWidth = shouldRotate ? boundingClientHeight : boundingClientWidth;
             let screenHeight = shouldRotate ? boundingClientWidth : boundingClientHeight;
-            Capabilities.$boundingClientWidth = screenWidth;
-            Capabilities.$boundingClientHeight = screenHeight;
+            Capabilities["boundingClientWidth" + ""] = screenWidth;
+            Capabilities["boundingClientHeight" + ""] = screenHeight;
             let stageSize = egret.sys.screenAdapter.calculateStageSize(this.stage.$scaleMode,
                 screenWidth, screenHeight, option.contentWidth, option.contentHeight);
             let stageWidth = stageSize.stageWidth;

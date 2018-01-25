@@ -40,24 +40,24 @@ namespace egret.wxapp {
         public static detect():void {
             let capabilities = egret.Capabilities;
             let ua = navigator.userAgent.toLowerCase();
-            capabilities.$isMobile = (ua.indexOf('mobile') != -1 || ua.indexOf('android') != -1);
-            if(capabilities.$isMobile){
+            capabilities["isMobile" + ""] = (ua.indexOf('mobile') != -1 || ua.indexOf('android') != -1);
+            if(capabilities.isMobile){
                 if(ua.indexOf("windows") < 0&&(ua.indexOf("iphone") != -1 || ua.indexOf("ipad") != -1 || ua.indexOf("ipod") != -1)){
-                    capabilities.$os = "iOS";
+                    capabilities["os" + ""] = "iOS";
                 }
                 else if(ua.indexOf("android")!= -1&&ua.indexOf("linux")!= -1){
-                    capabilities.$os = "Android";
+                    capabilities["os" + ""] = "Android";
                 }
                 else if(ua.indexOf("windows")!= -1){
-                    capabilities.$os = "Windows Phone";
+                    capabilities["os" + ""] = "Windows Phone";
                 }
             }
             else{
                 if(ua.indexOf("windows nt")!= -1){
-                    capabilities.$os = "Windows PC";
+                    capabilities["os" + ""] = "Windows PC";
                 }
                 else if(ua.indexOf("mac os")!= -1){
-                    capabilities.$os = "Mac OS";
+                    capabilities["os" + ""] = "Mac OS";
                 }
             }
             
@@ -66,7 +66,7 @@ namespace egret.wxapp {
             if (strings.length > 1) {
                 strings[1] = strings[1].toUpperCase();
             }
-            capabilities.$language = strings.join("-");
+            capabilities["language" + ""] = strings.join("-");
 
             WebCapability.injectUIntFixOnIE9();
         }

@@ -142,7 +142,7 @@ namespace egret.wxapp {
      */
     function setRenderMode(renderMode: string): void {
         if (!wxgame.isSubContext) {
-            Capabilities.$renderMode = "webgl";
+            Capabilities["renderMode" + ""] = "webgl";
             sys.RenderBuffer = wxapp.WebGLRenderBuffer;
             sys.systemRenderer = new WebGLRenderer();
             sys.canvasRenderer = new CanvasRenderer();
@@ -151,7 +151,7 @@ namespace egret.wxapp {
 
         }
         else {
-            Capabilities.$renderMode = "canvas";
+            Capabilities["renderMode" + ""] = "canvas";
             sys.RenderBuffer = wxapp.CanvasRenderBuffer;
             sys.systemRenderer = new CanvasRenderer();
             sys.canvasRenderer = sys.systemRenderer;

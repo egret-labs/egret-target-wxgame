@@ -2895,28 +2895,6 @@ if (window['HTMLVideoElement'] == undefined) {
         wxapp.AudioType = AudioType;
         __reflect(AudioType.prototype, "egret.wxapp.AudioType");
         /**
-         * @private
-         */
-        var SystemOSType = (function () {
-            function SystemOSType() {
-            }
-            /**
-             * @private
-             */
-            SystemOSType.WPHONE = 1;
-            /**
-             * @private
-             */
-            SystemOSType.IOS = 2;
-            /**
-             * @private
-             */
-            SystemOSType.ADNROID = 3;
-            return SystemOSType;
-        }());
-        wxapp.SystemOSType = SystemOSType;
-        __reflect(SystemOSType.prototype, "egret.wxapp.SystemOSType");
-        /**
          * html5兼容性配置
          * @private
          */
@@ -2935,7 +2913,6 @@ if (window['HTMLVideoElement'] == undefined) {
             Html5Capatibility.$init = function () {
                 var ua = navigator.userAgent.toLowerCase();
                 Html5Capatibility.ua = ua;
-                egret.Capabilities.$isMobile = (ua.indexOf('mobile') != -1 || ua.indexOf('android') != -1);
                 Html5Capatibility._canUseBlob = false;
                 var canUseWebAudio = window["AudioContext"] || window["webkitAudioContext"] || window["mozAudioContext"];
                 if (canUseWebAudio) {
@@ -2957,33 +2934,17 @@ if (window['HTMLVideoElement'] == undefined) {
                     checkAudioType = true;
                     Html5Capatibility.setAudioType(AudioType.HTML5_AUDIO);
                 }
-                if (ua.indexOf("windows phone") >= 0) {
-                    Html5Capatibility._System_OS = SystemOSType.WPHONE;
-                    egret.Capabilities.$os = "Windows Phone";
-                }
-                else if (ua.indexOf("android") >= 0) {
-                    egret.Capabilities.$os = "Android";
-                    Html5Capatibility._System_OS = SystemOSType.ADNROID;
+                if (ua.indexOf("android") >= 0) {
                     if (checkAudioType && canUseWebAudio) {
                         Html5Capatibility.setAudioType(AudioType.WEB_AUDIO);
                     }
                 }
                 else if (ua.indexOf("iphone") >= 0 || ua.indexOf("ipad") >= 0 || ua.indexOf("ipod") >= 0) {
-                    egret.Capabilities.$os = "iOS";
-                    Html5Capatibility._System_OS = SystemOSType.IOS;
                     if (Html5Capatibility.getIOSVersion() >= 7) {
                         Html5Capatibility._canUseBlob = true;
                         if (checkAudioType && canUseWebAudio) {
                             Html5Capatibility.setAudioType(AudioType.WEB_AUDIO);
                         }
-                    }
-                }
-                else {
-                    if (ua.indexOf("windows nt") != -1) {
-                        egret.Capabilities.$os = "Windows PC";
-                    }
-                    else if (ua.indexOf("mac os") != -1) {
-                        egret.Capabilities.$os = "Mac OS";
                     }
                 }
                 var winURL = window["URL"] || window["webkitURL"];
@@ -3016,26 +2977,10 @@ if (window['HTMLVideoElement'] == undefined) {
                 var value = Html5Capatibility.ua.toLowerCase().match(/cpu [^\d]*\d.*like mac os x/)[0];
                 return parseInt(value.match(/\d+(_\d)*/)[0]) || 0;
             };
-            /**
-             * @private
-             *
-             */
-            Html5Capatibility.checkHtml5Support = function () {
-                var language = (navigator.language || navigator["browserLanguage"]).toLowerCase();
-                var strings = language.split("-");
-                if (strings.length > 1) {
-                    strings[1] = strings[1].toUpperCase();
-                }
-                egret.Capabilities.$language = strings.join("-");
-            };
             //当前浏览器版本是否支持blob
             Html5Capatibility._canUseBlob = false;
             //当前浏览器版本是否支持webaudio
             Html5Capatibility._audioType = 0;
-            /**
-             * @private
-             */
-            Html5Capatibility._System_OS = 0;
             /**
              * @private
              */
@@ -3224,7 +3169,7 @@ if (window['HTMLVideoElement'] == undefined) {
          */
         function setRenderMode(renderMode) {
             if (!egret.wxgame.isSubContext) {
-                egret.Capabilities.$renderMode = "webgl";
+                egret.Capabilities["renderMode" + ""] = "webgl";
                 egret.sys.RenderBuffer = wxapp.WebGLRenderBuffer;
                 egret.sys.systemRenderer = new wxapp.WebGLRenderer();
                 egret.sys.canvasRenderer = new egret.CanvasRenderer();
@@ -3232,7 +3177,7 @@ if (window['HTMLVideoElement'] == undefined) {
                 egret.sys.canvasHitTestBuffer = new wxapp.CanvasRenderBuffer(3, 3);
             }
             else {
-                egret.Capabilities.$renderMode = "canvas";
+                egret.Capabilities["renderMode" + ""] = "canvas";
                 egret.sys.RenderBuffer = wxapp.CanvasRenderBuffer;
                 egret.sys.systemRenderer = new egret.CanvasRenderer();
                 egret.sys.canvasRenderer = egret.sys.systemRenderer;
@@ -3326,24 +3271,24 @@ if (true) {
             WebCapability.detect = function () {
                 var capabilities = egret.Capabilities;
                 var ua = navigator.userAgent.toLowerCase();
-                capabilities.$isMobile = (ua.indexOf('mobile') != -1 || ua.indexOf('android') != -1);
-                if (capabilities.$isMobile) {
+                capabilities["isMobile" + ""] = (ua.indexOf('mobile') != -1 || ua.indexOf('android') != -1);
+                if (capabilities.isMobile) {
                     if (ua.indexOf("windows") < 0 && (ua.indexOf("iphone") != -1 || ua.indexOf("ipad") != -1 || ua.indexOf("ipod") != -1)) {
-                        capabilities.$os = "iOS";
+                        capabilities["os" + ""] = "iOS";
                     }
                     else if (ua.indexOf("android") != -1 && ua.indexOf("linux") != -1) {
-                        capabilities.$os = "Android";
+                        capabilities["os" + ""] = "Android";
                     }
                     else if (ua.indexOf("windows") != -1) {
-                        capabilities.$os = "Windows Phone";
+                        capabilities["os" + ""] = "Windows Phone";
                     }
                 }
                 else {
                     if (ua.indexOf("windows nt") != -1) {
-                        capabilities.$os = "Windows PC";
+                        capabilities["os" + ""] = "Windows PC";
                     }
                     else if (ua.indexOf("mac os") != -1) {
-                        capabilities.$os = "Mac OS";
+                        capabilities["os" + ""] = "Mac OS";
                     }
                 }
                 var language = (navigator.language || navigator["browserLanguage"]).toLowerCase();
@@ -3351,7 +3296,7 @@ if (true) {
                 if (strings.length > 1) {
                     strings[1] = strings[1].toUpperCase();
                 }
-                capabilities.$language = strings.join("-");
+                capabilities["language" + ""] = strings.join("-");
                 WebCapability.injectUIntFixOnIE9();
             };
             WebCapability.injectUIntFixOnIE9 = function () {
@@ -3698,8 +3643,8 @@ if (true) {
                 }
                 var screenWidth = shouldRotate ? boundingClientHeight : boundingClientWidth;
                 var screenHeight = shouldRotate ? boundingClientWidth : boundingClientHeight;
-                egret.Capabilities.$boundingClientWidth = screenWidth;
-                egret.Capabilities.$boundingClientHeight = screenHeight;
+                egret.Capabilities["boundingClientWidth" + ""] = screenWidth;
+                egret.Capabilities["boundingClientHeight" + ""] = screenHeight;
                 var stageSize = egret.sys.screenAdapter.calculateStageSize(this.stage.$scaleMode, screenWidth, screenHeight, option.contentWidth, option.contentHeight);
                 var stageWidth = stageSize.stageWidth;
                 var stageHeight = stageSize.stageHeight;
@@ -3836,7 +3781,7 @@ if (true) {
             surface["style"]["height"] = iHeight + "px";
             sharedCanvas.width = iWidth;
             sharedCanvas.height = iHeight;
-            if (egret.Capabilities.$renderMode == "webgl") {
+            if (egret.Capabilities.renderMode == "webgl") {
                 var renderTexture = void 0;
                 //webgl下非RenderTexture纹理先画到RenderTexture
                 if (!texture.$renderBuffer) {
