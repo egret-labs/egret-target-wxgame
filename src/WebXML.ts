@@ -125,7 +125,6 @@ namespace egret.wxapp {
     }
 
 
-    //let parser = new DOMParser();
     let parser;
 
     /**
@@ -134,6 +133,14 @@ namespace egret.wxapp {
      * @param text 要解析的字符串
      */
     function parse(text:string):XML {
+        if(!parser) {
+            if(!window["DOMParser"]) {
+                console.error("没有 XML 支持库，请访问 http://developer.egret.com/cn/github/egret-docs/Engine2D/minigame/minigameFAQ/index.html#xml 了解详情");
+            }
+            else {
+                parser = new DOMParser();
+            }
+        }
         let xmlDoc = parser.parseFromString(text, "text/xml");
         let length = xmlDoc.childNodes.length;
         for (let i = 0; i < length; i++) {

@@ -3962,7 +3962,6 @@ if (true) {
         }(XMLNode));
         wxapp.XMLText = XMLText;
         __reflect(XMLText.prototype, "egret.wxapp.XMLText");
-        //let parser = new DOMParser();
         var parser;
         /**
          * @private
@@ -3970,6 +3969,14 @@ if (true) {
          * @param text 要解析的字符串
          */
         function parse(text) {
+            if (!parser) {
+                if (!window["DOMParser"]) {
+                    console.error("没有 XML 支持库，请访问 http://developer.egret.com/cn/github/egret-docs/Engine2D/minigame/minigameFAQ/index.html#xml 了解详情");
+                }
+                else {
+                    parser = new DOMParser();
+                }
+            }
             var xmlDoc = parser.parseFromString(text, "text/xml");
             var length = xmlDoc.childNodes.length;
             for (var i = 0; i < length; i++) {
