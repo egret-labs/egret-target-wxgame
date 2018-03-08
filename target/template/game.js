@@ -8,7 +8,7 @@ egret.runEgret({
     //The following is automatically modified, please do not modify
     //----auto option start----
     //----auto option end----
-    
+    renderMode: 'webgl',
     audioType: 0,
     calculateCanvasScaleFactor: function (context) {
         var backingStore = context.backingStorePixelRatio ||

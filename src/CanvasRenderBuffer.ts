@@ -127,17 +127,23 @@ namespace egret.wxapp {
          */
         public resize(width: number, height: number, useMaxSize?: boolean): void {
             let surface = this.surface;
-            if(surface == window["sharedCanvas"]) {
+            if (wxgame.isSubContext) {
                 return;
             }
             if (useMaxSize) {
                 let change = false;
                 if (surface.width < width) {
                     surface.width = width;
+                    if (Capabilities.renderMode === 'canvas') {
+                        window["sharedCanvas"].width = width;
+                    }
                     change = true;
                 }
                 if (surface.height < height) {
                     surface.height = height;
+                    if (Capabilities.renderMode === 'canvas') {
+                        window["sharedCanvas"].height = height;
+                    }
                     change = true;
                 }
                 //尺寸没有变化时,将绘制属性重置
@@ -150,9 +156,15 @@ namespace egret.wxapp {
             else {
                 if (surface.width != width) {
                     surface.width = width;
+                    if (Capabilities.renderMode === 'canvas') {
+                        window["sharedCanvas"].width = width;
+                    }
                 }
                 if (surface.height != height) {
                     surface.height = height;
+                    if (Capabilities.renderMode === 'canvas') {
+                        window["sharedCanvas"].height = height;
+                    }
                 }
             }
             this.clear();

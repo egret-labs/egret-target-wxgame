@@ -2483,17 +2483,25 @@ if (window['HTMLVideoElement'] == undefined) {
              */
             CanvasRenderBuffer.prototype.resize = function (width, height, useMaxSize) {
                 var surface = this.surface;
-                if (surface == window["sharedCanvas"]) {
+                if (egret.wxgame.isSubContext) {
                     return;
                 }
                 if (useMaxSize) {
                     var change = false;
                     if (surface.width < width) {
                         surface.width = width;
+                        // window["sharedCanvas"].width = width;
+                        if (egret.Capabilities.renderMode === 'canvas') {
+                            window["sharedCanvas"].width = width;
+                        }
                         change = true;
                     }
                     if (surface.height < height) {
                         surface.height = height;
+                        if (egret.Capabilities.renderMode === 'canvas') {
+                            window["sharedCanvas"].height = height;
+                        }
+                        // window["sharedCanvas"].height = height;
                         change = true;
                     }
                     //尺寸没有变化时,将绘制属性重置
@@ -2506,9 +2514,17 @@ if (window['HTMLVideoElement'] == undefined) {
                 else {
                     if (surface.width != width) {
                         surface.width = width;
+                        if (egret.Capabilities.renderMode === 'canvas') {
+                            window["sharedCanvas"].width = width;
+                        }
+                        // window["sharedCanvas"].width = width;
                     }
                     if (surface.height != height) {
                         surface.height = height;
+                        if (egret.Capabilities.renderMode === 'canvas') {
+                            window["sharedCanvas"].height = height;
+                        }
+                        // window["sharedCanvas"].height = height;
                     }
                 }
                 this.clear();
@@ -3168,7 +3184,7 @@ if (window['HTMLVideoElement'] == undefined) {
          * @param renderMode
          */
         function setRenderMode(renderMode) {
-            if (!egret.wxgame.isSubContext) {
+            if (renderMode === "webgl") {
                 egret.Capabilities["renderMode" + ""] = "webgl";
                 egret.sys.RenderBuffer = wxapp.WebGLRenderBuffer;
                 egret.sys.systemRenderer = new wxapp.WebGLRenderer();

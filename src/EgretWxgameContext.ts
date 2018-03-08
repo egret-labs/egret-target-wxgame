@@ -36,7 +36,7 @@ namespace egret.wxgame {
     /**
      * 运行环境是否为子域
      */
-    export let isSubContext:boolean = false;
+    export let isSubContext: boolean = false;
 }
 
 namespace egret.wxapp {
@@ -141,7 +141,7 @@ namespace egret.wxapp {
      * @param renderMode
      */
     function setRenderMode(renderMode: string): void {
-        if (!wxgame.isSubContext) {
+        if (renderMode === "webgl") {
             Capabilities["renderMode" + ""] = "webgl";
             sys.RenderBuffer = wxapp.WebGLRenderBuffer;
             sys.systemRenderer = new WebGLRenderer();
