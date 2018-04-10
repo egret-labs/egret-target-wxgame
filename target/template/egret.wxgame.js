@@ -1931,20 +1931,18 @@ if (window['HTMLVideoElement'] == undefined) {
             WebHttpRequest.prototype.onReadyStateChange = function () {
                 var xhr = this._xhr;
                 if (xhr.readyState == 4) {
-                    var ioError_1 = (xhr.status >= 400 || xhr.status == 0);
-                    var url_1 = this._url;
+                    var ioError = (xhr.status >= 400 || xhr.status == 0);
+                    var url = this._url;
                     var self_1 = this;
-                    window.setTimeout(function () {
-                        if (ioError_1) {
-                            if (true && !self_1.hasEventListener(egret.IOErrorEvent.IO_ERROR)) {
-                                egret.$error(1011, url_1);
-                            }
-                            self_1.dispatchEventWith(egret.IOErrorEvent.IO_ERROR);
+                    if (ioError) {
+                        if (true && !self_1.hasEventListener(egret.IOErrorEvent.IO_ERROR)) {
+                            egret.$error(1011, url);
                         }
-                        else {
-                            self_1.dispatchEventWith(egret.Event.COMPLETE);
-                        }
-                    }, 0);
+                        self_1.dispatchEventWith(egret.IOErrorEvent.IO_ERROR);
+                    }
+                    else {
+                        self_1.dispatchEventWith(egret.Event.COMPLETE);
+                    }
                 }
             };
             /**
@@ -2084,9 +2082,7 @@ if (window['HTMLVideoElement'] == undefined) {
                 }
                 this.data = new egret.BitmapData(image);
                 var self = this;
-                window.setTimeout(function () {
-                    self.dispatchEventWith(egret.Event.COMPLETE);
-                }, 0);
+                self.dispatchEventWith(egret.Event.COMPLETE);
             };
             /**
              * @private
@@ -2100,12 +2096,10 @@ if (window['HTMLVideoElement'] == undefined) {
             };
             WebImageLoader.prototype.dispatchIOError = function (url) {
                 var self = this;
-                window.setTimeout(function () {
-                    if (true && !self.hasEventListener(egret.IOErrorEvent.IO_ERROR)) {
-                        egret.$error(1011, url);
-                    }
-                    self.dispatchEventWith(egret.IOErrorEvent.IO_ERROR);
-                }, 0);
+                if (true && !self.hasEventListener(egret.IOErrorEvent.IO_ERROR)) {
+                    egret.$error(1011, url);
+                }
+                self.dispatchEventWith(egret.IOErrorEvent.IO_ERROR);
             };
             /**
              * @private
@@ -2490,7 +2484,6 @@ if (window['HTMLVideoElement'] == undefined) {
                     var change = false;
                     if (surface.width < width) {
                         surface.width = width;
-                        // window["sharedCanvas"].width = width;
                         if (egret.Capabilities.renderMode === 'canvas') {
                             window["sharedCanvas"].width = width;
                         }
@@ -2501,7 +2494,6 @@ if (window['HTMLVideoElement'] == undefined) {
                         if (egret.Capabilities.renderMode === 'canvas') {
                             window["sharedCanvas"].height = height;
                         }
-                        // window["sharedCanvas"].height = height;
                         change = true;
                     }
                     //尺寸没有变化时,将绘制属性重置
@@ -2517,14 +2509,12 @@ if (window['HTMLVideoElement'] == undefined) {
                         if (egret.Capabilities.renderMode === 'canvas') {
                             window["sharedCanvas"].width = width;
                         }
-                        // window["sharedCanvas"].width = width;
                     }
                     if (surface.height != height) {
                         surface.height = height;
                         if (egret.Capabilities.renderMode === 'canvas') {
                             window["sharedCanvas"].height = height;
                         }
-                        // window["sharedCanvas"].height = height;
                     }
                 }
                 this.clear();
@@ -3085,7 +3075,7 @@ if (window['HTMLVideoElement'] == undefined) {
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "1.0.13";
+        wxgame.version = "1.0.14";
         /**
          * 运行环境是否为子域
          */
