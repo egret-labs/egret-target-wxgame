@@ -3124,6 +3124,7 @@ if (window['HTMLVideoElement'] == undefined) {
                 wxapp.WebGLRenderContext.antialias = !!antialias;
                 // WebGLRenderContext.antialias = (typeof antialias == undefined) ? true : antialias;
             }
+            egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
             egret.sys.CanvasRenderBuffer = wxapp.CanvasRenderBuffer;
             setRenderMode(options.renderMode);
             var canvasScaleFactor;

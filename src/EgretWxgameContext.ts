@@ -84,6 +84,8 @@ namespace egret.wxapp {
             // WebGLRenderContext.antialias = (typeof antialias == undefined) ? true : antialias;
         }
 
+        Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
+
         sys.CanvasRenderBuffer = wxapp.CanvasRenderBuffer;
         setRenderMode(options.renderMode);
 
