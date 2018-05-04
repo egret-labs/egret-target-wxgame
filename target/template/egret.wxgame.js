@@ -3075,7 +3075,7 @@ if (window['HTMLVideoElement'] == undefined) {
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "1.0.14";
+        wxgame.version = "1.0.15";
         /**
          * 运行环境是否为子域
          */
@@ -3781,8 +3781,8 @@ if (true) {
             rect.y = Math.min(rect.y, h - 1);
             rect.width = Math.min(rect.width, w - rect.x);
             rect.height = Math.min(rect.height, h - rect.y);
-            var iWidth = rect.width;
-            var iHeight = rect.height;
+            var iWidth = Math.floor(rect.width);
+            var iHeight = Math.floor(rect.height);
             var surface = sharedCanvas;
             surface["style"]["width"] = iWidth + "px";
             surface["style"]["height"] = iHeight + "px";
@@ -3800,11 +3800,21 @@ if (true) {
                 }
                 //从RenderTexture中读取像素数据，填入canvas
                 var pixels = renderTexture.$renderBuffer.getPixels(rect.x, rect.y, iWidth, iHeight);
-                var imageData = new ImageData(iWidth, iHeight);
-                for (var i = 0; i < pixels.length; i++) {
-                    imageData.data[i] = pixels[i];
+                var x = 0;
+                var y = 0;
+                for (var i = 0; i < pixels.length; i += 4) {
+                    sharedContext.fillStyle =
+                        'rgba(' + pixels[i]
+                            + ',' + pixels[i + 1]
+                            + ',' + pixels[i + 2]
+                            + ',' + (pixels[i + 3] / 255) + ')';
+                    sharedContext.fillRect(x, y, 1, 1);
+                    x++;
+                    if (x == iWidth) {
+                        x = 0;
+                        y++;
+                    }
                 }
-                sharedContext.putImageData(imageData, 0, 0);
                 if (!texture.$renderBuffer) {
                     renderTexture.dispose();
                 }
@@ -3838,17 +3848,18 @@ if (true) {
          * 有些杀毒软件认为 saveToFile 可能是一个病毒文件
          */
         function eliFoTevas(type, filePath, rect, encoderOptions) {
-            var base64 = toDataURL.call(this, type, rect, encoderOptions);
-            if (base64 == null) {
-                return;
-            }
-            var href = base64.replace(/^data:image[^;]*/, "data:image/octet-stream");
-            var aLink = document.createElement('a');
-            aLink['download'] = filePath;
-            aLink.href = href;
-            var evt = document.createEvent('MouseEvents');
-            evt.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-            aLink.dispatchEvent(evt);
+            var surface = convertImageToCanvas(this, rect);
+            var result = surface.toTempFilePathSync({
+                fileType: type.indexOf("png") >= 0 ? "png" : "jpg"
+            });
+            wx.getFileSystemManager().saveFile({
+                tempFilePath: result,
+                filePath: wx.env.USER_DATA_PATH + "/" + filePath,
+                success: function (res) {
+                    //todo
+                }
+            });
+            return result;
         }
         function getPixel32(x, y) {
             egret.$warn(1041, "getPixel32", "getPixels");

@@ -57,8 +57,8 @@ namespace egret.wxapp {
         rect.width = Math.min(rect.width, w - rect.x);
         rect.height = Math.min(rect.height, h - rect.y);
 
-        let iWidth = rect.width;
-        let iHeight = rect.height;
+        let iWidth = Math.floor(rect.width);
+        let iHeight = Math.floor(rect.height);
         let surface = sharedCanvas;
         surface["style"]["width"] = iWidth + "px";
         surface["style"]["height"] = iHeight + "px";
@@ -77,11 +77,21 @@ namespace egret.wxapp {
             }
             //从RenderTexture中读取像素数据，填入canvas
             let pixels = renderTexture.$renderBuffer.getPixels(rect.x, rect.y, iWidth, iHeight);
-            let imageData = new ImageData(iWidth, iHeight);
-            for (let i = 0; i < pixels.length; i++) {
-                imageData.data[i] = pixels[i];
+            var x = 0;
+            var y = 0;
+            for (var i = 0; i < pixels.length; i += 4) {
+                sharedContext.fillStyle =
+                    'rgba(' + pixels[i]
+                    + ',' + pixels[i + 1]
+                    + ',' + pixels[i + 2]
+                    + ',' + (pixels[i + 3] / 255) + ')';
+                sharedContext.fillRect(x, y, 1, 1);
+                x++;
+                if (x == iWidth) {
+                    x = 0;
+                    y++;
+                }
             }
-            sharedContext.putImageData(imageData, 0, 0);
 
             if (!(<RenderTexture>texture).$renderBuffer) {
                 renderTexture.dispose();
@@ -120,19 +130,20 @@ namespace egret.wxapp {
      * 有些杀毒软件认为 saveToFile 可能是一个病毒文件
      */
     function eliFoTevas(type: string, filePath: string, rect?: egret.Rectangle, encoderOptions?): void {
-        let base64 = toDataURL.call(this, type, rect, encoderOptions);
-        if (base64 == null) {
-            return;
-        }
+        var surface = convertImageToCanvas(this, rect);
+        var result = (surface as any).toTempFilePathSync({
+            fileType: type.indexOf("png") >= 0 ? "png" : "jpg"
+        });
 
-        let href = base64.replace(/^data:image[^;]*/, "data:image/octet-stream");
-        let aLink = document.createElement('a');
-        aLink['download'] = filePath;
-        aLink.href = href;
+        wx.getFileSystemManager().saveFile({
+            tempFilePath: result,
+            filePath: `${wx.env.USER_DATA_PATH}/${filePath}`,
+            success: function (res) {
+                //todo
+            }
+        })
 
-        var evt = document.createEvent('MouseEvents');
-        evt.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-        aLink.dispatchEvent(evt);
+        return result;
     }
 
     function getPixel32(x: number, y: number): number[] {
