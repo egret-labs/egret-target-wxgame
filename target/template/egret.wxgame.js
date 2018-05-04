@@ -1737,28 +1737,6 @@ if (window['HTMLVideoElement'] == undefined) {
                     if (this._response) {
                         return this._response;
                     }
-                    if (!this._xhr) {
-                        return null;
-                    }
-                    if (this._xhr.response != undefined) {
-                        return this._xhr.response;
-                    }
-                    if (this._responseType == "text") {
-                        return this._xhr.responseText;
-                    }
-                    if (this._responseType == "arraybuffer" && /msie 9.0/i.test(navigator.userAgent)) {
-                        var w = window;
-                        return w.convertResponseBodyToText(this._xhr["responseBody"]);
-                    }
-                    if (this._responseType == "document") {
-                        return this._xhr.responseXML;
-                    }
-                    /*if (this._xhr.responseXML) {
-                        return this._xhr.responseXML;
-                    }
-                    if (this._xhr.responseText != undefined) {
-                        return this._xhr.responseText;
-                    }*/
                     return null;
                 },
                 enumerable: true,
@@ -1802,14 +1780,6 @@ if (window['HTMLVideoElement'] == undefined) {
                 if (method === void 0) { method = "GET"; }
                 this._url = url;
                 this._method = method;
-                if (this._xhr) {
-                    this._xhr.abort();
-                    this._xhr = null;
-                }
-                this._xhr = new XMLHttpRequest();
-                this._xhr.onreadystatechange = this.onReadyStateChange.bind(this);
-                this._xhr.onprogress = this.updateProgress.bind(this);
-                this._xhr.open(this._method, this._url, true);
             };
             WebHttpRequest.prototype.readFileAsync = function () {
                 var self = this;
@@ -1859,18 +1829,46 @@ if (window['HTMLVideoElement'] == undefined) {
                     this.readFileAsync();
                 }
                 else {
-                    if (this._responseType != null) {
-                        this._xhr.responseType = this._responseType;
-                    }
-                    if (this._withCredentials != null) {
-                        this._xhr.withCredentials = this._withCredentials;
-                    }
-                    if (this.headerObj) {
-                        for (var key in this.headerObj) {
-                            this._xhr.setRequestHeader(key, this.headerObj[key]);
+                    var self_1 = this;
+                    wx.request({
+                        data: data,
+                        url: this._url,
+                        method: this._method,
+                        header: this.headerObj,
+                        responseType: this.responseType,
+                        success: function success(_ref) {
+                            var data = _ref.data, statusCode = _ref.statusCode, header = _ref.header;
+                            if (statusCode != 200) {
+                                self_1.dispatchEventWith(egret.IOErrorEvent.IO_ERROR);
+                                return;
+                            }
+                            if (typeof data !== 'string' && !(data instanceof ArrayBuffer)) {
+                                try {
+                                    data = JSON.stringify(data);
+                                }
+                                catch (e) {
+                                    data = data;
+                                }
+                            }
+                            self_1._responseHeader = header;
+                            if (data instanceof ArrayBuffer) {
+                                self_1._response = '';
+                                var bytes = new Uint8Array(data);
+                                var len = bytes.byteLength;
+                                for (var i = 0; i < len; i++) {
+                                    self_1._response += String.fromCharCode(bytes[i]);
+                                }
+                            }
+                            else {
+                                self_1._response = data;
+                            }
+                            self_1.dispatchEventWith(egret.Event.COMPLETE);
+                        },
+                        fail: function fail(_ref2) {
+                            // var errMsg = _ref2.errMsg;
+                            self_1.dispatchEventWith(egret.IOErrorEvent.IO_ERROR);
                         }
-                    }
-                    this._xhr.send(data);
+                    });
                 }
             };
             /**
@@ -1886,20 +1884,19 @@ if (window['HTMLVideoElement'] == undefined) {
              * 如果请求已经被发送,则立刻中止请求.
              */
             WebHttpRequest.prototype.abort = function () {
-                if (this._xhr) {
-                    this._xhr.abort();
-                }
             };
             /**
              * @private
              * 返回所有响应头信息(响应头名和值), 如果响应头还没接受,则返回"".
              */
             WebHttpRequest.prototype.getAllResponseHeaders = function () {
-                if (!this._xhr) {
+                var responseHeader = this._responseHeader;
+                if (!responseHeader) {
                     return null;
                 }
-                var result = this._xhr.getAllResponseHeaders();
-                return result ? result : "";
+                return Object.keys(responseHeader).map(function (header) {
+                    return header + ': ' + responseHeader[header];
+                }).join('\n');
             };
             /**
              * @private
@@ -1919,31 +1916,11 @@ if (window['HTMLVideoElement'] == undefined) {
              * @param header 要返回的响应头名称
              */
             WebHttpRequest.prototype.getResponseHeader = function (header) {
-                if (!this._xhr) {
+                if (!this._responseHeader) {
                     return null;
                 }
-                var result = this._xhr.getResponseHeader(header);
+                var result = this._responseHeader[header];
                 return result ? result : "";
-            };
-            /**
-             * @private
-             */
-            WebHttpRequest.prototype.onReadyStateChange = function () {
-                var xhr = this._xhr;
-                if (xhr.readyState == 4) {
-                    var ioError = (xhr.status >= 400 || xhr.status == 0);
-                    var url = this._url;
-                    var self_1 = this;
-                    if (ioError) {
-                        if (true && !self_1.hasEventListener(egret.IOErrorEvent.IO_ERROR)) {
-                            egret.$error(1011, url);
-                        }
-                        self_1.dispatchEventWith(egret.IOErrorEvent.IO_ERROR);
-                    }
-                    else {
-                        self_1.dispatchEventWith(egret.Event.COMPLETE);
-                    }
-                }
             };
             /**
              * @private

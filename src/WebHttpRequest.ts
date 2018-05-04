@@ -45,11 +45,6 @@ namespace egret.wxapp {
 
         /**
          * @private
-         */
-        private _xhr: XMLHttpRequest;
-
-        /**
-         * @private
          * 本次请求返回的数据，数据类型根据responseType设置的值确定。
          */
 
@@ -57,34 +52,6 @@ namespace egret.wxapp {
             if (this._response) {
                 return this._response;
             }
-
-            if (!this._xhr) {
-                return null;
-            }
-
-            if (this._xhr.response != undefined) {
-                return this._xhr.response;
-            }
-
-            if (this._responseType == "text") {
-                return this._xhr.responseText;
-            }
-
-            if (this._responseType == "arraybuffer" && /msie 9.0/i.test(navigator.userAgent)) {
-                let w: any = window;
-                return w.convertResponseBodyToText(this._xhr["responseBody"]);
-            }
-
-            if (this._responseType == "document") {
-                return this._xhr.responseXML;
-            }
-
-            /*if (this._xhr.responseXML) {
-                return this._xhr.responseXML;
-            }
-            if (this._xhr.responseText != undefined) {
-                return this._xhr.responseText;
-            }*/
             return null;
         }
 
@@ -127,6 +94,7 @@ namespace egret.wxapp {
          */
         private _url: string = "";
         private _method: string = "";
+        private _responseHeader: string;
 
         /**
          * @private
@@ -137,17 +105,9 @@ namespace egret.wxapp {
         public open(url: string, method: string = "GET"): void {
             this._url = url;
             this._method = method;
-            if (this._xhr) {
-                this._xhr.abort();
-                this._xhr = null;
-            }
-            this._xhr = new XMLHttpRequest();
-            this._xhr.onreadystatechange = this.onReadyStateChange.bind(this);
-            this._xhr.onprogress = this.updateProgress.bind(this);
-            this._xhr.open(this._method, this._url, true);
         }
 
-        public readFileAsync(): void {
+        private readFileAsync(): void {
             var self = this;
 
             var onSuccessFunc = function (content) {
@@ -196,18 +156,49 @@ namespace egret.wxapp {
             if (!this.isNetUrl(this._url)) {
                 this.readFileAsync();
             } else {
-                if (this._responseType != null) {
-                    this._xhr.responseType = this._responseType;
-                }
-                if (this._withCredentials != null) {
-                    this._xhr.withCredentials = this._withCredentials;
-                }
-                if (this.headerObj) {
-                    for (let key in this.headerObj) {
-                        this._xhr.setRequestHeader(key, this.headerObj[key]);
+                const self = this;
+                wx.request({
+                    data: data,
+                    url: this._url,
+                    method: this._method,
+                    header: this.headerObj,
+                    responseType: this.responseType,
+                    success: function success(_ref) {
+                        var data = _ref.data,
+                            statusCode = _ref.statusCode,
+                            header = _ref.header;
+                        if (statusCode != 200) {
+                            self.dispatchEventWith(egret.IOErrorEvent.IO_ERROR);
+                            return;
+                        }
+                        if (typeof data !== 'string' && !(data instanceof ArrayBuffer)) {
+                            try {
+                                data = JSON.stringify(data);
+                            } catch (e) {
+                                data = data;
+                            }
+                        }
+
+                        self._responseHeader = header;
+                        if (data instanceof ArrayBuffer) {
+                            self._response = '';
+                            var bytes = new Uint8Array(data);
+                            var len = bytes.byteLength;
+
+                            for (var i = 0; i < len; i++) {
+                                self._response += String.fromCharCode(bytes[i]);
+                            }
+                        } else {
+                            self._response = data;
+                        }
+                        self.dispatchEventWith(egret.Event.COMPLETE);
+                    },
+                    fail: function fail(_ref2) {
+                        // var errMsg = _ref2.errMsg;
+                        self.dispatchEventWith(egret.IOErrorEvent.IO_ERROR);
                     }
-                }
-                this._xhr.send(data);
+                });
+
             }
         }
 
@@ -225,9 +216,7 @@ namespace egret.wxapp {
          * 如果请求已经被发送,则立刻中止请求.
          */
         public abort(): void {
-            if (this._xhr) {
-                this._xhr.abort();
-            }
+
         }
 
         /**
@@ -235,11 +224,13 @@ namespace egret.wxapp {
          * 返回所有响应头信息(响应头名和值), 如果响应头还没接受,则返回"".
          */
         public getAllResponseHeaders(): string {
-            if (!this._xhr) {
+            const responseHeader = this._responseHeader;
+            if (!responseHeader) {
                 return null;
             }
-            let result = this._xhr.getAllResponseHeaders();
-            return result ? result : "";
+            return Object.keys(responseHeader).map(function (header) {
+                return header + ': ' + responseHeader[header];
+            }).join('\n');
         }
 
         private headerObj: any;
@@ -262,32 +253,11 @@ namespace egret.wxapp {
          * @param header 要返回的响应头名称
          */
         public getResponseHeader(header: string): string {
-            if (!this._xhr) {
+            if (!this._responseHeader) {
                 return null;
             }
-            let result = this._xhr.getResponseHeader(header);
+            let result = this._responseHeader[header];
             return result ? result : "";
-        }
-
-        /**
-         * @private
-         */
-        private onReadyStateChange(): void {
-            let xhr = this._xhr;
-            if (xhr.readyState == 4) {// 4 = "loaded"
-                let ioError = (xhr.status >= 400 || xhr.status == 0);
-                let url = this._url;
-                let self = this;
-                if (ioError) {//请求错误
-                    if (DEBUG && !self.hasEventListener(IOErrorEvent.IO_ERROR)) {
-                        $error(1011, url);
-                    }
-                    self.dispatchEventWith(IOErrorEvent.IO_ERROR);
-                }
-                else {
-                    self.dispatchEventWith(Event.COMPLETE);
-                }
-            }
         }
 
         /**
