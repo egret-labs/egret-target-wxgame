@@ -2059,7 +2059,9 @@ if (window['HTMLVideoElement'] == undefined) {
                 }
                 this.data = new egret.BitmapData(image);
                 var self = this;
-                self.dispatchEventWith(egret.Event.COMPLETE);
+                window.setTimeout(function () {
+                    self.dispatchEventWith(egret.Event.COMPLETE);
+                }, 0);
             };
             /**
              * @private
@@ -2073,10 +2075,12 @@ if (window['HTMLVideoElement'] == undefined) {
             };
             WebImageLoader.prototype.dispatchIOError = function (url) {
                 var self = this;
-                if (true && !self.hasEventListener(egret.IOErrorEvent.IO_ERROR)) {
-                    egret.$error(1011, url);
-                }
-                self.dispatchEventWith(egret.IOErrorEvent.IO_ERROR);
+                window.setTimeout(function () {
+                    if (true && !self.hasEventListener(egret.IOErrorEvent.IO_ERROR)) {
+                        egret.$error(1011, url);
+                    }
+                    self.dispatchEventWith(egret.IOErrorEvent.IO_ERROR);
+                }, 0);
             };
             /**
              * @private

@@ -133,7 +133,9 @@ namespace egret.wxapp {
             }
             this.data = new egret.BitmapData(image);
             let self = this;
-            self.dispatchEventWith(Event.COMPLETE);
+            window.setTimeout(function (): void {
+                self.dispatchEventWith(Event.COMPLETE);
+            }, 0);
         }
 
         /**
@@ -149,10 +151,12 @@ namespace egret.wxapp {
 
         private dispatchIOError(url: string): void {
             let self = this;
-            if (DEBUG && !self.hasEventListener(IOErrorEvent.IO_ERROR)) {
-                $error(1011, url);
-            }
-            self.dispatchEventWith(IOErrorEvent.IO_ERROR);
+            window.setTimeout(function (): void {
+                if (DEBUG && !self.hasEventListener(IOErrorEvent.IO_ERROR)) {
+                    $error(1011, url);
+                }
+                self.dispatchEventWith(IOErrorEvent.IO_ERROR);
+            }, 0);
         }
 
         /**
