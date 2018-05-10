@@ -1851,17 +1851,7 @@ if (window['HTMLVideoElement'] == undefined) {
                                 }
                             }
                             self_1._responseHeader = header;
-                            if (data instanceof ArrayBuffer) {
-                                self_1._response = '';
-                                var bytes = new Uint8Array(data);
-                                var len = bytes.byteLength;
-                                for (var i = 0; i < len; i++) {
-                                    self_1._response += String.fromCharCode(bytes[i]);
-                                }
-                            }
-                            else {
-                                self_1._response = data;
-                            }
+                            self_1._response = data;
                             self_1.dispatchEventWith(egret.Event.COMPLETE);
                         },
                         fail: function fail(_ref2) {
@@ -3056,7 +3046,7 @@ if (window['HTMLVideoElement'] == undefined) {
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "1.0.15";
+        wxgame.version = "1.0.16";
         /**
          * 运行环境是否为子域
          */

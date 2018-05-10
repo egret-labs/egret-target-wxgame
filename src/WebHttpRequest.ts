@@ -180,17 +180,7 @@ namespace egret.wxapp {
                         }
 
                         self._responseHeader = header;
-                        if (data instanceof ArrayBuffer) {
-                            self._response = '';
-                            var bytes = new Uint8Array(data);
-                            var len = bytes.byteLength;
-
-                            for (var i = 0; i < len; i++) {
-                                self._response += String.fromCharCode(bytes[i]);
-                            }
-                        } else {
-                            self._response = data;
-                        }
+                        self._response = data;
                         self.dispatchEventWith(egret.Event.COMPLETE);
                     },
                     fail: function fail(_ref2) {
