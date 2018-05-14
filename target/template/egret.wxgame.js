@@ -3046,7 +3046,7 @@ if (window['HTMLVideoElement'] == undefined) {
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "1.0.16";
+        wxgame.version = "1.0.17";
         /**
          * 运行环境是否为子域
          */
@@ -3184,11 +3184,6 @@ if (window['HTMLVideoElement'] == undefined) {
                 requestAnimationFrame(onTick);
             }
         }
-        //覆盖原生的isNaN()方法实现，在不同浏览器上有2~10倍性能提升。
-        window["isNaN"] = function (value) {
-            value = +value;
-            return value !== value;
-        };
         egret.runEgret = runEgret;
         egret.updateAllScreens = updateAllScreens;
         var resizeTimer = NaN;
