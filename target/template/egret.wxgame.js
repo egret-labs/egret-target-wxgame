@@ -2048,7 +2048,7 @@ if (window['HTMLVideoElement'] == undefined) {
                     return;
                 }
                 this.data = new egret.BitmapData(image);
-                if (egret.wxgame.preUploadTexture) {
+                if (egret.wxgame.preUploadTexture && egret.Capabilities.renderMode == "webgl") {
                     wxapp.WebGLRenderContext.getInstance(null, null).getWebGLTexture(this.data);
                 }
                 var self = this;
