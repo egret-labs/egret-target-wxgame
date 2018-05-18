@@ -2048,6 +2048,9 @@ if (window['HTMLVideoElement'] == undefined) {
                     return;
                 }
                 this.data = new egret.BitmapData(image);
+                if (egret.wxgame.preUploadTexture) {
+                    wxapp.WebGLRenderContext.getInstance(null, null).getWebGLTexture(this.data);
+                }
                 var self = this;
                 window.setTimeout(function () {
                     self.dispatchEventWith(egret.Event.COMPLETE);
@@ -3051,6 +3054,10 @@ if (window['HTMLVideoElement'] == undefined) {
          * 运行环境是否为子域
          */
         wxgame.isSubContext = false;
+        /**
+         * 解决提交纹理异常临时方案
+         */
+        wxgame.preUploadTexture = false;
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
 (function (egret) {

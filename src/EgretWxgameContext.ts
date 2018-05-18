@@ -37,6 +37,11 @@ namespace egret.wxgame {
      * 运行环境是否为子域
      */
     export let isSubContext: boolean = false;
+
+    /**
+     * 解决提交纹理异常临时方案
+     */
+    export let preUploadTexture: boolean = false;
 }
 
 namespace egret.wxapp {
