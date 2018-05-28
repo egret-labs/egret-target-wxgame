@@ -36,7 +36,7 @@ class ImageProcessor {
             }
         }
         else {
-            return loadImage(root + '/' + url);
+            return loadImage(root + url);
         }
     }
 
