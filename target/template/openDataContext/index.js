@@ -15,7 +15,7 @@
  * 之后可通过assets.引用名方式进行获取
  */
 var assets = {
-  bg: "openDataContext/assets/bg.jpg",
+  icon: "openDataContext/assets/icon.png",
   box: "openDataContext/assets/box.png",
   panel: "openDataContext/assets/panel.png",
   button: "openDataContext/assets/button.png",
@@ -47,22 +47,22 @@ context.globalCompositeOperation = "source-over";
  * 排位序号i会根据parge*perPageNum+i+1进行计算
  */
 let totalGroup = [
-  { key: 1, name: "1111111111", url: assets.bg, scroes: 10000 },
-  { key: 2, name: "2222222222", url: assets.bg, scroes: 9000 },
-  { key: 3, name: "3333333", url: assets.bg, scroes: 8000 },
-  { key: 4, name: "4444444", url: assets.bg, scroes: 7000 },
-  { key: 5, name: "55555555", url: assets.bg, scroes: 6000 },
-  { key: 6, name: "6666666", url: assets.bg, scroes: 5000 },
-  { key: 7, name: "7777777", url: assets.bg, scroes: 4000 },
-  { key: 8, name: "8888888", url: assets.bg, scroes: 3000 },
-  { key: 9, name: "9999999", url: assets.bg, scroes: 2000 },
-  { key: 10, name: "1010101010", url: assets.bg, scroes: 2000 },
-  { key: 11, name: "111111111111", url: assets.bg, scroes: 2000 },
-  { key: 12, name: "121212121212", url: assets.bg, scroes: 2000 },
-  { key: 13, name: "13131313", url: assets.bg, scroes: 2000 },
-  { key: 14, name: "1414141414", url: assets.bg, scroes: 2000 },
-  { key: 15, name: "1515151515", url: assets.bg, scroes: 2000 },
-  { key: 16, name: "1616161616", url: assets.bg, scroes: 2000 },
+  { key: 1, name: "1111111111", url: assets.icon, scroes: 10000 },
+  { key: 2, name: "2222222222", url: assets.icon, scroes: 9000 },
+  { key: 3, name: "3333333", url: assets.icon, scroes: 8000 },
+  { key: 4, name: "4444444", url: assets.icon, scroes: 7000 },
+  { key: 5, name: "55555555", url: assets.icon, scroes: 6000 },
+  { key: 6, name: "6666666", url: assets.icon, scroes: 5000 },
+  { key: 7, name: "7777777", url: assets.icon, scroes: 4000 },
+  { key: 8, name: "8888888", url: assets.icon, scroes: 3000 },
+  { key: 9, name: "9999999", url: assets.icon, scroes: 2000 },
+  { key: 10, name: "1010101010", url: assets.icon, scroes: 2000 },
+  { key: 11, name: "111111111111", url: assets.icon, scroes: 2000 },
+  { key: 12, name: "121212121212", url: assets.icon, scroes: 2000 },
+  { key: 13, name: "13131313", url: assets.icon, scroes: 2000 },
+  { key: 14, name: "1414141414", url: assets.icon, scroes: 2000 },
+  { key: 15, name: "1515151515", url: assets.icon, scroes: 2000 },
+  { key: 16, name: "1616161616", url: assets.icon, scroes: 2000 },
 ];
 
 /**
