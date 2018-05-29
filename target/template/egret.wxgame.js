@@ -1,12 +1,12 @@
 var __reflect = (this && this.__reflect) || function (p, c, t) {
     p.__class__ = c, t ? t.push(c) : t = [c], p.__types__ = p.__types__ ? t.concat(p.__types__) : t;
 };
-var __extends = this && this.__extends || function __extends(t, e) { 
- function r() { 
- this.constructor = t;
-}
-for (var i in e) e.hasOwnProperty(i) && (t[i] = e[i]);
-r.prototype = e.prototype, t.prototype = new r();
+var __extends = this && this.__extends || function __extends(t, e) {
+    function r() {
+        this.constructor = t;
+    }
+    for (var i in e) e.hasOwnProperty(i) && (t[i] = e[i]);
+    r.prototype = e.prototype, t.prototype = new r();
 };
 //////////////////////////////////////////////////////////////////////////////////////
 //
@@ -3049,7 +3049,7 @@ if (window['HTMLVideoElement'] == undefined) {
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "1.0.17";
+        wxgame.version = "1.1.0";
         /**
          * 运行环境是否为子域
          */
@@ -3778,9 +3778,9 @@ if (true) {
                 for (var i = 0; i < pixels.length; i += 4) {
                     sharedContext.fillStyle =
                         'rgba(' + pixels[i]
-                            + ',' + pixels[i + 1]
-                            + ',' + pixels[i + 2]
-                            + ',' + (pixels[i + 3] / 255) + ')';
+                        + ',' + pixels[i + 1]
+                        + ',' + pixels[i + 2]
+                        + ',' + (pixels[i + 3] / 255) + ')';
                     sharedContext.fillRect(x, y, 1, 1);
                     x++;
                     if (x == iWidth) {
