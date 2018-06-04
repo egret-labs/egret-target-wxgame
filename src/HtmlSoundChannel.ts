@@ -39,61 +39,40 @@ namespace egret.wxapp {
         /**
          * @private
          */
-        $url:string;
+        $url: string;
         /**
          * @private
          */
-        $loops:number;
+        $loops: number;
         /**
          * @private
          */
-        $startTime:number = 0;
+        $startTime: number = 0;
         /**
          * @private
          */
-        private audio:HTMLAudioElement = null;
+        private audio: HTMLAudioElement = null;
 
         //声音是否已经播放完成
-        private isStopped:boolean = false;
+        private isStopped: boolean = false;
 
         /**
          * @private
          */
-        constructor(audio:HTMLAudioElement) {
+        constructor(audio: HTMLAudioElement) {
             super();
             audio.addEventListener("ended", this.onPlayEnd);
             this.audio = audio;
         }
 
-        private canPlay =():void => {
-            this.audio.removeEventListener("canplay", this.canPlay);
-
-            try {
-                this.audio.currentTime = this.$startTime;
-            }
-            catch (e) {
-            }
-            finally {
-                this.audio.play();
-            }
-        };
-
-        $play():void {
+        $play(): void {
             if (this.isStopped) {
                 egret.$error(1036);
                 return;
             }
-
-            try {
-                //this.audio.pause();
-                this.audio.volume = this._volume;
-                this.audio.currentTime = this.$startTime;
-            }
-            catch (e) {
-                this.audio.addEventListener("canplay", this.canPlay);
-                return;
-            }
             this.audio.play();
+            this.audio.volume = this._volume;
+            this.audio.currentTime = this.$startTime;
         }
 
         /**
@@ -147,20 +126,20 @@ namespace egret.wxapp {
         /**
          * @private
          */
-        private _volume:number = 1;
+        private _volume: number = 1;
 
         /**
          * @private
          * @inheritDoc
          */
-        public get volume():number {
+        public get volume(): number {
             return this._volume;
         }
 
         /**
          * @inheritDoc
          */
-        public set volume(value:number) {
+        public set volume(value: number) {
             if (this.isStopped) {
                 egret.$error(1036);
                 return;
@@ -175,7 +154,7 @@ namespace egret.wxapp {
          * @private
          * @inheritDoc
          */
-        public get position():number {
+        public get position(): number {
             if (!this.audio)
                 return 0;
             return this.audio.currentTime;
