@@ -1,6 +1,6 @@
 
 
-namespace egret.wxapp {
+namespace egret.wxgame {
 
     /**
      * @private
@@ -49,5 +49,5 @@ namespace egret.wxapp {
             this.dispatchEvent(event);
         }
     }
-    egret.Motion = egret.wxapp.WebMotion;
+    egret.Motion = egret.wxgame.WebMotion;
 }

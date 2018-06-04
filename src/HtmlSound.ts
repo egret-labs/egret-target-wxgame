@@ -27,7 +27,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////
 
-namespace egret.wxapp {
+namespace egret.wxgame {
 
     /**
      * @private
@@ -119,7 +119,7 @@ namespace egret.wxapp {
                 audio.muted = true;
             }
 
-           // audio.load();     wxapp没有此接口
+           // audio.load();     wxgame没有此接口
             this.originAudio = audio;
             if(HtmlSound.clearAudios[this.url]) {
                 delete HtmlSound.clearAudios[this.url];

@@ -27,7 +27,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////
 
-namespace egret.wxapp {
+namespace egret.wxgame {
     /**
      * @private
      */
@@ -194,7 +194,7 @@ namespace egret.wxapp {
             let stageHeight = stageSize.stageHeight;
             let displayWidth = stageSize.displayWidth;
             let displayHeight = stageSize.displayHeight;
-            canvas.style[egret.wxapp.getPrefixStyleName("transformOrigin")] = "0% 0% 0px";
+            canvas.style[getPrefixStyleName("transformOrigin")] = "0% 0% 0px";
             if (canvas.width != stageWidth) {
                 if (!wxgame.isSubContext) {
                     if (window["sharedCanvas"]) {
@@ -241,7 +241,7 @@ namespace egret.wxapp {
             m.scale(scalex / canvasScaleX, scaley / canvasScaleY);
             m.rotate(rotation * Math.PI / 180);
             let transform = `matrix(${m.a},${m.b},${m.c},${m.d},${m.tx},${m.ty})`;
-            canvas.style[egret.wxapp.getPrefixStyleName("transform")] = transform;
+            canvas.style[getPrefixStyleName("transform")] = transform;
             sys.DisplayList.$setCanvasScale(canvasScaleX, canvasScaleY);
             this.webTouchHandler.updateScaleMode(scalex, scaley, rotation);
             this.player.updateStageSize(stageWidth, stageHeight);//不要在这个方法后面修改属性

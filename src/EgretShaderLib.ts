@@ -1,4 +1,4 @@
-namespace egret.wxapp {
+namespace egret.wxgame {
 /** 
  * @private 
  */

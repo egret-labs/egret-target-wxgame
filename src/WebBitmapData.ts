@@ -36,7 +36,7 @@ if (window['HTMLDivElement'] == undefined) {
 if (window['HTMLVideoElement'] == undefined) {
     window['HTMLVideoElement'] = HTMLDivElement;
 }
-namespace egret.wxapp {
+namespace egret.wxgame {
 
     let className = "egret.BitmapData";
     registerClass(HTMLImageElement, className);

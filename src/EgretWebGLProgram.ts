@@ -27,7 +27,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////
 
-namespace egret.wxapp {
+namespace egret.wxgame {
 
     function loadShader(gl:WebGLRenderingContext, type:number, source:string):WebGLShader {
         let shader = gl.createShader(type);

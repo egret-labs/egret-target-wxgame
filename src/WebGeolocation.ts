@@ -3,7 +3,7 @@
  */
 interface BrowerGeolocation extends Geolocation { }
 
-namespace egret.wxapp {
+namespace egret.wxgame {
     /**
      * @private
      */
@@ -81,5 +81,5 @@ namespace egret.wxapp {
             this.dispatchEvent(event);
         };
     }
-    egret.Geolocation = egret.wxapp.WebGeolocation;
+    egret.Geolocation = egret.wxgame.WebGeolocation;
 }

@@ -44,7 +44,7 @@ namespace egret.wxgame {
     export let preUploadTexture: boolean = false;
 }
 
-namespace egret.wxapp {
+namespace egret.wxgame {
 
     /**
      * @private
@@ -91,7 +91,7 @@ namespace egret.wxapp {
 
         Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
 
-        sys.CanvasRenderBuffer = wxapp.CanvasRenderBuffer;
+        sys.CanvasRenderBuffer = CanvasRenderBuffer;
         setRenderMode(options.renderMode);
 
         let canvasScaleFactor;
@@ -132,7 +132,7 @@ namespace egret.wxapp {
         // }
 
         var container = {};
-        var player = new wxapp.WebPlayer(container, options);
+        var player = new WebPlayer(container, options);
         window['player'] = player;
 
 
@@ -150,7 +150,7 @@ namespace egret.wxapp {
     function setRenderMode(renderMode: string): void {
         if (renderMode === "webgl") {
             Capabilities["renderMode" + ""] = "webgl";
-            sys.RenderBuffer = wxapp.WebGLRenderBuffer;
+            sys.RenderBuffer = WebGLRenderBuffer;
             sys.systemRenderer = new WebGLRenderer();
             sys.canvasRenderer = new CanvasRenderer();
             sys.customHitTestBuffer = new WebGLRenderBuffer(3, 3);
@@ -159,7 +159,7 @@ namespace egret.wxapp {
         }
         else {
             Capabilities["renderMode" + ""] = "canvas";
-            sys.RenderBuffer = wxapp.CanvasRenderBuffer;
+            sys.RenderBuffer = CanvasRenderBuffer;
             sys.systemRenderer = new CanvasRenderer();
             sys.canvasRenderer = sys.systemRenderer;
             sys.customHitTestBuffer = new CanvasRenderBuffer(3, 3);

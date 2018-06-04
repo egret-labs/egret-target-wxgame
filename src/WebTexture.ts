@@ -28,7 +28,7 @@
 //////////////////////////////////////////////////////////////////////////////////////
 
 
-namespace egret.wxapp {
+namespace egret.wxgame {
 
     let sharedCanvas: HTMLCanvasElement;
     let sharedContext: CanvasRenderingContext2D;

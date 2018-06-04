@@ -29,7 +29,7 @@
 //////////////////////////////////////////////////////////////////////////////////////
 
 
-namespace egret.wxapp {
+namespace egret.wxgame {
 
     let winURL = window["URL"] || window["webkitURL"];
 

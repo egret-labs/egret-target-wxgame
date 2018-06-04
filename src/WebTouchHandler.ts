@@ -27,7 +27,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////
 
-namespace egret.wxapp {
+namespace egret.wxgame {
 
     /**
      * @private
@@ -159,14 +159,14 @@ namespace egret.wxapp {
          * @private
          */
         private getLocation(event: any): Point {
-            //   event.identifier = +event.identifier || 0;        wxapp 内核该属性只读
+            //   event.identifier = +event.identifier || 0;        wxgame 内核该属性只读
             let doc = document.documentElement;
             let box = this.canvas.getBoundingClientRect();
             let left = box.left
-                //+ window.pageXOffset - doc.clientLeft              wxapp 不存在
+                //+ window.pageXOffset - doc.clientLeft              wxgame 不存在
                 ;
             let top = box.top
-                //+ window.pageYOffset - doc.clientTop                wxapp 不存在
+                //+ window.pageYOffset - doc.clientTop                wxgame 不存在
                 ;
             let x = event.pageX - left, newx = x;
             let y = event.pageY - top, newy = y;

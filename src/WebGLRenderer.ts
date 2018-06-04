@@ -27,7 +27,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////
 
-namespace egret.wxapp {
+namespace egret.wxgame {
 
     let blendModes = ["source-over", "lighter", "destination-out"];
     let defaultCompositeOp = "source-over";

@@ -1,4 +1,4 @@
-namespace egret.wxapp {
+namespace egret.wxgame {
 
     /**
      * @private
@@ -34,4 +34,4 @@ namespace egret.wxapp {
     }
 }
 
-egret.DeviceOrientation = egret.wxapp.WebDeviceOrientation;
+egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;

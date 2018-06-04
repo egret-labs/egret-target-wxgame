@@ -26,7 +26,7 @@
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-namespace egret.localStorage.wxapp {
+namespace egret.localStorage.wxgame {
     /**
      * @private
      * 

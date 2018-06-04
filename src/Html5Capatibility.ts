@@ -27,7 +27,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////
 
-namespace egret.wxapp {
+namespace egret.wxgame {
 
     /**
      * @private
@@ -131,10 +131,10 @@ namespace egret.wxapp {
             Html5Capatibility._audioType = type;
             switch (type) {
                 case AudioType.WEB_AUDIO:
-                    Html5Capatibility._AudioClass = egret.wxapp.WebAudioSound;
+                    Html5Capatibility._AudioClass = WebAudioSound;
                     break;
                 case AudioType.HTML5_AUDIO:
-                    Html5Capatibility._AudioClass = egret.wxapp.HtmlSound;
+                    Html5Capatibility._AudioClass = HtmlSound;
                     break;
             }
         }

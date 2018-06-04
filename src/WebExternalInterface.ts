@@ -27,7 +27,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////
 
-namespace egret.wxapp {
+namespace egret.wxgame {
     /**
      * @private
      */
@@ -56,7 +56,7 @@ namespace egret.wxapp {
     }
 }
 
-namespace egret.wxapp {
+namespace egret.wxgame {
     let callBackDic = {};
 
     /**
