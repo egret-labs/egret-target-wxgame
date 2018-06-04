@@ -33,6 +33,34 @@ class WxgamePlatform {
             })
         })
     }
+
+    openDataContext = new WxgameOpenDataContext();
+}
+
+class WxgameOpenDataContext {
+
+    createDisplayObject(type,width,height){
+        const bitmapdata = new egret.BitmapData(sharedCanvas);
+        bitmapdata.$deleteSource = false;
+        const texture = new egret.Texture();
+        texture._setBitmapData(bitmapdata);
+        const bitmap = new egret.Bitmap(texture);
+        bitmap.width = width;
+        bitmap.height = height;
+
+        egret.startTick((timeStarmp) => {
+            egret.WebGLUtils.deleteWebGLTexture(bitmapdata.webGLTexture);
+            bitmapdata.webGLTexture = null;
+            return false;
+        }, this);
+        return bitmap;
+    }
+
+
+    postMessage(data){
+        const openDataContext = wx.getOpenDataContext();
+        openDataContext.postMessage(data);
+    }
 }
 
 
