@@ -36,7 +36,7 @@ r.prototype = e.prototype, t.prototype = new r();
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -285,7 +285,7 @@ if (window['HTMLDivElement'] == undefined) {
 if (window['HTMLVideoElement'] == undefined) {
     window['HTMLVideoElement'] = HTMLDivElement;
 }
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -335,7 +335,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var localStorage;
     (function (localStorage) {
@@ -417,7 +417,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -615,7 +615,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -767,7 +767,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -969,7 +969,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -1144,7 +1144,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -1689,7 +1689,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -1937,7 +1937,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -2111,7 +2111,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -2267,7 +2267,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -2340,7 +2340,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -2537,7 +2537,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -2736,7 +2736,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -2834,7 +2834,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -3024,14 +3024,14 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "1.0.7";
+        wxgame.version = "1.1.1";
         /**
          * 运行环境是否为子域
          */
@@ -3216,7 +3216,7 @@ if (true) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -3331,7 +3331,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -3439,7 +3439,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -3482,7 +3482,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -3709,7 +3709,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -3866,7 +3866,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -4006,7 +4006,7 @@ var egret;
         egret.XML = { parse: parse };
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -4050,7 +4050,7 @@ var egret;
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
 egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -4125,7 +4125,7 @@ var egret;
         egret.Geolocation = egret.wxgame.WebGeolocation;
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -4212,7 +4212,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -4297,7 +4297,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -4562,7 +4562,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -4857,7 +4857,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -5005,7 +5005,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -5880,7 +5880,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -6249,7 +6249,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -7241,7 +7241,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -7347,7 +7347,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -7452,7 +7452,7 @@ var egret;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -7686,7 +7686,7 @@ var egret;
         __reflect(EgretWebGLUniform.prototype, "egret.wxgame.EgretWebGLUniform");
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
-var egret;
+
 (function (egret) {
     var wxgame;
     (function (wxgame) {
