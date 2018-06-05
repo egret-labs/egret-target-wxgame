@@ -32,18 +32,37 @@ namespace egret.wxgame {
      * draw类型，所有的绘图操作都会缓存在drawData中，每个drawData都是一个drawable对象
      * $renderWebGL方法依据drawable对象的类型，调用不同的绘制方法
      */
+    //fix for egret3d
+    //修改枚举。
+
+    //原枚举
+    // export const enum DRAWABLE_TYPE {
+    //     TEXTURE,
+    //     RECT,
+    //     PUSH_MASK,
+    //     POP_MASK,
+    //     BLEND,
+    //     RESIZE_TARGET,
+    //     CLEAR_COLOR,
+    //     ACT_BUFFER,
+    //     ENABLE_SCISSOR,
+    //     DISABLE_SCISSOR,
+    //     SMOOTHING
+    // }
+
     export const enum DRAWABLE_TYPE {
-        TEXTURE,
-        RECT,
-        PUSH_MASK,
-        POP_MASK,
-        BLEND,
-        RESIZE_TARGET,
-        CLEAR_COLOR,
-        ACT_BUFFER,
-        ENABLE_SCISSOR,
-        DISABLE_SCISSOR,
-        SMOOTHING
+        TEXTURE = 0,
+        PUSH_MASK = 1,
+        POP_MASK = 2,
+        BLEND = 3,
+        RESIZE_TARGET = 4,
+        CLEAR_COLOR = 5,
+        ACT_BUFFER = 6,
+        ENABLE_SCISSOR = 7,
+        DISABLE_SCISSOR = 8,
+        SMOOTHING = 9,
+        CHANGE_PROGRAM = 10,
+        RECT = 11
     }
 
     /**
@@ -67,8 +86,8 @@ namespace egret.wxgame {
         /**
          * 压入绘制矩形指令
          */
-        public pushDrawRect():void {
-            if(this.drawDataLen == 0 || this.drawData[this.drawDataLen - 1].type != DRAWABLE_TYPE.RECT) {
+        public pushDrawRect(): void {
+            if (this.drawDataLen == 0 || this.drawData[this.drawDataLen - 1].type != DRAWABLE_TYPE.RECT) {
                 let data = this.drawData[this.drawDataLen] || {};
                 data.type = DRAWABLE_TYPE.RECT;
                 data.count = 0;
@@ -81,8 +100,8 @@ namespace egret.wxgame {
         /**
          * 压入绘制texture指令
          */
-        public pushDrawTexture(texture:any, count:number = 2, filter?:any, textureWidth?:number, textureHeight?:number):void {
-            if(filter) {
+        public pushDrawTexture(texture: any, count: number = 2, filter?: any, textureWidth?: number, textureHeight?: number): void {
+            if (filter) {
                 // 目前有滤镜的情况下不会合并绘制
                 let data = this.drawData[this.drawDataLen] || {};
                 data.type = DRAWABLE_TYPE.TEXTURE;
@@ -108,7 +127,7 @@ namespace egret.wxgame {
             }
         }
 
-        public pushChangeSmoothing(texture:WebGLTexture, smoothing:boolean):void {
+        public pushChangeSmoothing(texture: WebGLTexture, smoothing: boolean): void {
             texture["smoothing"] = smoothing;
             let data = this.drawData[this.drawDataLen] || {};
             data.type = DRAWABLE_TYPE.SMOOTHING;
@@ -121,7 +140,7 @@ namespace egret.wxgame {
         /**
          * 压入pushMask指令
          */
-        public pushPushMask(count:number = 1):void {
+        public pushPushMask(count: number = 1): void {
             let data = this.drawData[this.drawDataLen] || {};
             data.type = DRAWABLE_TYPE.PUSH_MASK;
             data.count = count * 2;
@@ -132,7 +151,7 @@ namespace egret.wxgame {
         /**
          * 压入popMask指令
          */
-        public pushPopMask(count:number = 1):void {
+        public pushPopMask(count: number = 1): void {
             let data = this.drawData[this.drawDataLen] || {};
             data.type = DRAWABLE_TYPE.POP_MASK;
             data.count = count * 2;
@@ -143,28 +162,28 @@ namespace egret.wxgame {
         /**
          * 压入混色指令
          */
-        public pushSetBlend(value:string):void {
+        public pushSetBlend(value: string): void {
             let len = this.drawDataLen;
             // 有无遍历到有效绘图操作
             let drawState = false;
-            for(let i = len - 1; i >= 0; i--) {
+            for (let i = len - 1; i >= 0; i--) {
                 let data = this.drawData[i];
 
-                if(data){
-                    if(data.type == DRAWABLE_TYPE.TEXTURE || data.type == DRAWABLE_TYPE.RECT) {
+                if (data) {
+                    if (data.type == DRAWABLE_TYPE.TEXTURE || data.type == DRAWABLE_TYPE.RECT) {
                         drawState = true;
                     }
 
                     // 如果与上一次blend操作之间无有效绘图，上一次操作无效
-                    if(!drawState && data.type == DRAWABLE_TYPE.BLEND) {
+                    if (!drawState && data.type == DRAWABLE_TYPE.BLEND) {
                         this.drawData.splice(i, 1);
                         this.drawDataLen--;
                         continue;
                     }
 
                     // 如果与上一次blend操作重复，本次操作无效
-                    if(data.type == DRAWABLE_TYPE.BLEND) {
-                        if(data.value == value) {
+                    if (data.type == DRAWABLE_TYPE.BLEND) {
+                        if (data.value == value) {
                             return;
                         } else {
                             break;
@@ -183,7 +202,7 @@ namespace egret.wxgame {
         /*
          * 压入resize render target命令
          */
-        public pushResize(buffer:WebGLRenderBuffer, width:number, height:number) {
+        public pushResize(buffer: WebGLRenderBuffer, width: number, height: number) {
             let data = this.drawData[this.drawDataLen] || {};
             data.type = DRAWABLE_TYPE.RESIZE_TARGET;
             data.buffer = buffer;
@@ -206,20 +225,20 @@ namespace egret.wxgame {
         /**
          * 压入激活buffer命令
          */
-        public pushActivateBuffer(buffer:WebGLRenderBuffer) {
+        public pushActivateBuffer(buffer: WebGLRenderBuffer) {
             let len = this.drawDataLen;
             // 有无遍历到有效绘图操作
             let drawState = false;
-            for(let i = len - 1; i >= 0; i--) {
+            for (let i = len - 1; i >= 0; i--) {
                 let data = this.drawData[i];
 
-                if(data){
-                    if(data.type != DRAWABLE_TYPE.BLEND && data.type != DRAWABLE_TYPE.ACT_BUFFER) {
+                if (data) {
+                    if (data.type != DRAWABLE_TYPE.BLEND && data.type != DRAWABLE_TYPE.ACT_BUFFER) {
                         drawState = true;
                     }
 
                     // 如果与上一次buffer操作之间无有效绘图，上一次操作无效
-                    if(!drawState && data.type == DRAWABLE_TYPE.ACT_BUFFER) {
+                    if (!drawState && data.type == DRAWABLE_TYPE.ACT_BUFFER) {
                         this.drawData.splice(i, 1);
                         this.drawDataLen--;
                         continue;
@@ -248,7 +267,7 @@ namespace egret.wxgame {
         /*
          * 压入enabel scissor命令
          */
-        public pushEnableScissor(x:number, y:number, width:number, height:number) {
+        public pushEnableScissor(x: number, y: number, width: number, height: number) {
             let data = this.drawData[this.drawDataLen] || {};
             data.type = DRAWABLE_TYPE.ENABLE_SCISSOR;
             data.x = x;
@@ -272,8 +291,8 @@ namespace egret.wxgame {
         /**
          * 清空命令数组
          */
-        public clear():void {
-            for(let i = 0; i < this.drawDataLen; i++) {
+        public clear(): void {
+            for (let i = 0; i < this.drawDataLen; i++) {
                 let data = this.drawData[i];
 
                 data.type = 0;

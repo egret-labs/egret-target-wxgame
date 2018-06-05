@@ -63,7 +63,7 @@ namespace egret.wxgame {
         /**
          * 顶点数组管理器
          */
-        private vao: WebGLVertexArrayObject;
+        public vao: WebGLVertexArrayObject;
 
         /**
          * 绘制命令管理器
@@ -297,7 +297,7 @@ namespace egret.wxgame {
             this.setContext(window['canvas'].getContext('webgl'));
         }
 
-        private setContext(gl: any) {
+        public setContext(gl: any) {
             this.context = gl;
             gl.id = WebGLRenderContext.glContextId++;
             this.glID = gl.id;

@@ -36,7 +36,7 @@ r.prototype = e.prototype, t.prototype = new r();
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -285,7 +285,7 @@ if (window['HTMLDivElement'] == undefined) {
 if (window['HTMLVideoElement'] == undefined) {
     window['HTMLVideoElement'] = HTMLDivElement;
 }
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -335,7 +335,7 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var localStorage;
     (function (localStorage) {
@@ -417,7 +417,7 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -615,7 +615,7 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -767,7 +767,7 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -969,7 +969,7 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -1144,7 +1144,7 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -1689,7 +1689,7 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -1937,7 +1937,7 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -2111,7 +2111,7 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -2267,7 +2267,7 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -2340,7 +2340,7 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -2537,7 +2537,7 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -2736,7 +2736,7 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -2834,7 +2834,7 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -3024,14 +3024,14 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "1.1.1";
+        wxgame.version = "1.0.7";
         /**
          * 运行环境是否为子域
          */
@@ -3216,7 +3216,7 @@ if (true) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -3331,7 +3331,7 @@ if (true) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -3439,7 +3439,7 @@ if (true) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -3482,7 +3482,7 @@ if (true) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -3709,7 +3709,7 @@ if (true) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -3866,7 +3866,7 @@ if (true) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -4006,7 +4006,7 @@ if (true) {
         egret.XML = { parse: parse };
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -4050,7 +4050,7 @@ if (true) {
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
 egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -4125,7 +4125,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
         egret.Geolocation = egret.wxgame.WebGeolocation;
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -4212,7 +4212,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -4297,10 +4297,17 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
+        /**
+         * @private
+         * draw类型，所有的绘图操作都会缓存在drawData中，每个drawData都是一个drawable对象
+         * $renderWebGL方法依据drawable对象的类型，调用不同的绘制方法
+         */
+        //fix for egret3d
+        //修改枚举。
         /**
          * @private
          * 绘制指令管理器
@@ -4318,9 +4325,9 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
              * 压入绘制矩形指令
              */
             WebGLDrawCmdManager.prototype.pushDrawRect = function () {
-                if (this.drawDataLen == 0 || this.drawData[this.drawDataLen - 1].type != 1 /* RECT */) {
+                if (this.drawDataLen == 0 || this.drawData[this.drawDataLen - 1].type != 11 /* RECT */) {
                     var data = this.drawData[this.drawDataLen] || {};
-                    data.type = 1 /* RECT */;
+                    data.type = 11 /* RECT */;
                     data.count = 0;
                     this.drawData[this.drawDataLen] = data;
                     this.drawDataLen++;
@@ -4359,7 +4366,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
             WebGLDrawCmdManager.prototype.pushChangeSmoothing = function (texture, smoothing) {
                 texture["smoothing"] = smoothing;
                 var data = this.drawData[this.drawDataLen] || {};
-                data.type = 10 /* SMOOTHING */;
+                data.type = 9 /* SMOOTHING */;
                 data.texture = texture;
                 data.smoothing = smoothing;
                 this.drawData[this.drawDataLen] = data;
@@ -4371,7 +4378,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
             WebGLDrawCmdManager.prototype.pushPushMask = function (count) {
                 if (count === void 0) { count = 1; }
                 var data = this.drawData[this.drawDataLen] || {};
-                data.type = 2 /* PUSH_MASK */;
+                data.type = 1 /* PUSH_MASK */;
                 data.count = count * 2;
                 this.drawData[this.drawDataLen] = data;
                 this.drawDataLen++;
@@ -4382,7 +4389,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
             WebGLDrawCmdManager.prototype.pushPopMask = function (count) {
                 if (count === void 0) { count = 1; }
                 var data = this.drawData[this.drawDataLen] || {};
-                data.type = 3 /* POP_MASK */;
+                data.type = 2 /* POP_MASK */;
                 data.count = count * 2;
                 this.drawData[this.drawDataLen] = data;
                 this.drawDataLen++;
@@ -4397,17 +4404,17 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 for (var i = len - 1; i >= 0; i--) {
                     var data = this.drawData[i];
                     if (data) {
-                        if (data.type == 0 /* TEXTURE */ || data.type == 1 /* RECT */) {
+                        if (data.type == 0 /* TEXTURE */ || data.type == 11 /* RECT */) {
                             drawState = true;
                         }
                         // 如果与上一次blend操作之间无有效绘图，上一次操作无效
-                        if (!drawState && data.type == 4 /* BLEND */) {
+                        if (!drawState && data.type == 3 /* BLEND */) {
                             this.drawData.splice(i, 1);
                             this.drawDataLen--;
                             continue;
                         }
                         // 如果与上一次blend操作重复，本次操作无效
-                        if (data.type == 4 /* BLEND */) {
+                        if (data.type == 3 /* BLEND */) {
                             if (data.value == value) {
                                 return;
                             }
@@ -4418,7 +4425,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     }
                 }
                 var _data = this.drawData[this.drawDataLen] || {};
-                _data.type = 4 /* BLEND */;
+                _data.type = 3 /* BLEND */;
                 _data.value = value;
                 this.drawData[this.drawDataLen] = _data;
                 this.drawDataLen++;
@@ -4428,7 +4435,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
              */
             WebGLDrawCmdManager.prototype.pushResize = function (buffer, width, height) {
                 var data = this.drawData[this.drawDataLen] || {};
-                data.type = 5 /* RESIZE_TARGET */;
+                data.type = 4 /* RESIZE_TARGET */;
                 data.buffer = buffer;
                 data.width = width;
                 data.height = height;
@@ -4440,7 +4447,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
              */
             WebGLDrawCmdManager.prototype.pushClearColor = function () {
                 var data = this.drawData[this.drawDataLen] || {};
-                data.type = 6 /* CLEAR_COLOR */;
+                data.type = 5 /* CLEAR_COLOR */;
                 this.drawData[this.drawDataLen] = data;
                 this.drawDataLen++;
             };
@@ -4454,11 +4461,11 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 for (var i = len - 1; i >= 0; i--) {
                     var data = this.drawData[i];
                     if (data) {
-                        if (data.type != 4 /* BLEND */ && data.type != 7 /* ACT_BUFFER */) {
+                        if (data.type != 3 /* BLEND */ && data.type != 6 /* ACT_BUFFER */) {
                             drawState = true;
                         }
                         // 如果与上一次buffer操作之间无有效绘图，上一次操作无效
-                        if (!drawState && data.type == 7 /* ACT_BUFFER */) {
+                        if (!drawState && data.type == 6 /* ACT_BUFFER */) {
                             this.drawData.splice(i, 1);
                             this.drawDataLen--;
                             continue;
@@ -4474,7 +4481,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     }
                 }
                 var _data = this.drawData[this.drawDataLen] || {};
-                _data.type = 7 /* ACT_BUFFER */;
+                _data.type = 6 /* ACT_BUFFER */;
                 _data.buffer = buffer;
                 _data.width = buffer.rootRenderTarget.width;
                 _data.height = buffer.rootRenderTarget.height;
@@ -4486,7 +4493,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
              */
             WebGLDrawCmdManager.prototype.pushEnableScissor = function (x, y, width, height) {
                 var data = this.drawData[this.drawDataLen] || {};
-                data.type = 8 /* ENABLE_SCISSOR */;
+                data.type = 7 /* ENABLE_SCISSOR */;
                 data.x = x;
                 data.y = y;
                 data.width = width;
@@ -4499,7 +4506,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
              */
             WebGLDrawCmdManager.prototype.pushDisableScissor = function () {
                 var data = this.drawData[this.drawDataLen] || {};
-                data.type = 9 /* DISABLE_SCISSOR */;
+                data.type = 8 /* DISABLE_SCISSOR */;
                 this.drawData[this.drawDataLen] = data;
                 this.drawDataLen++;
             };
@@ -4555,7 +4562,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -4850,7 +4857,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -4998,7 +5005,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -5505,10 +5512,10 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     var data = this.drawCmdManager.drawData[i];
                     offset = this.drawData(data, offset);
                     // 计算draw call
-                    if (data.type == 7 /* ACT_BUFFER */) {
+                    if (data.type == 6 /* ACT_BUFFER */) {
                         this.activatedBuffer = data.buffer;
                     }
-                    if (data.type == 0 /* TEXTURE */ || data.type == 1 /* RECT */ || data.type == 2 /* PUSH_MASK */ || data.type == 3 /* POP_MASK */) {
+                    if (data.type == 0 /* TEXTURE */ || data.type == 11 /* RECT */ || data.type == 1 /* PUSH_MASK */ || data.type == 2 /* POP_MASK */) {
                         if (this.activatedBuffer && this.activatedBuffer.$computeDrawCall) {
                             this.activatedBuffer.$drawCalls++;
                         }
@@ -5558,32 +5565,32 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                         this.syncUniforms(program, filter, data.textureWidth, data.textureHeight);
                         offset += this.drawTextureElements(data, offset);
                         break;
-                    case 1 /* RECT */:
+                    case 11 /* RECT */:
                         program = wxgame.EgretWebGLProgram.getProgram(gl, wxgame.EgretShaderLib.default_vert, wxgame.EgretShaderLib.primitive_frag, "primitive");
                         this.activeProgram(gl, program);
                         this.syncUniforms(program, filter, data.textureWidth, data.textureHeight);
                         offset += this.drawRectElements(data, offset);
                         break;
-                    case 2 /* PUSH_MASK */:
+                    case 1 /* PUSH_MASK */:
                         program = wxgame.EgretWebGLProgram.getProgram(gl, wxgame.EgretShaderLib.default_vert, wxgame.EgretShaderLib.primitive_frag, "primitive");
                         this.activeProgram(gl, program);
                         this.syncUniforms(program, filter, data.textureWidth, data.textureHeight);
                         offset += this.drawPushMaskElements(data, offset);
                         break;
-                    case 3 /* POP_MASK */:
+                    case 2 /* POP_MASK */:
                         program = wxgame.EgretWebGLProgram.getProgram(gl, wxgame.EgretShaderLib.default_vert, wxgame.EgretShaderLib.primitive_frag, "primitive");
                         this.activeProgram(gl, program);
                         this.syncUniforms(program, filter, data.textureWidth, data.textureHeight);
                         offset += this.drawPopMaskElements(data, offset);
                         break;
-                    case 4 /* BLEND */:
+                    case 3 /* BLEND */:
                         this.setBlendMode(data.value);
                         break;
-                    case 5 /* RESIZE_TARGET */:
+                    case 4 /* RESIZE_TARGET */:
                         data.buffer.rootRenderTarget.resize(data.width, data.height);
                         this.onResize(data.width, data.height);
                         break;
-                    case 6 /* CLEAR_COLOR */:
+                    case 5 /* CLEAR_COLOR */:
                         if (this.activatedBuffer) {
                             var target = this.activatedBuffer.rootRenderTarget;
                             if (target.width != 0 || target.height != 0) {
@@ -5591,10 +5598,10 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                             }
                         }
                         break;
-                    case 7 /* ACT_BUFFER */:
+                    case 6 /* ACT_BUFFER */:
                         this.activateBuffer(data.buffer);
                         break;
-                    case 8 /* ENABLE_SCISSOR */:
+                    case 7 /* ENABLE_SCISSOR */:
                         var buffer = this.activatedBuffer;
                         if (buffer) {
                             if (buffer.rootRenderTarget) {
@@ -5603,13 +5610,13 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                             buffer.enableScissor(data.x, data.y, data.width, data.height);
                         }
                         break;
-                    case 9 /* DISABLE_SCISSOR */:
+                    case 8 /* DISABLE_SCISSOR */:
                         buffer = this.activatedBuffer;
                         if (buffer) {
                             buffer.disableScissor();
                         }
                         break;
-                    case 10 /* SMOOTHING */:
+                    case 9 /* SMOOTHING */:
                         gl.bindTexture(gl.TEXTURE_2D, data.texture);
                         if (data.smoothing) {
                             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
@@ -5873,7 +5880,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -6045,6 +6052,9 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     }
                 }
                 return result;
+            };
+            WebGLRenderBuffer.prototype.$pushResize = function (width, height) {
+                this.context.drawCmdManager.pushResize(this, width, height);
             };
             /**
              * 转换成base64字符串，如果图片（或者包含的图片）跨域，则返回null
@@ -6239,7 +6249,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -7231,7 +7241,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -7337,7 +7347,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -7442,7 +7452,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -7676,7 +7686,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
         __reflect(EgretWebGLUniform.prototype, "egret.wxgame.EgretWebGLUniform");
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {

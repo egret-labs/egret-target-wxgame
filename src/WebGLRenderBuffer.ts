@@ -227,6 +227,10 @@ namespace egret.wxgame {
             return <number[]><any>result;
         }
 
+        public $pushResize(width:number,height:number){
+            this.context.drawCmdManager.pushResize(this,width,height);
+        }
+
         /**
          * 转换成base64字符串，如果图片（或者包含的图片）跨域，则返回null
          * @param type 转换的类型，如: "image/png","image/jpeg"
