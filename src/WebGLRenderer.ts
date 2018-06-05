@@ -40,6 +40,8 @@ namespace egret.wxgame {
      */
     export class WebGLRenderer implements sys.SystemRenderer {
 
+        public $currentBuffer:WebGLRenderBuffer;
+
         public constructor() {
 
         }
@@ -64,7 +66,8 @@ namespace egret.wxgame {
 
             //绘制显示对象
             webglBuffer.transform(matrix.a, matrix.b, matrix.c, matrix.d, 0, 0);
-            this.drawDisplayObject(displayObject, webglBuffer, matrix.tx, matrix.ty, true);
+            this.$currentBuffer = webglBuffer;
+            this.drawDisplayObject(displayObject, matrix.tx, matrix.ty, true);
             webglBufferContext.$drawWebGL();
             let drawCall = webglBuffer.$drawCalls;
             webglBuffer.onRenderFinish();
@@ -93,17 +96,22 @@ namespace egret.wxgame {
          * @private
          * 绘制一个显示对象
          */
-        private drawDisplayObject(displayObject: DisplayObject, buffer: WebGLRenderBuffer, offsetX: number, offsetY: number, isStage?: boolean): number {
+        private drawDisplayObject(displayObject: DisplayObject,  offsetX: number, offsetY: number, isStage?: boolean): number {
+            let buffer = this.$currentBuffer;
             let drawCalls = 0;
             let node: sys.RenderNode;
             let displayList = displayObject.$displayList;
-            if (displayList && !isStage) {
+            let hasRednerNode: boolean;
+            let needDrawToSurface = !!(displayList && !isStage);
+            if (needDrawToSurface) {
                 if (displayObject.$cacheDirty || displayObject.$renderDirty ||
                     displayList.$canvasScaleX != sys.DisplayList.$canvasScaleX ||
                     displayList.$canvasScaleY != sys.DisplayList.$canvasScaleY) {
                     drawCalls += displayList.drawToSurface();
                 }
                 node = displayList.$renderNode;
+                hasRednerNode = true;
+
             }
             else {
                 if (displayObject.$renderDirty) {
@@ -112,40 +120,37 @@ namespace egret.wxgame {
                 else {
                     node = displayObject.$renderNode;
                 }
+                hasRednerNode = displayObject.$hasRenderNode;
+
             }
             displayObject.$cacheDirty = false;
-            if (node) {
+            if (hasRednerNode) {
                 drawCalls++;
                 buffer.$offsetX = offsetX;
                 buffer.$offsetY = offsetY;
-                switch (node.type) {
-                    case sys.RenderNodeType.BitmapNode:
-                        this.renderBitmap(<sys.BitmapNode>node, buffer);
-                        break;
-                    case sys.RenderNodeType.TextNode:
-                        this.renderText(<sys.TextNode>node, buffer);
-                        break;
-                    case sys.RenderNodeType.GraphicsNode:
-                        this.renderGraphics(<sys.GraphicsNode>node, buffer);
-                        break;
-                    case sys.RenderNodeType.GroupNode:
-                        this.renderGroup(<sys.GroupNode>node, buffer);
-                        break;
-                    case sys.RenderNodeType.MeshNode:
-                        this.renderMesh(<sys.MeshNode>node, buffer);
-                        break;
-                    case sys.RenderNodeType.NormalBitmapNode:
-                        this.renderNormalBitmap(<sys.NormalBitmapNode>node, buffer);
-                        break;
+
+                if (node.type == sys.RenderNodeType.NormalBitmapNode) {
+                    this.renderNormalBitmap(<sys.NormalBitmapNode>node, buffer);
+                } else if (node.type == sys.RenderNodeType.BitmapNode) {
+                    this.renderBitmap(<sys.BitmapNode>node, buffer);
+                } else if (node.type == sys.RenderNodeType.TextNode) {
+                    this.renderText(<sys.TextNode>node, buffer);
+                } else if (node.type == sys.RenderNodeType.GraphicsNode) {
+                    this.renderGraphics(<sys.GraphicsNode>node, buffer);
+                } else if (node.type == sys.RenderNodeType.GroupNode) {
+                    this.renderGroup(<sys.GroupNode>node, buffer);
+                } else if (sys.RenderNodeType.MeshNode) {
+                    this.renderMesh(<sys.MeshNode>node, buffer);
                 }
+
                 buffer.$offsetX = 0;
                 buffer.$offsetY = 0;
             }
-            if (displayList && !isStage) {
+            if (needDrawToSurface) {
                 return drawCalls;
             }
             let children = displayObject.$children;
-            if (children) {
+            if (displayObject.$hasChildren) {
                 let length = children.length;
                 for (let i = 0; i < length; i++) {
                     let child = children[i];
@@ -170,29 +175,33 @@ namespace egret.wxgame {
                         savedMatrix.tx = m2.tx;
                         savedMatrix.ty = m2.ty;
                         buffer.transform(m.a, m.b, m.c, m.d, offsetX2, offsetY2);
-                        offsetX2 = -child.$anchorOffsetX;
-                        offsetY2 = -child.$anchorOffsetY;
+                        if (child.$hasAnchor) {
+                            offsetX2 = -child.$anchorOffsetX;
+                            offsetY2 = -child.$anchorOffsetY;
+                        }
                     }
                     else {
-                        offsetX2 = offsetX + child.$x - child.$anchorOffsetX;
-                        offsetY2 = offsetY + child.$y - child.$anchorOffsetY;
+                        offsetX2 = offsetX + child.$x;
+                        offsetY2 = offsetY + child.$y;
+                        if (child.$hasAnchor) {
+                            offsetX2 -= child.$anchorOffsetX;
+                            offsetY2 -= child.$anchorOffsetY;
+                        }
                     }
-                    switch (child.$renderMode) {
-                        case RenderMode.NONE:
-                            break;
-                        case RenderMode.FILTER:
-                            drawCalls += this.drawWithFilter(child, buffer, offsetX2, offsetY2);
-                            break;
-                        case RenderMode.CLIP:
-                            drawCalls += this.drawWithClip(child, buffer, offsetX2, offsetY2);
-                            break;
-                        case RenderMode.SCROLLRECT:
-                            drawCalls += this.drawWithScrollRect(child, buffer, offsetX2, offsetY2);
-                            break;
-                        default:
-                            drawCalls += this.drawDisplayObject(child, buffer, offsetX2, offsetY2);
-                            break;
+
+                    if (child.$renderMode === RenderMode.DEFAULT) {
+                        drawCalls += this.drawDisplayObject(child, offsetX2, offsetY2);
                     }
+                    else if (child.$renderMode === RenderMode.FILTER) {
+                        drawCalls += this.drawWithFilter(child, buffer, offsetX2, offsetY2);
+                    }
+                    else if (child.$renderMode === RenderMode.CLIP) {
+                        drawCalls += this.drawWithClip(child, buffer, offsetX2, offsetY2);
+                    }
+                    else if (child.$renderMode === RenderMode.SCROLLRECT) {
+                        drawCalls += this.drawWithScrollRect(child, buffer, offsetX2, offsetY2);
+                    }
+
                     if (tempAlpha) {
                         buffer.globalAlpha = tempAlpha;
                     }
@@ -217,7 +226,7 @@ namespace egret.wxgame {
         private drawWithFilter(displayObject: DisplayObject, buffer: WebGLRenderBuffer, offsetX: number, offsetY: number): number {
             let drawCalls = 0;
             if (displayObject.$children && displayObject.$children.length == 0 && (!displayObject.$renderNode || displayObject.$renderNode.$getRenderCount() == 0)) {
-                return;
+                return drawCalls;
             }
             let filters = displayObject.$filters;
             let hasBlendMode = (displayObject.$blendMode !== 0);
@@ -229,8 +238,12 @@ namespace egret.wxgame {
                 }
             }
 
-            let displayBounds = displayObject.$getOriginalBounds();
-            if (displayBounds.width <= 0 || displayBounds.height <= 0) {
+            const displayBounds = displayObject.$getOriginalBounds();
+            const displayBoundsX = displayBounds.x;
+            const displayBoundsY = displayBounds.y;
+            const displayBoundsWidth = displayBounds.width;
+            const displayBoundsHeight = displayBounds.height;
+            if (displayBoundsWidth <= 0 || displayBoundsHeight <= 0) {
                 return drawCalls;
             }
 
@@ -249,7 +262,7 @@ namespace egret.wxgame {
                         drawCalls += this.drawWithScrollRect(displayObject, buffer, offsetX, offsetY);
                     }
                     else {
-                        drawCalls += this.drawDisplayObject(displayObject, buffer, offsetX, offsetY);
+                        drawCalls += this.drawDisplayObject(displayObject, offsetX, offsetY);
                     }
 
                     buffer.context.$filter = null;
@@ -263,18 +276,18 @@ namespace egret.wxgame {
             }
 
             // 为显示对象创建一个新的buffer
-            let displayBuffer = this.createRenderBuffer(displayBounds.width, displayBounds.height);
+            let displayBuffer = this.createRenderBuffer(displayBoundsWidth, displayBoundsHeight);
             displayBuffer.context.pushBuffer(displayBuffer);
 
             //todo 可以优化减少draw次数
             if (displayObject.$mask) {
-                drawCalls += this.drawWithClip(displayObject, displayBuffer, -displayBounds.x, -displayBounds.y);
+                drawCalls += this.drawWithClip(displayObject, displayBuffer, -displayBoundsX, -displayBoundsY);
             }
             else if (displayObject.$scrollRect || displayObject.$maskRect) {
-                drawCalls += this.drawWithScrollRect(displayObject, displayBuffer, -displayBounds.x, -displayBounds.y);
+                drawCalls += this.drawWithScrollRect(displayObject, displayBuffer, -displayBoundsX, -displayBoundsY);
             }
             else {
-                drawCalls += this.drawDisplayObject(displayObject, displayBuffer, -displayBounds.x, -displayBounds.y);
+                drawCalls += this.drawDisplayObject(displayObject, -displayBoundsX, -displayBoundsY);
             }
 
             displayBuffer.context.popBuffer();
@@ -286,8 +299,8 @@ namespace egret.wxgame {
                 }
                 drawCalls++;
                 // 绘制结果的时候，应用滤镜
-                buffer.$offsetX = offsetX + displayBounds.x;
-                buffer.$offsetY = offsetY + displayBounds.y;
+                buffer.$offsetX = offsetX + displayBoundsX;
+                buffer.$offsetY = offsetY + displayBoundsY;
                 let savedMatrix = Matrix.create();
                 let curMatrix = buffer.globalMatrix;
                 savedMatrix.a = curMatrix.a;
@@ -314,19 +327,30 @@ namespace egret.wxgame {
         }
 
         private getRenderCount(displayObject: DisplayObject): number {
-            let childrenDrawCount = 0;
+            let drawCount = 0;
+            const node = displayObject.$getRenderNode();
+            if (displayObject.$hasRenderNode) {
+                drawCount += node.$getRenderCount();
+            }
             if (displayObject.$children) {
-                for (let child of displayObject.$children) {
-                    let node = child.$getRenderNode();
-                    if (node) {
-                        childrenDrawCount += node.$getRenderCount();
+                for (const child of displayObject.$children) {
+                    const filters = child.$filters;
+                    // 特殊处理有滤镜的对象
+                    if (filters && filters.length > 0) {
+                        return 2;
                     }
-                    if (child.$children) {
-                        childrenDrawCount += this.getRenderCount(child);
+                    else if (child.$children) {
+                        drawCount += this.getRenderCount(child);
+                    }
+                    else {
+                        const node = child.$getRenderNode();
+                        if (child.$hasRenderNode) {
+                            drawCount += node.$getRenderCount();
+                        }
                     }
                 }
             }
-            return childrenDrawCount;
+            return drawCount;
         }
 
         /**
@@ -362,7 +386,7 @@ namespace egret.wxgame {
                 if (hasBlendMode) {
                     buffer.context.setGlobalCompositeOperation(compositeOp);
                 }
-                drawCalls += this.drawDisplayObject(displayObject, buffer, offsetX, offsetY);
+                drawCalls += this.drawDisplayObject(displayObject, offsetX, offsetY);
                 if (hasBlendMode) {
                     buffer.context.setGlobalCompositeOperation(defaultCompositeOp);
                 }
@@ -373,25 +397,28 @@ namespace egret.wxgame {
             }
             else {
                 let displayBounds = displayObject.$getOriginalBounds();
+                const displayBoundsX = displayBounds.x;
+                const displayBoundsY = displayBounds.y;
+                const displayBoundsWidth = displayBounds.width;
+                const displayBoundsHeight = displayBounds.height;
                 //绘制显示对象自身，若有scrollRect，应用clip
-                let displayBuffer = this.createRenderBuffer(displayBounds.width, displayBounds.height);
+                let displayBuffer = this.createRenderBuffer(displayBoundsWidth, displayBoundsHeight);
                 displayBuffer.context.pushBuffer(displayBuffer);
-                drawCalls += this.drawDisplayObject(displayObject, displayBuffer, -displayBounds.x, -displayBounds.y);
+                drawCalls += this.drawDisplayObject(displayObject, -displayBoundsX, -displayBoundsY);
                 //绘制遮罩
                 if (mask) {
-                    let maskBuffer = this.createRenderBuffer(displayBounds.width, displayBounds.height);
+                    let maskBuffer = this.createRenderBuffer(displayBoundsWidth, displayBoundsHeight);
                     maskBuffer.context.pushBuffer(maskBuffer);
                     let maskMatrix = Matrix.create();
                     maskMatrix.copyFrom(mask.$getConcatenatedMatrix());
                     mask.$getConcatenatedMatrixAt(displayObject, maskMatrix);
-                    maskMatrix.translate(-displayBounds.x, -displayBounds.y);
+                    maskMatrix.translate(-displayBoundsX, -displayBoundsY);
                     maskBuffer.setTransform(maskMatrix.a, maskMatrix.b, maskMatrix.c, maskMatrix.d, maskMatrix.tx, maskMatrix.ty);
                     Matrix.release(maskMatrix);
-                    drawCalls += this.drawDisplayObject(mask, maskBuffer, 0, 0);
+                    drawCalls += this.drawDisplayObject(mask, 0, 0);
                     maskBuffer.context.popBuffer();
                     displayBuffer.context.setGlobalCompositeOperation("destination-in");
                     displayBuffer.setTransform(1, 0, 0, -1, 0, maskBuffer.height);
-                    displayBuffer.globalAlpha = 1;
                     let maskBufferWidth = maskBuffer.rootRenderTarget.width;
                     let maskBufferHeight = maskBuffer.rootRenderTarget.height;
                     displayBuffer.context.drawTexture(maskBuffer.rootRenderTarget.texture, 0, 0, maskBufferWidth, maskBufferHeight,
@@ -413,7 +440,6 @@ namespace egret.wxgame {
                     if (scrollRect) {
                         buffer.context.pushMask(scrollRect.x + offsetX, scrollRect.y + offsetY, scrollRect.width, scrollRect.height);
                     }
-                    buffer.globalAlpha = 1;
                     let savedMatrix = Matrix.create();
                     let curMatrix = buffer.globalMatrix;
                     savedMatrix.a = curMatrix.a;
@@ -422,7 +448,7 @@ namespace egret.wxgame {
                     savedMatrix.d = curMatrix.d;
                     savedMatrix.tx = curMatrix.tx;
                     savedMatrix.ty = curMatrix.ty;
-                    curMatrix.append(1, 0, 0, -1, offsetX + displayBounds.x, offsetY + displayBounds.y + displayBuffer.height);
+                    curMatrix.append(1, 0, 0, -1, offsetX + displayBoundsX, offsetY + displayBoundsY + displayBuffer.height);
                     let displayBufferWidth = displayBuffer.rootRenderTarget.width;
                     let displayBufferHeight = displayBuffer.rootRenderTarget.height;
                     buffer.context.drawTexture(displayBuffer.rootRenderTarget.texture, 0, 0, displayBufferWidth, displayBufferHeight,
@@ -525,7 +551,7 @@ namespace egret.wxgame {
                 context.enableScissor(minX, -maxY + buffer.height, maxX - minX, maxY - minY);
                 scissor = true;
             }
-            drawCalls += this.drawDisplayObject(displayObject, buffer, offsetX, offsetY);
+            drawCalls += this.drawDisplayObject(displayObject, offsetX, offsetY);
             if (scissor) {
                 context.disableScissor();
             } else {
@@ -575,27 +601,20 @@ namespace egret.wxgame {
                 node = displayObject.$renderNode;
             }
             let drawCalls = 0;
-            if (node) {
+            if (displayObject.$hasRenderNode) {
                 drawCalls++;
-                switch (node.type) {
-                    case sys.RenderNodeType.BitmapNode:
-                        this.renderBitmap(<sys.BitmapNode>node, buffer);
-                        break;
-                    case sys.RenderNodeType.TextNode:
-                        this.renderText(<sys.TextNode>node, buffer);
-                        break;
-                    case sys.RenderNodeType.GraphicsNode:
-                        this.renderGraphics(<sys.GraphicsNode>node, buffer);
-                        break;
-                    case sys.RenderNodeType.GroupNode:
-                        this.renderGroup(<sys.GroupNode>node, buffer);
-                        break;
-                    case sys.RenderNodeType.MeshNode:
-                        this.renderMesh(<sys.MeshNode>node, buffer);
-                        break;
-                    case sys.RenderNodeType.NormalBitmapNode:
-                        this.renderNormalBitmap(<sys.NormalBitmapNode>node, buffer);
-                        break;
+                if (node.type == sys.RenderNodeType.NormalBitmapNode) {
+                    this.renderNormalBitmap(<sys.NormalBitmapNode>node, buffer);
+                } else if (node.type == sys.RenderNodeType.BitmapNode) {
+                    this.renderBitmap(<sys.BitmapNode>node, buffer);
+                } else if (node.type == sys.RenderNodeType.TextNode) {
+                    this.renderText(<sys.TextNode>node, buffer);
+                } else if (node.type == sys.RenderNodeType.GraphicsNode) {
+                    this.renderGraphics(<sys.GraphicsNode>node, buffer);
+                } else if (node.type == sys.RenderNodeType.GroupNode) {
+                    this.renderGroup(<sys.GroupNode>node, buffer);
+                } else if (node.type == sys.RenderNodeType.MeshNode) {
+                    this.renderMesh(<sys.MeshNode>node, buffer);
                 }
             }
             let children = displayObject.$children;
@@ -603,22 +622,20 @@ namespace egret.wxgame {
                 let length = children.length;
                 for (let i = 0; i < length; i++) {
                     let child = children[i];
-                    switch (child.$renderMode) {
-                        case RenderMode.NONE:
-                            break;
-                        case RenderMode.FILTER:
-                            drawCalls += this.drawWithFilter(child, buffer, 0, 0);
-                            break;
-                        case RenderMode.CLIP:
-                            drawCalls += this.drawWithClip(child, buffer, 0, 0);
-                            break;
-                        case RenderMode.SCROLLRECT:
-                            drawCalls += this.drawWithScrollRect(child, buffer, 0, 0);
-                            break;
-                        default:
-                            drawCalls += this.drawDisplayObject(child, buffer, 0, 0);
-                            break;
+
+                    if (child.$renderMode === RenderMode.DEFAULT) {
+                        drawCalls += this.drawDisplayObject(child, 0, 0);
                     }
+                    else if (child.$renderMode === RenderMode.FILTER) {
+                        drawCalls += this.drawWithFilter(child, buffer, 0, 0);
+                    }
+                    else if (child.$renderMode === RenderMode.CLIP) {
+                        drawCalls += this.drawWithClip(child, buffer, 0, 0);
+                    }
+                    else if (child.$renderMode === RenderMode.SCROLLRECT) {
+                        drawCalls += this.drawWithScrollRect(child, buffer, 0, 0);
+                    }
+
                 }
             }
 
@@ -635,26 +652,20 @@ namespace egret.wxgame {
         private renderNode(node: sys.RenderNode, buffer: WebGLRenderBuffer, offsetX: number, offsetY: number, forHitTest?: boolean): void {
             buffer.$offsetX = offsetX;
             buffer.$offsetY = offsetY;
-            switch (node.type) {
-                case sys.RenderNodeType.BitmapNode:
-                    this.renderBitmap(<sys.BitmapNode>node, buffer);
-                    break;
-                case sys.RenderNodeType.TextNode:
-                    this.renderText(<sys.TextNode>node, buffer);
-                    break;
-                case sys.RenderNodeType.GraphicsNode:
-                    this.renderGraphics(<sys.GraphicsNode>node, buffer, forHitTest);
-                    break;
-                case sys.RenderNodeType.GroupNode:
-                    this.renderGroup(<sys.GroupNode>node, buffer);
-                    break;
-                case sys.RenderNodeType.MeshNode:
-                    this.renderMesh(<sys.MeshNode>node, buffer);
-                    break;
-                case sys.RenderNodeType.NormalBitmapNode:
-                    this.renderNormalBitmap(<sys.NormalBitmapNode>node, buffer);
-                    break;
+            if (node.type == sys.RenderNodeType.NormalBitmapNode) {
+                this.renderNormalBitmap(<sys.NormalBitmapNode>node, buffer);
+            } else if (node.type == sys.RenderNodeType.BitmapNode) {
+                this.renderBitmap(<sys.BitmapNode>node, buffer);
+            } else if (node.type == sys.RenderNodeType.TextNode) {
+                this.renderText(<sys.TextNode>node, buffer);
+            } else if (node.type == sys.RenderNodeType.GraphicsNode) {
+                this.renderGraphics(<sys.GraphicsNode>node, buffer, forHitTest);
+            } else if (node.type == sys.RenderNodeType.GroupNode) {
+                this.renderGroup(<sys.GroupNode>node, buffer);
+            } else if (node.type == sys.RenderNodeType.MeshNode) {
+                this.renderMesh(<sys.MeshNode>node, buffer);
             }
+
         }
 
         /**
@@ -665,8 +676,7 @@ namespace egret.wxgame {
             if (!image) {
                 return;
             }
-            buffer.context.drawImage(image, node.sourceX, node.sourceY, node.sourceW, node.sourceH,
-                node.drawX, node.drawY, node.drawW, node.drawH, node.imageWidth, node.imageHeight, node.rotated, node.smoothing);
+            buffer.context.drawImageByRenderNode(node);
         }
 
         /**
@@ -889,10 +899,7 @@ namespace egret.wxgame {
                 node.$textureWidth = surface.width;
                 node.$textureHeight = surface.height;
             }
-
-            let textureWidth = node.$textureWidth;
-            let textureHeight = node.$textureHeight;
-            buffer.context.drawTexture(node.$texture, 0, 0, textureWidth, textureHeight, 0, 0, textureWidth / canvasScaleX, textureHeight / canvasScaleY, textureWidth, textureHeight);
+            buffer.context.drawTextureByRenderNode(node);
 
             if (x || y) {
                 if (node.dirtyRender) {
@@ -955,6 +962,7 @@ namespace egret.wxgame {
                 this.canvasRenderer.renderGraphics(node, this.canvasRenderBuffer.context, true);
                 WebGLUtils.deleteWebGLTexture(surface);
                 let texture = buffer.context.getWebGLTexture(<BitmapData><any>surface);
+
                 buffer.context.drawTexture(texture, 0, 0, width, height, 0, 0, width, height, surface.width, surface.height);
             } else {
                 if (node.dirtyRender) {
@@ -973,9 +981,9 @@ namespace egret.wxgame {
                     node.$textureWidth = surface.width;
                     node.$textureHeight = surface.height;
                 }
-                let textureWidth = node.$textureWidth;
-                let textureHeight = node.$textureHeight;
-                buffer.context.drawTexture(node.$texture, 0, 0, textureWidth, textureHeight, 0, 0, textureWidth / canvasScaleX, textureHeight / canvasScaleY, textureWidth, textureHeight);
+                // buffer.context.drawTexture(node.$texture, 0, 0, node.$textureWidth, node.$textureHeight, 0, 0,
+                //     node.$textureWidth / canvasScaleX, node.$textureHeight / canvasScaleY, node.$textureWidth, node.$textureHeight);
+                buffer.context.drawTextureByRenderNode(node);
             }
 
             if (node.x || node.y) {

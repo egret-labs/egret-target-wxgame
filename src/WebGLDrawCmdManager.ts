@@ -75,7 +75,11 @@ namespace egret.wxgame {
         /**
          * 用于缓存绘制命令的数组
          */
-        public drawData = [];
+        public drawData = {};
+
+        private lastDrawTextureData: any;
+
+        private lastProgramKey: string;
 
         public drawDataLen = 0;
 
@@ -84,24 +88,15 @@ namespace egret.wxgame {
         }
 
         /**
-         * 压入绘制矩形指令
-         */
-        public pushDrawRect(): void {
-            if (this.drawDataLen == 0 || this.drawData[this.drawDataLen - 1].type != DRAWABLE_TYPE.RECT) {
-                let data = this.drawData[this.drawDataLen] || {};
-                data.type = DRAWABLE_TYPE.RECT;
-                data.count = 0;
-                this.drawData[this.drawDataLen] = data;
-                this.drawDataLen++;
-            }
-            this.drawData[this.drawDataLen - 1].count += 2;
-        }
-
-        /**
          * 压入绘制texture指令
          */
         public pushDrawTexture(texture: any, count: number = 2, filter?: any, textureWidth?: number, textureHeight?: number): void {
             if (filter) {
+                //根据filter压入切换program
+                let programeKey = filter.type;
+                if (this.lastProgramKey !== programeKey) {
+                    this.pushChangeProgram(programeKey, filter);
+                }
                 // 目前有滤镜的情况下不会合并绘制
                 let data = this.drawData[this.drawDataLen] || {};
                 data.type = DRAWABLE_TYPE.TEXTURE;
@@ -112,16 +107,21 @@ namespace egret.wxgame {
                 data.textureHeight = textureHeight;
                 this.drawData[this.drawDataLen] = data;
                 this.drawDataLen++;
+                this.lastDrawTextureData = null;
             } else {
-
-                if (this.drawDataLen == 0 || this.drawData[this.drawDataLen - 1].type != DRAWABLE_TYPE.TEXTURE || texture != this.drawData[this.drawDataLen - 1].texture || this.drawData[this.drawDataLen - 1].filter) {
+                if (this.lastDrawTextureData == null || texture != this.lastDrawTextureData.texture) {
+                    if (this.lastProgramKey !== "texture") {
+                        this.pushChangeProgram("texture");
+                    }
                     let data = this.drawData[this.drawDataLen] || {};
                     data.type = DRAWABLE_TYPE.TEXTURE;
                     data.texture = texture;
                     data.count = 0;
                     this.drawData[this.drawDataLen] = data;
                     this.drawDataLen++;
+                    this.lastDrawTextureData = data;
                 }
+
                 this.drawData[this.drawDataLen - 1].count += count;
 
             }
@@ -135,6 +135,7 @@ namespace egret.wxgame {
             data.smoothing = smoothing;
             this.drawData[this.drawDataLen] = data;
             this.drawDataLen++;
+            this.lastDrawTextureData = null;
         }
 
         /**
@@ -146,6 +147,7 @@ namespace egret.wxgame {
             data.count = count * 2;
             this.drawData[this.drawDataLen] = data;
             this.drawDataLen++;
+            this.lastDrawTextureData = null;
         }
 
         /**
@@ -157,6 +159,7 @@ namespace egret.wxgame {
             data.count = count * 2;
             this.drawData[this.drawDataLen] = data;
             this.drawDataLen++;
+            this.lastDrawTextureData = null;
         }
 
         /**
@@ -170,14 +173,13 @@ namespace egret.wxgame {
                 let data = this.drawData[i];
 
                 if (data) {
-                    if (data.type == DRAWABLE_TYPE.TEXTURE || data.type == DRAWABLE_TYPE.RECT) {
+                    if (data.type == DRAWABLE_TYPE.TEXTURE ) {
                         drawState = true;
                     }
 
                     // 如果与上一次blend操作之间无有效绘图，上一次操作无效
                     if (!drawState && data.type == DRAWABLE_TYPE.BLEND) {
-                        this.drawData.splice(i, 1);
-                        this.drawDataLen--;
+                        delete this.drawData[i];
                         continue;
                     }
 
@@ -197,6 +199,7 @@ namespace egret.wxgame {
             _data.value = value;
             this.drawData[this.drawDataLen] = _data;
             this.drawDataLen++;
+            this.lastDrawTextureData = null;
         }
 
         /*
@@ -210,6 +213,7 @@ namespace egret.wxgame {
             data.height = height;
             this.drawData[this.drawDataLen] = data;
             this.drawDataLen++;
+            this.lastDrawTextureData = null;
         }
 
         /*
@@ -220,6 +224,7 @@ namespace egret.wxgame {
             data.type = DRAWABLE_TYPE.CLEAR_COLOR;
             this.drawData[this.drawDataLen] = data;
             this.drawDataLen++;
+            this.lastDrawTextureData = null;
         }
 
         /**
@@ -239,8 +244,7 @@ namespace egret.wxgame {
 
                     // 如果与上一次buffer操作之间无有效绘图，上一次操作无效
                     if (!drawState && data.type == DRAWABLE_TYPE.ACT_BUFFER) {
-                        this.drawData.splice(i, 1);
-                        this.drawDataLen--;
+                        delete this.drawData[i];
                         continue;
                     }
 
@@ -262,6 +266,7 @@ namespace egret.wxgame {
             _data.height = buffer.rootRenderTarget.height;
             this.drawData[this.drawDataLen] = _data;
             this.drawDataLen++;
+            this.lastDrawTextureData = null;
         }
 
         /*
@@ -276,6 +281,7 @@ namespace egret.wxgame {
             data.height = height;
             this.drawData[this.drawDataLen] = data;
             this.drawDataLen++;
+            this.lastDrawTextureData = null;
         }
 
         /*
@@ -286,6 +292,7 @@ namespace egret.wxgame {
             data.type = DRAWABLE_TYPE.DISABLE_SCISSOR;
             this.drawData[this.drawDataLen] = data;
             this.drawDataLen++;
+            this.lastDrawTextureData = null;
         }
 
         /**
@@ -294,7 +301,8 @@ namespace egret.wxgame {
         public clear(): void {
             for (let i = 0; i < this.drawDataLen; i++) {
                 let data = this.drawData[i];
-
+                if (!data)
+                    continue;
                 data.type = 0;
                 data.count = 0;
                 data.texture = null;
@@ -304,10 +312,49 @@ namespace egret.wxgame {
                 data.buffer = null;
                 data.width = 0;
                 data.height = 0;
+                data.vertSource = null;
+                data.fragSource = null;
+                data.key = null;
             }
-
             this.drawDataLen = 0;
+            this.lastDrawTextureData = null;
+            this.lastProgramKey = null;
         }
 
+
+        /**
+         * 压入切换shader programe命令
+         */
+        public pushChangeProgram(type: string, filter?: egret.Filter): void {
+            let key: string;
+            let vertSource: string = EgretShaderLib.default_vert;
+            let fragSource: string = EgretShaderLib.blur_frag;
+            if (type === "texture") {
+                key = "texture";
+                fragSource = EgretShaderLib.texture_frag;
+            } else if (type === "custom") {
+                key = (filter as egret.CustomFilter).$shaderKey;
+                vertSource = (filter as egret.CustomFilter).$vertexSrc;
+                fragSource = (filter as egret.CustomFilter).$fragmentSrc;
+            } else if (type === "colorTransform") {
+                key = "colorTransform";
+                fragSource = EgretShaderLib.colorTransform_frag
+            } else if (type === "blurX" || type === "blurY") {
+                key = "blur";
+            } else if (type === "glow") {
+                key = "glow";
+                fragSource = EgretShaderLib.glow_frag;
+            }
+            //记录上一次的Programe类型
+            this.lastProgramKey = key;
+            let data = this.drawData[this.drawDataLen] || {};
+            data.type = DRAWABLE_TYPE.CHANGE_PROGRAM;
+            data.key = key;
+            data.vertSource = vertSource;
+            data.fragSource = fragSource;
+            this.drawData[this.drawDataLen] = data;
+            this.drawDataLen++;
+            this.lastDrawTextureData = null;
+        }
     }
 }

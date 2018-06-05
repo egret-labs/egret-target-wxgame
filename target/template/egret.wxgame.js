@@ -246,7 +246,7 @@ r.prototype = e.prototype, t.prototype = new r();
             return WebFps;
         }(egret.DisplayObject));
         wxgame.WebFps = WebFps;
-        __reflect(WebFps.prototype, "egret.wxgame.WebFps", ["egret.FPSDisplay", "egret.DisplayObject"]);
+        __reflect(WebFps.prototype, "egret.wxgame.WebFps", ["egret.FPSDisplay"]);
         egret.FPSDisplay = WebFps;
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
@@ -4318,28 +4318,20 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 /**
                  * 用于缓存绘制命令的数组
                  */
-                this.drawData = [];
+                this.drawData = {};
                 this.drawDataLen = 0;
             }
-            /**
-             * 压入绘制矩形指令
-             */
-            WebGLDrawCmdManager.prototype.pushDrawRect = function () {
-                if (this.drawDataLen == 0 || this.drawData[this.drawDataLen - 1].type != 11 /* RECT */) {
-                    var data = this.drawData[this.drawDataLen] || {};
-                    data.type = 11 /* RECT */;
-                    data.count = 0;
-                    this.drawData[this.drawDataLen] = data;
-                    this.drawDataLen++;
-                }
-                this.drawData[this.drawDataLen - 1].count += 2;
-            };
             /**
              * 压入绘制texture指令
              */
             WebGLDrawCmdManager.prototype.pushDrawTexture = function (texture, count, filter, textureWidth, textureHeight) {
                 if (count === void 0) { count = 2; }
                 if (filter) {
+                    //根据filter压入切换program
+                    var programeKey = filter.type;
+                    if (this.lastProgramKey !== programeKey) {
+                        this.pushChangeProgram(programeKey, filter);
+                    }
                     // 目前有滤镜的情况下不会合并绘制
                     var data = this.drawData[this.drawDataLen] || {};
                     data.type = 0 /* TEXTURE */;
@@ -4350,15 +4342,20 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     data.textureHeight = textureHeight;
                     this.drawData[this.drawDataLen] = data;
                     this.drawDataLen++;
+                    this.lastDrawTextureData = null;
                 }
                 else {
-                    if (this.drawDataLen == 0 || this.drawData[this.drawDataLen - 1].type != 0 /* TEXTURE */ || texture != this.drawData[this.drawDataLen - 1].texture || this.drawData[this.drawDataLen - 1].filter) {
+                    if (this.lastDrawTextureData == null || texture != this.lastDrawTextureData.texture) {
+                        if (this.lastProgramKey !== "texture") {
+                            this.pushChangeProgram("texture");
+                        }
                         var data = this.drawData[this.drawDataLen] || {};
                         data.type = 0 /* TEXTURE */;
                         data.texture = texture;
                         data.count = 0;
                         this.drawData[this.drawDataLen] = data;
                         this.drawDataLen++;
+                        this.lastDrawTextureData = data;
                     }
                     this.drawData[this.drawDataLen - 1].count += count;
                 }
@@ -4371,6 +4368,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 data.smoothing = smoothing;
                 this.drawData[this.drawDataLen] = data;
                 this.drawDataLen++;
+                this.lastDrawTextureData = null;
             };
             /**
              * 压入pushMask指令
@@ -4382,6 +4380,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 data.count = count * 2;
                 this.drawData[this.drawDataLen] = data;
                 this.drawDataLen++;
+                this.lastDrawTextureData = null;
             };
             /**
              * 压入popMask指令
@@ -4393,6 +4392,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 data.count = count * 2;
                 this.drawData[this.drawDataLen] = data;
                 this.drawDataLen++;
+                this.lastDrawTextureData = null;
             };
             /**
              * 压入混色指令
@@ -4404,13 +4404,12 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 for (var i = len - 1; i >= 0; i--) {
                     var data = this.drawData[i];
                     if (data) {
-                        if (data.type == 0 /* TEXTURE */ || data.type == 11 /* RECT */) {
+                        if (data.type == 0 /* TEXTURE */) {
                             drawState = true;
                         }
                         // 如果与上一次blend操作之间无有效绘图，上一次操作无效
                         if (!drawState && data.type == 3 /* BLEND */) {
-                            this.drawData.splice(i, 1);
-                            this.drawDataLen--;
+                            delete this.drawData[i];
                             continue;
                         }
                         // 如果与上一次blend操作重复，本次操作无效
@@ -4429,6 +4428,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 _data.value = value;
                 this.drawData[this.drawDataLen] = _data;
                 this.drawDataLen++;
+                this.lastDrawTextureData = null;
             };
             /*
              * 压入resize render target命令
@@ -4441,6 +4441,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 data.height = height;
                 this.drawData[this.drawDataLen] = data;
                 this.drawDataLen++;
+                this.lastDrawTextureData = null;
             };
             /*
              * 压入clear color命令
@@ -4450,6 +4451,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 data.type = 5 /* CLEAR_COLOR */;
                 this.drawData[this.drawDataLen] = data;
                 this.drawDataLen++;
+                this.lastDrawTextureData = null;
             };
             /**
              * 压入激活buffer命令
@@ -4466,8 +4468,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                         }
                         // 如果与上一次buffer操作之间无有效绘图，上一次操作无效
                         if (!drawState && data.type == 6 /* ACT_BUFFER */) {
-                            this.drawData.splice(i, 1);
-                            this.drawDataLen--;
+                            delete this.drawData[i];
                             continue;
                         }
                         // 如果与上一次buffer操作重复，本次操作无效
@@ -4487,6 +4488,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 _data.height = buffer.rootRenderTarget.height;
                 this.drawData[this.drawDataLen] = _data;
                 this.drawDataLen++;
+                this.lastDrawTextureData = null;
             };
             /*
              * 压入enabel scissor命令
@@ -4500,6 +4502,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 data.height = height;
                 this.drawData[this.drawDataLen] = data;
                 this.drawDataLen++;
+                this.lastDrawTextureData = null;
             };
             /*
              * 压入disable scissor命令
@@ -4509,6 +4512,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 data.type = 8 /* DISABLE_SCISSOR */;
                 this.drawData[this.drawDataLen] = data;
                 this.drawDataLen++;
+                this.lastDrawTextureData = null;
             };
             /**
              * 清空命令数组
@@ -4516,6 +4520,8 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
             WebGLDrawCmdManager.prototype.clear = function () {
                 for (var i = 0; i < this.drawDataLen; i++) {
                     var data = this.drawData[i];
+                    if (!data)
+                        continue;
                     data.type = 0;
                     data.count = 0;
                     data.texture = null;
@@ -4525,8 +4531,51 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     data.buffer = null;
                     data.width = 0;
                     data.height = 0;
+                    data.vertSource = null;
+                    data.fragSource = null;
+                    data.key = null;
                 }
                 this.drawDataLen = 0;
+                this.lastDrawTextureData = null;
+                this.lastProgramKey = null;
+            };
+            /**
+             * 压入切换shader programe命令
+             */
+            WebGLDrawCmdManager.prototype.pushChangeProgram = function (type, filter) {
+                var key;
+                var vertSource = wxgame.EgretShaderLib.default_vert;
+                var fragSource = wxgame.EgretShaderLib.blur_frag;
+                if (type === "texture") {
+                    key = "texture";
+                    fragSource = wxgame.EgretShaderLib.texture_frag;
+                }
+                else if (type === "custom") {
+                    key = filter.$shaderKey;
+                    vertSource = filter.$vertexSrc;
+                    fragSource = filter.$fragmentSrc;
+                }
+                else if (type === "colorTransform") {
+                    key = "colorTransform";
+                    fragSource = wxgame.EgretShaderLib.colorTransform_frag;
+                }
+                else if (type === "blurX" || type === "blurY") {
+                    key = "blur";
+                }
+                else if (type === "glow") {
+                    key = "glow";
+                    fragSource = wxgame.EgretShaderLib.glow_frag;
+                }
+                //记录上一次的Programe类型
+                this.lastProgramKey = key;
+                var data = this.drawData[this.drawDataLen] || {};
+                data.type = 10 /* CHANGE_PROGRAM */;
+                data.key = key;
+                data.vertSource = vertSource;
+                data.fragSource = fragSource;
+                this.drawData[this.drawDataLen] = data;
+                this.drawDataLen++;
+                this.lastDrawTextureData = null;
             };
             return WebGLDrawCmdManager;
         }());
@@ -4596,6 +4645,8 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     this.indices[i + 4] = j + 2;
                     this.indices[i + 5] = j + 3;
                 }
+                //用于drawImageByRenderNode 计算
+                this.vertexActualSize = this.vertexMaxSize - 4;
             }
             /**
              * 是否达到最大缓存数量
@@ -4605,11 +4656,14 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 if (indexCount === void 0) { indexCount = 6; }
                 return this.vertexIndex > this.vertexMaxSize - vertexCount || this.indexIndex > this.indicesMaxSize - indexCount;
             };
+            WebGLVertexArrayObject.prototype.reachVertexMaxSize = function () {
+                return this.vertexIndex > this.vertexActualSize;
+            };
             /**
              * 获取缓存完成的顶点数组
              */
             WebGLVertexArrayObject.prototype.getVertices = function () {
-                var view = this.vertices.subarray(0, this.vertexIndex * this.vertSize);
+                var view = this.vertices;
                 return view;
             };
             /**
@@ -5033,6 +5087,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 this.drawCmdManager = new wxgame.WebGLDrawCmdManager();
                 this.vao = new wxgame.WebGLVertexArrayObject();
                 this.setGlobalCompositeOperation("source-over");
+                this.firstTimeUploadVertices = true;
             }
             WebGLRenderContext.getInstance = function (width, height) {
                 if (this.instance) {
@@ -5089,8 +5144,13 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
              */
             WebGLRenderContext.prototype.uploadVerticesArray = function (array) {
                 var gl = this.context;
-                gl.bufferData(gl.ARRAY_BUFFER, array, gl.STREAM_DRAW);
-                // gl.bufferSubData(gl.ARRAY_BUFFER, 0, array);
+                if (this.firstTimeUploadVertices) {
+                    gl.bufferData(gl.ARRAY_BUFFER, array, gl.DYNAMIC_DRAW);
+                    this.firstTimeUploadVertices = false;
+                }
+                else {
+                    gl.bufferSubData(gl.ARRAY_BUFFER, 0, array);
+                }
             };
             /**
              * 上传索引数据
@@ -5299,7 +5359,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     var buffer = this.currentBuffer;
                     if (buffer.$hasScissor) {
                         this.setGlobalCompositeOperation("destination-out");
-                        this.drawRect(x, y, width, height);
+                        // this.drawRect(x, y, width, height);
                         this.setGlobalCompositeOperation("source-over");
                     }
                     else {
@@ -5315,7 +5375,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                         }
                         else {
                             this.setGlobalCompositeOperation("destination-out");
-                            this.drawRect(x, y, width, height);
+                            // this.drawRect(x, y, width, height);
                             this.setGlobalCompositeOperation("source-over");
                         }
                     }
@@ -5363,6 +5423,141 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 if (image.source && image.source["texture"]) {
                     buffer.$offsetX = offsetX;
                     buffer.$offsetY = offsetY;
+                    buffer.restoreTransform();
+                }
+            };
+            /**
+             * 绘制图片，image参数可以是BitmapData或者renderTarget
+             * 同样的功能，单参数，整合drawTexture部分
+             */
+            WebGLRenderContext.prototype.drawImageByRenderNode = function (node) {
+                var buffer = this.currentBuffer;
+                var image = node.image;
+                var destHeight = node.drawH;
+                var destWidth = node.drawW;
+                var destX = node.drawX;
+                var destY = node.drawY;
+                if (this.contextLost || !image || !buffer) {
+                    return;
+                }
+                var texture;
+                var buffer_offsetX;
+                var buffer_offsetY;
+                if (image["texture"] || (image.source && image.source["texture"])) {
+                    // 如果是render target
+                    texture = image["texture"] || image.source["texture"];
+                    buffer.saveTransform();
+                    buffer_offsetX = buffer.$offsetX;
+                    buffer_offsetY = buffer.$offsetY;
+                    buffer.useOffset();
+                    buffer.transform(1, 0, 0, -1, 0, destHeight + destY * 2); // 翻转
+                }
+                else if (!image.source && !image.webGLTexture) {
+                    return;
+                }
+                else {
+                    texture = this.getWebGLTexture(image);
+                }
+                if (!texture) {
+                    return;
+                }
+                //drawTexture
+                if (this.vao.reachVertexMaxSize()) {
+                    this.$drawWebGL();
+                }
+                var smoothing = node.smoothing;
+                if (smoothing != undefined && texture["smoothing"] != smoothing) {
+                    this.drawCmdManager.pushChangeSmoothing(texture, smoothing);
+                }
+                var count = 2;
+                var width = node.imageWidth;
+                var height = node.imageHeight;
+                // 应用$filter，因为只可能是colorMatrixFilter，最后两个参数可不传
+                this.drawCmdManager.pushDrawTexture(texture, count, this.$filter, width, height);
+                //cacheArray
+                var locWorldTransform = buffer.globalMatrix;
+                var a = locWorldTransform.a;
+                var b = locWorldTransform.b;
+                var c = locWorldTransform.c;
+                var d = locWorldTransform.d;
+                var tx = locWorldTransform.tx;
+                var ty = locWorldTransform.ty;
+                var offsetX = buffer.$offsetX;
+                var offsetY = buffer.$offsetY;
+                if (offsetX != 0 || offsetY != 0) {
+                    tx = offsetX * a + offsetY * c + tx;
+                    ty = offsetX * b + offsetY * d + ty;
+                }
+                if (destX != 0 || destY != 0) {
+                    tx = destX * a + destY * c + tx;
+                    ty = destX * b + destY * d + ty;
+                }
+                var sourceWidth = node.sourceW;
+                var sourceHeight = node.sourceH;
+                var rotated = node.rotated;
+                var a1 = destWidth / sourceWidth;
+                if (a1 != 1) {
+                    a = a1 * a;
+                    b = a1 * b;
+                }
+                var d1 = destHeight / sourceHeight;
+                if (d1 != 1) {
+                    c = d1 * c;
+                    d = d1 * d;
+                }
+                var vertices = this.vao.vertices;
+                var index = this.vao.vertexIndex * this.vertSize;
+                var alpha = buffer.globalAlpha;
+                var a_w = a * sourceWidth;
+                var b_w = b * sourceWidth;
+                var c_h = c * sourceHeight;
+                var d_h = d * sourceHeight;
+                var uvX_LT = node.uvX_LT;
+                var uvY_LT = node.uvY_LT;
+                var uvX_RT = node.uvX_RT;
+                var uvY_RT = node.uvY_RT;
+                var uvX_RB = node.uvX_RB;
+                var uvY_RB = node.uvY_RB;
+                var uvX_LB = node.uvX_LB;
+                var uvY_LB = node.uvY_LB;
+                // xy
+                vertices[index++] = tx;
+                vertices[index++] = ty;
+                // uv
+                vertices[index++] = uvX_LT;
+                vertices[index++] = uvY_LT;
+                // alpha
+                vertices[index++] = alpha;
+                // xy
+                vertices[index++] = a_w + tx;
+                vertices[index++] = b_w + ty;
+                // uv
+                vertices[index++] = uvX_RT;
+                vertices[index++] = uvY_RT;
+                // alpha
+                vertices[index++] = alpha;
+                // xy
+                vertices[index++] = a_w + c_h + tx;
+                vertices[index++] = d_h + b_w + ty;
+                // uv
+                vertices[index++] = uvX_RB;
+                vertices[index++] = uvY_RB;
+                // alpha
+                vertices[index++] = alpha;
+                // xy
+                vertices[index++] = c_h + tx;
+                vertices[index++] = d_h + ty;
+                // uv
+                vertices[index++] = uvX_LB;
+                vertices[index++] = uvY_LB;
+                // alpha
+                vertices[index++] = alpha;
+                // }
+                this.vao.vertexIndex += 4;
+                this.vao.indexIndex += 6;
+                if (image.source && image.source["texture"]) {
+                    buffer.$offsetX = buffer_offsetX;
+                    buffer.$offsetY = buffer_offsetY;
                     buffer.restoreTransform();
                 }
             };
@@ -5431,20 +5626,106 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 this.drawCmdManager.pushDrawTexture(texture, count, this.$filter);
                 this.vao.cacheArrays(buffer, sourceX, sourceY, sourceWidth, sourceHeight, destX, destY, destWidth, destHeight, textureWidth, textureHeight, meshUVs, meshVertices, meshIndices, rotated);
             };
-            /**
-             * 绘制矩形（仅用于遮罩擦除等）
-             */
-            WebGLRenderContext.prototype.drawRect = function (x, y, width, height) {
+            WebGLRenderContext.prototype.drawTextureByRenderNode = function (node) {
+                var texture = node.$texture;
+                var sourceWidth = node.$textureWidth;
+                var sourceHeight = node.$textureHeight;
+                var canvasScaleX = egret.sys.DisplayList.$canvasScaleX;
+                var canvasScaleY = egret.sys.DisplayList.$canvasScaleY;
+                var destWidth = node.$textureWidth / canvasScaleX;
+                var destHeight = node.$textureHeight / canvasScaleY;
                 var buffer = this.currentBuffer;
-                if (this.contextLost || !buffer) {
+                if (this.contextLost || !texture || !buffer) {
                     return;
                 }
                 if (this.vao.reachMaxSize()) {
                     this.$drawWebGL();
                 }
-                this.drawCmdManager.pushDrawRect();
-                this.vao.cacheArrays(buffer, 0, 0, width, height, x, y, width, height, width, height);
+                var count = 2;
+                // 应用$filter，因为只可能是colorMatrixFilter，最后两个参数可不传
+                this.drawCmdManager.pushDrawTexture(texture, count, this.$filter, sourceWidth, sourceHeight);
+                //cacheArray
+                var locWorldTransform = buffer.globalMatrix;
+                var a = locWorldTransform.a;
+                var b = locWorldTransform.b;
+                var c = locWorldTransform.c;
+                var d = locWorldTransform.d;
+                var tx = locWorldTransform.tx;
+                var ty = locWorldTransform.ty;
+                var offsetX = buffer.$offsetX;
+                var offsetY = buffer.$offsetY;
+                if (offsetX != 0 || offsetY != 0) {
+                    tx = offsetX * a + offsetY * c + tx;
+                    ty = offsetX * b + offsetY * d + ty;
+                }
+                var rotated = false;
+                var a1 = destWidth / sourceWidth;
+                if (a1 != 1) {
+                    a = a1 * a;
+                    b = a1 * b;
+                }
+                var d1 = destHeight / sourceHeight;
+                if (d1 != 1) {
+                    c = d1 * c;
+                    d = d1 * d;
+                }
+                var vertices = this.vao.vertices;
+                var index = this.vao.vertexIndex * this.vertSize;
+                var alpha = buffer.globalAlpha;
+                var a_w = a * sourceWidth;
+                var b_w = b * sourceWidth;
+                var c_h = c * sourceHeight;
+                var d_h = d * sourceHeight;
+                var uvSize = 1;
+                // xy
+                vertices[index++] = tx;
+                vertices[index++] = ty;
+                // uv
+                vertices[index++] = 0;
+                vertices[index++] = 0;
+                // alpha
+                vertices[index++] = alpha;
+                // xy
+                vertices[index++] = a_w + tx;
+                vertices[index++] = b_w + ty;
+                // uv
+                vertices[index++] = uvSize;
+                vertices[index++] = 0;
+                // alpha
+                vertices[index++] = alpha;
+                // xy
+                vertices[index++] = a_w + c_h + tx;
+                vertices[index++] = d_h + b_w + ty;
+                // uv
+                vertices[index++] = uvSize;
+                vertices[index++] = uvSize;
+                // alpha
+                vertices[index++] = alpha;
+                // xy
+                vertices[index++] = c_h + tx;
+                vertices[index++] = d_h + ty;
+                // uv
+                vertices[index++] = 0;
+                vertices[index++] = uvSize;
+                // alpha
+                vertices[index++] = alpha;
+                this.vao.vertexIndex += 4;
+                this.vao.indexIndex += 6;
             };
+            // /**
+            //  * 绘制矩形（仅用于遮罩擦除等）
+            //  */
+            // public drawRect(x: number, y: number, width: number, height: number): void {
+            //     let buffer = this.currentBuffer;
+            //     if (this.contextLost || !buffer) {
+            //         return;
+            //     }
+            //     if (this.vao.reachMaxSize()) {
+            //         this.$drawWebGL();
+            //     }
+            //     this.drawCmdManager.pushDrawRect();
+            //     this.vao.cacheArrays(buffer, 0, 0, width, height, x, y, width, height, width, height);
+            // }
             /**
              * 绘制遮罩
              */
@@ -5510,15 +5791,19 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 var offset = 0;
                 for (var i = 0; i < length; i++) {
                     var data = this.drawCmdManager.drawData[i];
+                    if (!data) {
+                        continue;
+                    }
                     offset = this.drawData(data, offset);
                     // 计算draw call
                     if (data.type == 6 /* ACT_BUFFER */) {
                         this.activatedBuffer = data.buffer;
                     }
-                    if (data.type == 0 /* TEXTURE */ || data.type == 11 /* RECT */ || data.type == 1 /* PUSH_MASK */ || data.type == 2 /* POP_MASK */) {
-                        if (this.activatedBuffer && this.activatedBuffer.$computeDrawCall) {
-                            this.activatedBuffer.$drawCalls++;
-                        }
+                    if (data.type != 0 /* TEXTURE */ && data.type != 11 /* RECT */ && data.type != 1 /* PUSH_MASK */ && data.type != 2 /* POP_MASK */) {
+                        continue;
+                    }
+                    if (this.activatedBuffer && this.activatedBuffer.$computeDrawCall) {
+                        this.activatedBuffer.$drawCalls++;
                     }
                 }
                 // 切换回默认indices
@@ -5540,36 +5825,13 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 var program;
                 var filter = data.filter;
                 switch (data.type) {
-                    case 0 /* TEXTURE */:
-                        if (filter) {
-                            if (filter.type === "custom") {
-                                program = wxgame.EgretWebGLProgram.getProgram(gl, filter.$vertexSrc, filter.$fragmentSrc, filter.$shaderKey);
-                            }
-                            else if (filter.type === "colorTransform") {
-                                program = wxgame.EgretWebGLProgram.getProgram(gl, wxgame.EgretShaderLib.default_vert, wxgame.EgretShaderLib.colorTransform_frag, "colorTransform");
-                            }
-                            else if (filter.type === "blurX") {
-                                program = wxgame.EgretWebGLProgram.getProgram(gl, wxgame.EgretShaderLib.default_vert, wxgame.EgretShaderLib.blur_frag, "blur");
-                            }
-                            else if (filter.type === "blurY") {
-                                program = wxgame.EgretWebGLProgram.getProgram(gl, wxgame.EgretShaderLib.default_vert, wxgame.EgretShaderLib.blur_frag, "blur");
-                            }
-                            else if (filter.type === "glow") {
-                                program = wxgame.EgretWebGLProgram.getProgram(gl, wxgame.EgretShaderLib.default_vert, wxgame.EgretShaderLib.glow_frag, "glow");
-                            }
-                        }
-                        else {
-                            program = wxgame.EgretWebGLProgram.getProgram(gl, wxgame.EgretShaderLib.default_vert, wxgame.EgretShaderLib.texture_frag, "texture");
-                        }
+                    case 10 /* CHANGE_PROGRAM */:
+                        program = wxgame.EgretWebGLProgram.getProgram(gl, data.vertSource, data.fragSource, data.key);
                         this.activeProgram(gl, program);
                         this.syncUniforms(program, filter, data.textureWidth, data.textureHeight);
-                        offset += this.drawTextureElements(data, offset);
                         break;
-                    case 11 /* RECT */:
-                        program = wxgame.EgretWebGLProgram.getProgram(gl, wxgame.EgretShaderLib.default_vert, wxgame.EgretShaderLib.primitive_frag, "primitive");
-                        this.activeProgram(gl, program);
-                        this.syncUniforms(program, filter, data.textureWidth, data.textureHeight);
-                        offset += this.drawRectElements(data, offset);
+                    case 0 /* TEXTURE */:
+                        offset += this.drawTextureElements(data, offset);
                         break;
                     case 1 /* PUSH_MASK */:
                         program = wxgame.EgretWebGLProgram.getProgram(gl, wxgame.EgretShaderLib.default_vert, wxgame.EgretShaderLib.primitive_frag, "primitive");
@@ -6283,7 +6545,8 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 webglBufferContext.pushBuffer(webglBuffer);
                 //绘制显示对象
                 webglBuffer.transform(matrix.a, matrix.b, matrix.c, matrix.d, 0, 0);
-                this.drawDisplayObject(displayObject, webglBuffer, matrix.tx, matrix.ty, true);
+                this.$currentBuffer = webglBuffer;
+                this.drawDisplayObject(displayObject, matrix.tx, matrix.ty, true);
                 webglBufferContext.$drawWebGL();
                 var drawCall = webglBuffer.$drawCalls;
                 webglBuffer.onRenderFinish();
@@ -6309,17 +6572,21 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
              * @private
              * 绘制一个显示对象
              */
-            WebGLRenderer.prototype.drawDisplayObject = function (displayObject, buffer, offsetX, offsetY, isStage) {
+            WebGLRenderer.prototype.drawDisplayObject = function (displayObject, offsetX, offsetY, isStage) {
+                var buffer = this.$currentBuffer;
                 var drawCalls = 0;
                 var node;
                 var displayList = displayObject.$displayList;
-                if (displayList && !isStage) {
+                var hasRednerNode;
+                var needDrawToSurface = !!(displayList && !isStage);
+                if (needDrawToSurface) {
                     if (displayObject.$cacheDirty || displayObject.$renderDirty ||
                         displayList.$canvasScaleX != egret.sys.DisplayList.$canvasScaleX ||
                         displayList.$canvasScaleY != egret.sys.DisplayList.$canvasScaleY) {
                         drawCalls += displayList.drawToSurface();
                     }
                     node = displayList.$renderNode;
+                    hasRednerNode = true;
                 }
                 else {
                     if (displayObject.$renderDirty) {
@@ -6328,40 +6595,39 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     else {
                         node = displayObject.$renderNode;
                     }
+                    hasRednerNode = displayObject.$hasRenderNode;
                 }
                 displayObject.$cacheDirty = false;
-                if (node) {
+                if (hasRednerNode) {
                     drawCalls++;
                     buffer.$offsetX = offsetX;
                     buffer.$offsetY = offsetY;
-                    switch (node.type) {
-                        case 1 /* BitmapNode */:
-                            this.renderBitmap(node, buffer);
-                            break;
-                        case 2 /* TextNode */:
-                            this.renderText(node, buffer);
-                            break;
-                        case 3 /* GraphicsNode */:
-                            this.renderGraphics(node, buffer);
-                            break;
-                        case 4 /* GroupNode */:
-                            this.renderGroup(node, buffer);
-                            break;
-                        case 5 /* MeshNode */:
-                            this.renderMesh(node, buffer);
-                            break;
-                        case 6 /* NormalBitmapNode */:
-                            this.renderNormalBitmap(node, buffer);
-                            break;
+                    if (node.type == 6 /* NormalBitmapNode */) {
+                        this.renderNormalBitmap(node, buffer);
+                    }
+                    else if (node.type == 1 /* BitmapNode */) {
+                        this.renderBitmap(node, buffer);
+                    }
+                    else if (node.type == 2 /* TextNode */) {
+                        this.renderText(node, buffer);
+                    }
+                    else if (node.type == 3 /* GraphicsNode */) {
+                        this.renderGraphics(node, buffer);
+                    }
+                    else if (node.type == 4 /* GroupNode */) {
+                        this.renderGroup(node, buffer);
+                    }
+                    else if (5 /* MeshNode */) {
+                        this.renderMesh(node, buffer);
                     }
                     buffer.$offsetX = 0;
                     buffer.$offsetY = 0;
                 }
-                if (displayList && !isStage) {
+                if (needDrawToSurface) {
                     return drawCalls;
                 }
                 var children = displayObject.$children;
-                if (children) {
+                if (displayObject.$hasChildren) {
                     var length_2 = children.length;
                     for (var i = 0; i < length_2; i++) {
                         var child = children[i];
@@ -6386,28 +6652,30 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                             savedMatrix.tx = m2.tx;
                             savedMatrix.ty = m2.ty;
                             buffer.transform(m.a, m.b, m.c, m.d, offsetX2, offsetY2);
-                            offsetX2 = -child.$anchorOffsetX;
-                            offsetY2 = -child.$anchorOffsetY;
+                            if (child.$hasAnchor) {
+                                offsetX2 = -child.$anchorOffsetX;
+                                offsetY2 = -child.$anchorOffsetY;
+                            }
                         }
                         else {
-                            offsetX2 = offsetX + child.$x - child.$anchorOffsetX;
-                            offsetY2 = offsetY + child.$y - child.$anchorOffsetY;
+                            offsetX2 = offsetX + child.$x;
+                            offsetY2 = offsetY + child.$y;
+                            if (child.$hasAnchor) {
+                                offsetX2 -= child.$anchorOffsetX;
+                                offsetY2 -= child.$anchorOffsetY;
+                            }
                         }
-                        switch (child.$renderMode) {
-                            case 1 /* NONE */:
-                                break;
-                            case 2 /* FILTER */:
-                                drawCalls += this.drawWithFilter(child, buffer, offsetX2, offsetY2);
-                                break;
-                            case 3 /* CLIP */:
-                                drawCalls += this.drawWithClip(child, buffer, offsetX2, offsetY2);
-                                break;
-                            case 4 /* SCROLLRECT */:
-                                drawCalls += this.drawWithScrollRect(child, buffer, offsetX2, offsetY2);
-                                break;
-                            default:
-                                drawCalls += this.drawDisplayObject(child, buffer, offsetX2, offsetY2);
-                                break;
+                        if (child.$renderMode === 1 /* DEFAULT */) {
+                            drawCalls += this.drawDisplayObject(child, offsetX2, offsetY2);
+                        }
+                        else if (child.$renderMode === 3 /* FILTER */) {
+                            drawCalls += this.drawWithFilter(child, buffer, offsetX2, offsetY2);
+                        }
+                        else if (child.$renderMode === 4 /* CLIP */) {
+                            drawCalls += this.drawWithClip(child, buffer, offsetX2, offsetY2);
+                        }
+                        else if (child.$renderMode === 5 /* SCROLLRECT */) {
+                            drawCalls += this.drawWithScrollRect(child, buffer, offsetX2, offsetY2);
                         }
                         if (tempAlpha) {
                             buffer.globalAlpha = tempAlpha;
@@ -6432,7 +6700,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
             WebGLRenderer.prototype.drawWithFilter = function (displayObject, buffer, offsetX, offsetY) {
                 var drawCalls = 0;
                 if (displayObject.$children && displayObject.$children.length == 0 && (!displayObject.$renderNode || displayObject.$renderNode.$getRenderCount() == 0)) {
-                    return;
+                    return drawCalls;
                 }
                 var filters = displayObject.$filters;
                 var hasBlendMode = (displayObject.$blendMode !== 0);
@@ -6444,7 +6712,11 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     }
                 }
                 var displayBounds = displayObject.$getOriginalBounds();
-                if (displayBounds.width <= 0 || displayBounds.height <= 0) {
+                var displayBoundsX = displayBounds.x;
+                var displayBoundsY = displayBounds.y;
+                var displayBoundsWidth = displayBounds.width;
+                var displayBoundsHeight = displayBounds.height;
+                if (displayBoundsWidth <= 0 || displayBoundsHeight <= 0) {
                     return drawCalls;
                 }
                 if (!displayObject.mask && filters.length == 1 && (filters[0].type == "colorTransform" || (filters[0].type === "custom" && filters[0].padding === 0))) {
@@ -6461,7 +6733,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                             drawCalls += this.drawWithScrollRect(displayObject, buffer, offsetX, offsetY);
                         }
                         else {
-                            drawCalls += this.drawDisplayObject(displayObject, buffer, offsetX, offsetY);
+                            drawCalls += this.drawDisplayObject(displayObject, offsetX, offsetY);
                         }
                         buffer.context.$filter = null;
                         if (hasBlendMode) {
@@ -6471,17 +6743,17 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     }
                 }
                 // 为显示对象创建一个新的buffer
-                var displayBuffer = this.createRenderBuffer(displayBounds.width, displayBounds.height);
+                var displayBuffer = this.createRenderBuffer(displayBoundsWidth, displayBoundsHeight);
                 displayBuffer.context.pushBuffer(displayBuffer);
                 //todo 可以优化减少draw次数
                 if (displayObject.$mask) {
-                    drawCalls += this.drawWithClip(displayObject, displayBuffer, -displayBounds.x, -displayBounds.y);
+                    drawCalls += this.drawWithClip(displayObject, displayBuffer, -displayBoundsX, -displayBoundsY);
                 }
                 else if (displayObject.$scrollRect || displayObject.$maskRect) {
-                    drawCalls += this.drawWithScrollRect(displayObject, displayBuffer, -displayBounds.x, -displayBounds.y);
+                    drawCalls += this.drawWithScrollRect(displayObject, displayBuffer, -displayBoundsX, -displayBoundsY);
                 }
                 else {
-                    drawCalls += this.drawDisplayObject(displayObject, displayBuffer, -displayBounds.x, -displayBounds.y);
+                    drawCalls += this.drawDisplayObject(displayObject, -displayBoundsX, -displayBoundsY);
                 }
                 displayBuffer.context.popBuffer();
                 //绘制结果到屏幕
@@ -6491,8 +6763,8 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     }
                     drawCalls++;
                     // 绘制结果的时候，应用滤镜
-                    buffer.$offsetX = offsetX + displayBounds.x;
-                    buffer.$offsetY = offsetY + displayBounds.y;
+                    buffer.$offsetX = offsetX + displayBoundsX;
+                    buffer.$offsetY = offsetY + displayBoundsY;
                     var savedMatrix = egret.Matrix.create();
                     var curMatrix = buffer.globalMatrix;
                     savedMatrix.a = curMatrix.a;
@@ -6518,20 +6790,31 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 return drawCalls;
             };
             WebGLRenderer.prototype.getRenderCount = function (displayObject) {
-                var childrenDrawCount = 0;
+                var drawCount = 0;
+                var node = displayObject.$getRenderNode();
+                if (displayObject.$hasRenderNode) {
+                    drawCount += node.$getRenderCount();
+                }
                 if (displayObject.$children) {
                     for (var _i = 0, _a = displayObject.$children; _i < _a.length; _i++) {
                         var child = _a[_i];
-                        var node = child.$getRenderNode();
-                        if (node) {
-                            childrenDrawCount += node.$getRenderCount();
+                        var filters = child.$filters;
+                        // 特殊处理有滤镜的对象
+                        if (filters && filters.length > 0) {
+                            return 2;
                         }
-                        if (child.$children) {
-                            childrenDrawCount += this.getRenderCount(child);
+                        else if (child.$children) {
+                            drawCount += this.getRenderCount(child);
+                        }
+                        else {
+                            var node_1 = child.$getRenderNode();
+                            if (child.$hasRenderNode) {
+                                drawCount += node_1.$getRenderCount();
+                            }
                         }
                     }
                 }
-                return childrenDrawCount;
+                return drawCount;
             };
             /**
              * @private
@@ -6564,7 +6847,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     if (hasBlendMode) {
                         buffer.context.setGlobalCompositeOperation(compositeOp);
                     }
-                    drawCalls += this.drawDisplayObject(displayObject, buffer, offsetX, offsetY);
+                    drawCalls += this.drawDisplayObject(displayObject, offsetX, offsetY);
                     if (hasBlendMode) {
                         buffer.context.setGlobalCompositeOperation(defaultCompositeOp);
                     }
@@ -6575,25 +6858,28 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 }
                 else {
                     var displayBounds = displayObject.$getOriginalBounds();
+                    var displayBoundsX = displayBounds.x;
+                    var displayBoundsY = displayBounds.y;
+                    var displayBoundsWidth = displayBounds.width;
+                    var displayBoundsHeight = displayBounds.height;
                     //绘制显示对象自身，若有scrollRect，应用clip
-                    var displayBuffer = this.createRenderBuffer(displayBounds.width, displayBounds.height);
+                    var displayBuffer = this.createRenderBuffer(displayBoundsWidth, displayBoundsHeight);
                     displayBuffer.context.pushBuffer(displayBuffer);
-                    drawCalls += this.drawDisplayObject(displayObject, displayBuffer, -displayBounds.x, -displayBounds.y);
+                    drawCalls += this.drawDisplayObject(displayObject, -displayBoundsX, -displayBoundsY);
                     //绘制遮罩
                     if (mask) {
-                        var maskBuffer = this.createRenderBuffer(displayBounds.width, displayBounds.height);
+                        var maskBuffer = this.createRenderBuffer(displayBoundsWidth, displayBoundsHeight);
                         maskBuffer.context.pushBuffer(maskBuffer);
                         var maskMatrix = egret.Matrix.create();
                         maskMatrix.copyFrom(mask.$getConcatenatedMatrix());
                         mask.$getConcatenatedMatrixAt(displayObject, maskMatrix);
-                        maskMatrix.translate(-displayBounds.x, -displayBounds.y);
+                        maskMatrix.translate(-displayBoundsX, -displayBoundsY);
                         maskBuffer.setTransform(maskMatrix.a, maskMatrix.b, maskMatrix.c, maskMatrix.d, maskMatrix.tx, maskMatrix.ty);
                         egret.Matrix.release(maskMatrix);
-                        drawCalls += this.drawDisplayObject(mask, maskBuffer, 0, 0);
+                        drawCalls += this.drawDisplayObject(mask, 0, 0);
                         maskBuffer.context.popBuffer();
                         displayBuffer.context.setGlobalCompositeOperation("destination-in");
                         displayBuffer.setTransform(1, 0, 0, -1, 0, maskBuffer.height);
-                        displayBuffer.globalAlpha = 1;
                         var maskBufferWidth = maskBuffer.rootRenderTarget.width;
                         var maskBufferHeight = maskBuffer.rootRenderTarget.height;
                         displayBuffer.context.drawTexture(maskBuffer.rootRenderTarget.texture, 0, 0, maskBufferWidth, maskBufferHeight, 0, 0, maskBufferWidth, maskBufferHeight, maskBufferWidth, maskBufferHeight);
@@ -6612,7 +6898,6 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                         if (scrollRect) {
                             buffer.context.pushMask(scrollRect.x + offsetX, scrollRect.y + offsetY, scrollRect.width, scrollRect.height);
                         }
-                        buffer.globalAlpha = 1;
                         var savedMatrix = egret.Matrix.create();
                         var curMatrix = buffer.globalMatrix;
                         savedMatrix.a = curMatrix.a;
@@ -6621,7 +6906,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                         savedMatrix.d = curMatrix.d;
                         savedMatrix.tx = curMatrix.tx;
                         savedMatrix.ty = curMatrix.ty;
-                        curMatrix.append(1, 0, 0, -1, offsetX + displayBounds.x, offsetY + displayBounds.y + displayBuffer.height);
+                        curMatrix.append(1, 0, 0, -1, offsetX + displayBoundsX, offsetY + displayBoundsY + displayBuffer.height);
                         var displayBufferWidth = displayBuffer.rootRenderTarget.width;
                         var displayBufferHeight = displayBuffer.rootRenderTarget.height;
                         buffer.context.drawTexture(displayBuffer.rootRenderTarget.texture, 0, 0, displayBufferWidth, displayBufferHeight, 0, 0, displayBufferWidth, displayBufferHeight, displayBufferWidth, displayBufferHeight);
@@ -6718,7 +7003,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     context.enableScissor(minX, -maxY + buffer.height, maxX - minX, maxY - minY);
                     scissor = true;
                 }
-                drawCalls += this.drawDisplayObject(displayObject, buffer, offsetX, offsetY);
+                drawCalls += this.drawDisplayObject(displayObject, offsetX, offsetY);
                 if (scissor) {
                     context.disableScissor();
                 }
@@ -6764,27 +7049,25 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     node = displayObject.$renderNode;
                 }
                 var drawCalls = 0;
-                if (node) {
+                if (displayObject.$hasRenderNode) {
                     drawCalls++;
-                    switch (node.type) {
-                        case 1 /* BitmapNode */:
-                            this.renderBitmap(node, buffer);
-                            break;
-                        case 2 /* TextNode */:
-                            this.renderText(node, buffer);
-                            break;
-                        case 3 /* GraphicsNode */:
-                            this.renderGraphics(node, buffer);
-                            break;
-                        case 4 /* GroupNode */:
-                            this.renderGroup(node, buffer);
-                            break;
-                        case 5 /* MeshNode */:
-                            this.renderMesh(node, buffer);
-                            break;
-                        case 6 /* NormalBitmapNode */:
-                            this.renderNormalBitmap(node, buffer);
-                            break;
+                    if (node.type == 6 /* NormalBitmapNode */) {
+                        this.renderNormalBitmap(node, buffer);
+                    }
+                    else if (node.type == 1 /* BitmapNode */) {
+                        this.renderBitmap(node, buffer);
+                    }
+                    else if (node.type == 2 /* TextNode */) {
+                        this.renderText(node, buffer);
+                    }
+                    else if (node.type == 3 /* GraphicsNode */) {
+                        this.renderGraphics(node, buffer);
+                    }
+                    else if (node.type == 4 /* GroupNode */) {
+                        this.renderGroup(node, buffer);
+                    }
+                    else if (node.type == 5 /* MeshNode */) {
+                        this.renderMesh(node, buffer);
                     }
                 }
                 var children = displayObject.$children;
@@ -6792,21 +7075,17 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     var length_3 = children.length;
                     for (var i = 0; i < length_3; i++) {
                         var child = children[i];
-                        switch (child.$renderMode) {
-                            case 1 /* NONE */:
-                                break;
-                            case 2 /* FILTER */:
-                                drawCalls += this.drawWithFilter(child, buffer, 0, 0);
-                                break;
-                            case 3 /* CLIP */:
-                                drawCalls += this.drawWithClip(child, buffer, 0, 0);
-                                break;
-                            case 4 /* SCROLLRECT */:
-                                drawCalls += this.drawWithScrollRect(child, buffer, 0, 0);
-                                break;
-                            default:
-                                drawCalls += this.drawDisplayObject(child, buffer, 0, 0);
-                                break;
+                        if (child.$renderMode === 1 /* DEFAULT */) {
+                            drawCalls += this.drawDisplayObject(child, 0, 0);
+                        }
+                        else if (child.$renderMode === 3 /* FILTER */) {
+                            drawCalls += this.drawWithFilter(child, buffer, 0, 0);
+                        }
+                        else if (child.$renderMode === 4 /* CLIP */) {
+                            drawCalls += this.drawWithClip(child, buffer, 0, 0);
+                        }
+                        else if (child.$renderMode === 5 /* SCROLLRECT */) {
+                            drawCalls += this.drawWithScrollRect(child, buffer, 0, 0);
                         }
                     }
                 }
@@ -6821,25 +7100,23 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
             WebGLRenderer.prototype.renderNode = function (node, buffer, offsetX, offsetY, forHitTest) {
                 buffer.$offsetX = offsetX;
                 buffer.$offsetY = offsetY;
-                switch (node.type) {
-                    case 1 /* BitmapNode */:
-                        this.renderBitmap(node, buffer);
-                        break;
-                    case 2 /* TextNode */:
-                        this.renderText(node, buffer);
-                        break;
-                    case 3 /* GraphicsNode */:
-                        this.renderGraphics(node, buffer, forHitTest);
-                        break;
-                    case 4 /* GroupNode */:
-                        this.renderGroup(node, buffer);
-                        break;
-                    case 5 /* MeshNode */:
-                        this.renderMesh(node, buffer);
-                        break;
-                    case 6 /* NormalBitmapNode */:
-                        this.renderNormalBitmap(node, buffer);
-                        break;
+                if (node.type == 6 /* NormalBitmapNode */) {
+                    this.renderNormalBitmap(node, buffer);
+                }
+                else if (node.type == 1 /* BitmapNode */) {
+                    this.renderBitmap(node, buffer);
+                }
+                else if (node.type == 2 /* TextNode */) {
+                    this.renderText(node, buffer);
+                }
+                else if (node.type == 3 /* GraphicsNode */) {
+                    this.renderGraphics(node, buffer, forHitTest);
+                }
+                else if (node.type == 4 /* GroupNode */) {
+                    this.renderGroup(node, buffer);
+                }
+                else if (node.type == 5 /* MeshNode */) {
+                    this.renderMesh(node, buffer);
                 }
             };
             /**
@@ -6850,7 +7127,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 if (!image) {
                     return;
                 }
-                buffer.context.drawImage(image, node.sourceX, node.sourceY, node.sourceW, node.sourceH, node.drawX, node.drawY, node.drawW, node.drawH, node.imageWidth, node.imageHeight, node.rotated, node.smoothing);
+                buffer.context.drawImageByRenderNode(node);
             };
             /**
              * @private
@@ -7059,9 +7336,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     node.$textureWidth = surface.width;
                     node.$textureHeight = surface.height;
                 }
-                var textureWidth = node.$textureWidth;
-                var textureHeight = node.$textureHeight;
-                buffer.context.drawTexture(node.$texture, 0, 0, textureWidth, textureHeight, 0, 0, textureWidth / canvasScaleX, textureHeight / canvasScaleY, textureWidth, textureHeight);
+                buffer.context.drawTextureByRenderNode(node);
                 if (x || y) {
                     if (node.dirtyRender) {
                         this.canvasRenderBuffer.context.setTransform(canvasScaleX, 0, 0, canvasScaleY, 0, 0);
@@ -7141,9 +7416,9 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                         node.$textureWidth = surface.width;
                         node.$textureHeight = surface.height;
                     }
-                    var textureWidth = node.$textureWidth;
-                    var textureHeight = node.$textureHeight;
-                    buffer.context.drawTexture(node.$texture, 0, 0, textureWidth, textureHeight, 0, 0, textureWidth / canvasScaleX, textureHeight / canvasScaleY, textureWidth, textureHeight);
+                    // buffer.context.drawTexture(node.$texture, 0, 0, node.$textureWidth, node.$textureHeight, 0, 0,
+                    //     node.$textureWidth / canvasScaleX, node.$textureHeight / canvasScaleY, node.$textureWidth, node.$textureHeight);
+                    buffer.context.drawTextureByRenderNode(node);
                 }
                 if (node.x || node.y) {
                     if (node.dirtyRender || forHitTest) {

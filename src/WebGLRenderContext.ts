@@ -38,6 +38,11 @@ namespace egret.wxgame {
         public static antialias: boolean;
 
         /**
+         * 第一次上传顶点数组标记量
+         */
+        public firstTimeUploadVertices: boolean;
+
+        /**
          * 渲染上下文
          */
         public context: WebGLRenderingContext;
@@ -149,8 +154,13 @@ namespace egret.wxgame {
         private uploadVerticesArray(array: any): void {
             let gl: any = this.context;
 
-            gl.bufferData(gl.ARRAY_BUFFER, array, gl.STREAM_DRAW);
-            // gl.bufferSubData(gl.ARRAY_BUFFER, 0, array);
+            if (this.firstTimeUploadVertices) {
+                gl.bufferData(gl.ARRAY_BUFFER, array, gl.DYNAMIC_DRAW);
+                this.firstTimeUploadVertices = false;
+            }
+            else {
+                gl.bufferSubData(gl.ARRAY_BUFFER, 0, array);
+            }
         }
 
         /**
@@ -184,6 +194,8 @@ namespace egret.wxgame {
             this.vao = new WebGLVertexArrayObject();
 
             this.setGlobalCompositeOperation("source-over");
+
+            this.firstTimeUploadVertices = true;
         }
 
         /**
@@ -214,13 +226,13 @@ namespace egret.wxgame {
             if (useMaxSize) {
                 if (surface.width < width) {
                     surface.width = width;
-                    if(!wxgame.isSubContext && window["sharedCanvas"]) {
+                    if (!wxgame.isSubContext && window["sharedCanvas"]) {
                         window["sharedCanvas"].width = width;
                     }
                 }
                 if (surface.height < height) {
                     surface.height = height;
-                    if(!wxgame.isSubContext && window["sharedCanvas"]) {
+                    if (!wxgame.isSubContext && window["sharedCanvas"]) {
                         window["sharedCanvas"].height = height;
                     }
                 }
@@ -228,13 +240,13 @@ namespace egret.wxgame {
             else {
                 if (surface.width != width) {
                     surface.width = width;
-                    if(!wxgame.isSubContext && window["sharedCanvas"]) {
+                    if (!wxgame.isSubContext && window["sharedCanvas"]) {
                         window["sharedCanvas"].width = width;
                     }
                 }
                 if (surface.height != height) {
                     surface.height = height;
-                    if(!wxgame.isSubContext && window["sharedCanvas"]) {
+                    if (!wxgame.isSubContext && window["sharedCanvas"]) {
                         window["sharedCanvas"].height = height;
                     }
                 }
@@ -423,7 +435,7 @@ namespace egret.wxgame {
                 let buffer = this.currentBuffer;
                 if (buffer.$hasScissor) {
                     this.setGlobalCompositeOperation("destination-out");
-                    this.drawRect(x, y, width, height);
+                    // this.drawRect(x, y, width, height);
                     this.setGlobalCompositeOperation("source-over");
                 } else {
                     let m = buffer.globalMatrix;
@@ -437,7 +449,7 @@ namespace egret.wxgame {
                         this.disableScissor();
                     } else {
                         this.setGlobalCompositeOperation("destination-out");
-                        this.drawRect(x, y, width, height);
+                        // this.drawRect(x, y, width, height);
                         this.setGlobalCompositeOperation("source-over");
                     }
                 }
@@ -498,6 +510,160 @@ namespace egret.wxgame {
                 buffer.restoreTransform();
             }
         }
+
+
+
+
+        /**
+         * 绘制图片，image参数可以是BitmapData或者renderTarget
+         * 同样的功能，单参数，整合drawTexture部分
+         */
+        public drawImageByRenderNode(node: sys.NormalBitmapNode) {
+            let buffer = this.currentBuffer;
+            let image = node.image;
+            let destHeight = node.drawH;
+            let destWidth = node.drawW;
+            let destX = node.drawX;
+            let destY = node.drawY;
+            if (this.contextLost || !image || !buffer) {
+                return;
+            }
+
+            let texture: WebGLTexture;
+            let buffer_offsetX;
+            let buffer_offsetY;
+            if (image["texture"] || (image.source && image.source["texture"])) {
+                // 如果是render target
+                texture = image["texture"] || image.source["texture"];
+                buffer.saveTransform();
+                buffer_offsetX = buffer.$offsetX;
+                buffer_offsetY = buffer.$offsetY;
+                buffer.useOffset();
+                buffer.transform(1, 0, 0, -1, 0, destHeight + destY * 2);// 翻转
+            } else if (!image.source && !image.webGLTexture) {
+                return;
+            } else {
+                texture = this.getWebGLTexture(image);
+            }
+
+            if (!texture) {
+                return;
+            }
+
+            //drawTexture
+            if (this.vao.reachVertexMaxSize()) {
+                this.$drawWebGL();
+            }
+
+            let smoothing = node.smoothing;
+            if (smoothing != undefined && texture["smoothing"] != smoothing) {
+                this.drawCmdManager.pushChangeSmoothing(texture, smoothing);
+            }
+
+            let count = 2;
+            let width = node.imageWidth;
+            let height = node.imageHeight;
+
+            // 应用$filter，因为只可能是colorMatrixFilter，最后两个参数可不传
+            this.drawCmdManager.pushDrawTexture(texture, count, this.$filter, width, height);
+
+            //cacheArray
+            let locWorldTransform = buffer.globalMatrix;
+            let a = locWorldTransform.a;
+            let b = locWorldTransform.b;
+            let c = locWorldTransform.c;
+            let d = locWorldTransform.d;
+            let tx = locWorldTransform.tx;
+            let ty = locWorldTransform.ty;
+            let offsetX = buffer.$offsetX;
+            let offsetY = buffer.$offsetY;
+            if (offsetX != 0 || offsetY != 0) {
+                tx = offsetX * a + offsetY * c + tx;
+                ty = offsetX * b + offsetY * d + ty;
+            }
+
+            if (destX != 0 || destY != 0) {
+                tx = destX * a + destY * c + tx;
+                ty = destX * b + destY * d + ty;
+            }
+
+            let sourceWidth = node.sourceW;
+            let sourceHeight = node.sourceH;
+            let rotated = node.rotated;
+
+            let a1 = destWidth / sourceWidth;
+            if (a1 != 1) {
+                a = a1 * a;
+                b = a1 * b;
+            }
+            let d1 = destHeight / sourceHeight;
+            if (d1 != 1) {
+                c = d1 * c;
+                d = d1 * d;
+            }
+
+            let vertices = this.vao.vertices;
+            let index = this.vao.vertexIndex * this.vertSize;
+            let alpha = buffer.globalAlpha;
+            let a_w = a * sourceWidth;
+            let b_w = b * sourceWidth;
+            let c_h = c * sourceHeight;
+            let d_h = d * sourceHeight;
+
+            let uvX_LT = node.uvX_LT;
+            let uvY_LT = node.uvY_LT;
+            let uvX_RT = node.uvX_RT;
+            let uvY_RT = node.uvY_RT;
+            let uvX_RB = node.uvX_RB;
+            let uvY_RB = node.uvY_RB;
+            let uvX_LB = node.uvX_LB;
+            let uvY_LB = node.uvY_LB;
+
+            // xy
+            vertices[index++] = tx;
+            vertices[index++] = ty;
+
+            // uv
+            vertices[index++] = uvX_LT;
+            vertices[index++] = uvY_LT;
+            // alpha
+            vertices[index++] = alpha;
+            // xy
+            vertices[index++] = a_w + tx;
+            vertices[index++] = b_w + ty;
+            // uv
+            vertices[index++] = uvX_RT;
+            vertices[index++] = uvY_RT;
+            // alpha
+            vertices[index++] = alpha;
+            // xy
+            vertices[index++] = a_w + c_h + tx;
+            vertices[index++] = d_h + b_w + ty;
+            // uv
+            vertices[index++] = uvX_RB;
+            vertices[index++] = uvY_RB;
+            // alpha
+            vertices[index++] = alpha;
+            // xy
+            vertices[index++] = c_h + tx;
+            vertices[index++] = d_h + ty;
+            // uv
+            vertices[index++] = uvX_LB;
+            vertices[index++] = uvY_LB;
+            // alpha
+            vertices[index++] = alpha;
+            // }
+            this.vao.vertexIndex += 4;
+            this.vao.indexIndex += 6;
+
+            if (image.source && image.source["texture"]) {
+                buffer.$offsetX = buffer_offsetX;
+                buffer.$offsetY = buffer_offsetY;
+                buffer.restoreTransform();
+            }
+        }
+
+
 
         /**
          * 绘制Mesh
@@ -585,12 +751,24 @@ namespace egret.wxgame {
                 meshUVs, meshVertices, meshIndices, rotated);
         }
 
-        /**
-         * 绘制矩形（仅用于遮罩擦除等）
-         */
-        public drawRect(x: number, y: number, width: number, height: number): void {
+
+
+
+
+
+
+        public drawTextureByRenderNode(node: sys.TextNode | sys.GraphicsNode): void {
+            let texture = node.$texture;
+            let sourceWidth = node.$textureWidth;
+            let sourceHeight = node.$textureHeight;
+            let canvasScaleX = sys.DisplayList.$canvasScaleX;
+            let canvasScaleY = sys.DisplayList.$canvasScaleY;
+            let destWidth = node.$textureWidth / canvasScaleX;
+            let destHeight = node.$textureHeight / canvasScaleY;
+
+
             let buffer = this.currentBuffer;
-            if (this.contextLost || !buffer) {
+            if (this.contextLost || !texture || !buffer) {
                 return;
             }
 
@@ -598,20 +776,116 @@ namespace egret.wxgame {
                 this.$drawWebGL();
             }
 
-            this.drawCmdManager.pushDrawRect();
+            let count = 2;
+            // 应用$filter，因为只可能是colorMatrixFilter，最后两个参数可不传
+            this.drawCmdManager.pushDrawTexture(texture, count, this.$filter, sourceWidth, sourceHeight);
 
-            this.vao.cacheArrays(buffer, 0, 0, width, height, x, y, width, height, width, height);
+            //cacheArray
+            let locWorldTransform = buffer.globalMatrix;
+            let a = locWorldTransform.a;
+            let b = locWorldTransform.b;
+            let c = locWorldTransform.c;
+            let d = locWorldTransform.d;
+            let tx = locWorldTransform.tx;
+            let ty = locWorldTransform.ty;
+            let offsetX = buffer.$offsetX;
+            let offsetY = buffer.$offsetY;
+            if (offsetX != 0 || offsetY != 0) {
+                tx = offsetX * a + offsetY * c + tx;
+                ty = offsetX * b + offsetY * d + ty;
+            }
+
+            let rotated = false;
+
+            let a1 = destWidth / sourceWidth;
+            if (a1 != 1) {
+                a = a1 * a;
+                b = a1 * b;
+            }
+            let d1 = destHeight / sourceHeight;
+            if (d1 != 1) {
+                c = d1 * c;
+                d = d1 * d;
+            }
+
+            let vertices = this.vao.vertices;
+            let index = this.vao.vertexIndex * this.vertSize;
+            let alpha = buffer.globalAlpha;
+            let a_w = a * sourceWidth;
+            let b_w = b * sourceWidth;
+            let c_h = c * sourceHeight;
+            let d_h = d * sourceHeight;
+
+            let uvSize = 1;
+
+            // xy
+            vertices[index++] = tx;
+            vertices[index++] = ty;
+
+            // uv
+            vertices[index++] = 0;
+            vertices[index++] = 0;
+            // alpha
+            vertices[index++] = alpha;
+            // xy
+            vertices[index++] = a_w + tx;
+            vertices[index++] = b_w + ty;
+            // uv
+            vertices[index++] = uvSize;
+            vertices[index++] = 0;
+            // alpha
+            vertices[index++] = alpha;
+            // xy
+            vertices[index++] = a_w + c_h + tx;
+            vertices[index++] = d_h + b_w + ty;
+            // uv
+            vertices[index++] = uvSize;
+            vertices[index++] = uvSize;
+            // alpha
+            vertices[index++] = alpha;
+            // xy
+            vertices[index++] = c_h + tx;
+            vertices[index++] = d_h + ty;
+            // uv
+            vertices[index++] = 0;
+            vertices[index++] = uvSize;
+            // alpha
+            vertices[index++] = alpha;
+
+            this.vao.vertexIndex += 4;
+            this.vao.indexIndex += 6;
         }
+
+
+
+
+        // /**
+        //  * 绘制矩形（仅用于遮罩擦除等）
+        //  */
+        // public drawRect(x: number, y: number, width: number, height: number): void {
+        //     let buffer = this.currentBuffer;
+        //     if (this.contextLost || !buffer) {
+        //         return;
+        //     }
+
+        //     if (this.vao.reachMaxSize()) {
+        //         this.$drawWebGL();
+        //     }
+
+        //     this.drawCmdManager.pushDrawRect();
+
+        //     this.vao.cacheArrays(buffer, 0, 0, width, height, x, y, width, height, width, height);
+        // }
 
         /**
          * 绘制遮罩
          */
-        public pushMask(x:number, y:number, width:number, height:number): void {
+        public pushMask(x: number, y: number, width: number, height: number): void {
             let buffer = this.currentBuffer;
             if (this.contextLost || !buffer) {
                 return;
             }
-            buffer.$stencilList.push({x,y,width,height});
+            buffer.$stencilList.push({ x, y, width, height });
             if (this.vao.reachMaxSize()) {
                 this.$drawWebGL();
             }
@@ -683,15 +957,22 @@ namespace egret.wxgame {
             let offset = 0;
             for (let i = 0; i < length; i++) {
                 let data = this.drawCmdManager.drawData[i];
+
+                if (!data) {
+                    continue;
+                }
+
                 offset = this.drawData(data, offset);
                 // 计算draw call
                 if (data.type == DRAWABLE_TYPE.ACT_BUFFER) {
                     this.activatedBuffer = data.buffer;
                 }
-                if (data.type == DRAWABLE_TYPE.TEXTURE || data.type == DRAWABLE_TYPE.RECT || data.type == DRAWABLE_TYPE.PUSH_MASK || data.type == DRAWABLE_TYPE.POP_MASK) {
-                    if (this.activatedBuffer && this.activatedBuffer.$computeDrawCall) {
-                        this.activatedBuffer.$drawCalls++;
-                    }
+
+                if (data.type != DRAWABLE_TYPE.TEXTURE && data.type != DRAWABLE_TYPE.RECT && data.type != DRAWABLE_TYPE.PUSH_MASK && data.type != DRAWABLE_TYPE.POP_MASK) {
+                    continue;
+                }
+                if (this.activatedBuffer && this.activatedBuffer.$computeDrawCall) {
+                    this.activatedBuffer.$drawCalls++;
                 }
             }
 
@@ -718,36 +999,17 @@ namespace egret.wxgame {
             let filter = data.filter;
 
             switch (data.type) {
-                case DRAWABLE_TYPE.TEXTURE:
-                    if (filter) {
-                        if (filter.type === "custom") {
-                            program = EgretWebGLProgram.getProgram(gl, filter.$vertexSrc, filter.$fragmentSrc, filter.$shaderKey);
-                        } else if (filter.type === "colorTransform") {
-                            program = EgretWebGLProgram.getProgram(gl, EgretShaderLib.default_vert, EgretShaderLib.colorTransform_frag, "colorTransform");
-                        } else if (filter.type === "blurX") {
-                            program = EgretWebGLProgram.getProgram(gl, EgretShaderLib.default_vert, EgretShaderLib.blur_frag, "blur");
-                        } else if (filter.type === "blurY") {
-                            program = EgretWebGLProgram.getProgram(gl, EgretShaderLib.default_vert, EgretShaderLib.blur_frag, "blur");
-                        } else if (filter.type === "glow") {
-                            program = EgretWebGLProgram.getProgram(gl, EgretShaderLib.default_vert, EgretShaderLib.glow_frag, "glow");
-                        }
-                    } else {
-                        program = EgretWebGLProgram.getProgram(gl, EgretShaderLib.default_vert, EgretShaderLib.texture_frag, "texture");
-                    }
-
+                case DRAWABLE_TYPE.CHANGE_PROGRAM:
+                    program = EgretWebGLProgram.getProgram(gl, data.vertSource, data.fragSource, data.key);
                     this.activeProgram(gl, program);
                     this.syncUniforms(program, filter, data.textureWidth, data.textureHeight);
+                    break;
 
+
+                case DRAWABLE_TYPE.TEXTURE:
                     offset += this.drawTextureElements(data, offset);
                     break;
-                case DRAWABLE_TYPE.RECT:
 
-                    program = EgretWebGLProgram.getProgram(gl, EgretShaderLib.default_vert, EgretShaderLib.primitive_frag, "primitive");
-                    this.activeProgram(gl, program);
-                    this.syncUniforms(program, filter, data.textureWidth, data.textureHeight);
-
-                    offset += this.drawRectElements(data, offset);
-                    break;
                 case DRAWABLE_TYPE.PUSH_MASK:
 
                     program = EgretWebGLProgram.getProgram(gl, EgretShaderLib.default_vert, EgretShaderLib.primitive_frag, "primitive");
