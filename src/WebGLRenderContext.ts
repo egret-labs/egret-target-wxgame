@@ -214,13 +214,13 @@ namespace egret.wxgame {
             if (useMaxSize) {
                 if (surface.width < width) {
                     surface.width = width;
-                    if(!wxgame.isSubContext && window["sharedCanvas"]) {
+                    if (!wxgame.isSubContext && window["sharedCanvas"]) {
                         window["sharedCanvas"].width = width;
                     }
                 }
                 if (surface.height < height) {
                     surface.height = height;
-                    if(!wxgame.isSubContext && window["sharedCanvas"]) {
+                    if (!wxgame.isSubContext && window["sharedCanvas"]) {
                         window["sharedCanvas"].height = height;
                     }
                 }
@@ -228,13 +228,13 @@ namespace egret.wxgame {
             else {
                 if (surface.width != width) {
                     surface.width = width;
-                    if(!wxgame.isSubContext && window["sharedCanvas"]) {
+                    if (!wxgame.isSubContext && window["sharedCanvas"]) {
                         window["sharedCanvas"].width = width;
                     }
                 }
                 if (surface.height != height) {
                     surface.height = height;
-                    if(!wxgame.isSubContext && window["sharedCanvas"]) {
+                    if (!wxgame.isSubContext && window["sharedCanvas"]) {
                         window["sharedCanvas"].height = height;
                     }
                 }
@@ -357,7 +357,9 @@ namespace egret.wxgame {
          */
         public createTexture(bitmapData: BitmapData): WebGLTexture {
             let gl: any = this.context;
-
+            if (bitmapData == window["sharedCanvas"] && gl.wxBindCanvasTexture != null) {
+                return bitmapData;
+            }
             let texture = gl.createTexture();
 
             if (!texture) {
@@ -606,12 +608,12 @@ namespace egret.wxgame {
         /**
          * 绘制遮罩
          */
-        public pushMask(x:number, y:number, width:number, height:number): void {
+        public pushMask(x: number, y: number, width: number, height: number): void {
             let buffer = this.currentBuffer;
             if (this.contextLost || !buffer) {
                 return;
             }
-            buffer.$stencilList.push({x,y,width,height});
+            buffer.$stencilList.push({ x, y, width, height });
             if (this.vao.reachMaxSize()) {
                 this.$drawWebGL();
             }
@@ -866,7 +868,11 @@ namespace egret.wxgame {
          **/
         private drawTextureElements(data: any, offset: number): number {
             let gl: any = this.context;
-            gl.bindTexture(gl.TEXTURE_2D, data.texture);
+            if (data.texture == window["sharedCanvas"]) {
+                gl.wxBindCanvasTexture(gl.TEXTURE_2D, window["sharedCanvas"]);
+            } else {
+                gl.bindTexture(gl.TEXTURE_2D, data.texture);
+            }
             let size = data.count * 3;
             gl.drawElements(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, offset * 2);
             return size;

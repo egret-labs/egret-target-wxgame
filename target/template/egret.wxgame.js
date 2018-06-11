@@ -3031,7 +3031,7 @@ if (window['HTMLVideoElement'] == undefined) {
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "1.1.1";
+        wxgame.version = "1.1.2";
         /**
          * 运行环境是否为子域
          */
@@ -5244,6 +5244,9 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
              */
             WebGLRenderContext.prototype.createTexture = function (bitmapData) {
                 var gl = this.context;
+                if (bitmapData == window["sharedCanvas"] && gl.wxBindCanvasTexture != null) {
+                    return bitmapData;
+                }
                 var texture = gl.createTexture();
                 if (!texture) {
                     //先创建texture失败,然后lost事件才发出来..
@@ -5682,7 +5685,12 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
              **/
             WebGLRenderContext.prototype.drawTextureElements = function (data, offset) {
                 var gl = this.context;
-                gl.bindTexture(gl.TEXTURE_2D, data.texture);
+                if (data.texture == window["sharedCanvas"]) {
+                    gl.wxBindCanvasTexture(gl.TEXTURE_2D, window["sharedCanvas"]);
+                }
+                else {
+                    gl.bindTexture(gl.TEXTURE_2D, data.texture);
+                }
                 var size = data.count * 3;
                 gl.drawElements(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, offset * 2);
                 return size;
