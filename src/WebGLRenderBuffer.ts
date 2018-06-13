@@ -59,6 +59,7 @@ namespace egret.wxgame {
          */
         private root: boolean;
 
+
         public constructor(width?: number, height?: number, root?: boolean) {
             super();
             // 获取webglRenderContext
@@ -95,7 +96,7 @@ namespace egret.wxgame {
          * 模版开关状态
          */
         private stencilState: boolean = false;
-        public $stencilList: { x:number, y:number, width:number, height:number }[] = [];
+        public $stencilList: { x: number, y: number, width: number, height: number }[] = [];
         public stencilHandleCount: number = 0;
 
         public enableStencil(): void {
@@ -175,11 +176,14 @@ namespace egret.wxgame {
          * @param useMaxSize 若传入true，则将改变后的尺寸与已有尺寸对比，保留较大的尺寸。
          */
         public resize(width: number, height: number, useMaxSize?: boolean): void {
-            this.context.pushBuffer(this);
-
             width = width || 1;
             height = height || 1;
+            if (egret.nativeRender) {
+                this.surface.resize(width, height);
+                return;
+            }
 
+            this.context.pushBuffer(this);
             // render target 尺寸重置
             if (width != this.rootRenderTarget.width || height != this.rootRenderTarget.height) {
                 this.context.drawCmdManager.pushResize(this, width, height);
@@ -187,7 +191,8 @@ namespace egret.wxgame {
                 this.rootRenderTarget.width = width;
                 this.rootRenderTarget.height = height;
             }
-
+            //for 3D&2D
+            //3D不需要主动resize,而是由3D部分进行修改
             // 如果是舞台的渲染缓冲，执行resize，否则surface大小不随之改变
             if (this.root) {
                 this.context.resize(width, height, useMaxSize);
@@ -198,37 +203,47 @@ namespace egret.wxgame {
             this.context.popBuffer();
         }
 
+
+        public $pushResize(width: number, height: number) {
+            this.context.drawCmdManager.pushResize(this, width, height);
+        }
+
         /**
          * 获取指定区域的像素
          */
         public getPixels(x: number, y: number, width: number = 1, height: number = 1): number[] {
             let pixels = new Uint8Array(4 * width * height);
 
-            let useFrameBuffer = this.rootRenderTarget.useFrameBuffer;
-            this.rootRenderTarget.useFrameBuffer = true;
-            this.rootRenderTarget.activate();
+            if (egret.nativeRender) {
+                egret_native.activateBuffer(this);
+                egret_native.nrGetPixels(x, y, width, height, pixels);
+                egret_native.activateBuffer(null);
+            }
+            else {
+                let useFrameBuffer = this.rootRenderTarget.useFrameBuffer;
+                this.rootRenderTarget.useFrameBuffer = true;
+                this.rootRenderTarget.activate();
 
-            this.context.getPixels(x, y, width, height, pixels);
+                this.context.getPixels(x, y, width, height, pixels);
 
-            this.rootRenderTarget.useFrameBuffer = useFrameBuffer;
-            this.rootRenderTarget.activate();
-
+                this.rootRenderTarget.useFrameBuffer = useFrameBuffer;
+                this.rootRenderTarget.activate();
+            }
             //图像反转
             let result = new Uint8Array(4 * width * height);
             for (let i = 0; i < height; i++) {
                 for (let j = 0; j < width; j++) {
-                    result[(width * (height - i - 1) + j) * 4] = pixels[(width * i + j) * 4];
-                    result[(width * (height - i - 1) + j) * 4 + 1] = pixels[(width * i + j) * 4 + 1];
-                    result[(width * (height - i - 1) + j) * 4 + 2] = pixels[(width * i + j) * 4 + 2];
-                    result[(width * (height - i - 1) + j) * 4 + 3] = pixels[(width * i + j) * 4 + 3];
+                    let index1 = (width * (height - i - 1) + j) * 4;
+                    let index2 = (width * i + j) * 4;
+                    let a = pixels[index2 + 3];
+                    result[index1] = Math.round(pixels[index2] / a * 255);
+                    result[index1 + 1] = Math.round(pixels[index2 + 1] / a * 255);
+                    result[index1 + 2] = Math.round(pixels[index2 + 2] / a * 255);
+                    result[index1 + 3] = pixels[index2 + 3];
                 }
             }
 
             return <number[]><any>result;
-        }
-
-        public $pushResize(width:number,height:number){
-            this.context.drawCmdManager.pushResize(this,width,height);
         }
 
         /**
@@ -347,12 +362,6 @@ namespace egret.wxgame {
             }
             matrix.tx = tx * a1 + ty * c1 + matrix.tx;
             matrix.ty = tx * b1 + ty * d1 + matrix.ty;
-        }
-
-        public translate(dx: number, dy: number): void {
-            let matrix = this.globalMatrix;
-            matrix.tx += dx;
-            matrix.ty += dy;
         }
 
         public useOffset(): void {

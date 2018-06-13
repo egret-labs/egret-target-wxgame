@@ -3031,7 +3031,7 @@ if (window['HTMLVideoElement'] == undefined) {
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "1.1.1";
+        wxgame.version = "1.1.2";
         /**
          * 运行环境是否为子域
          */
@@ -4303,13 +4303,6 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
     (function (wxgame) {
         /**
          * @private
-         * draw类型，所有的绘图操作都会缓存在drawData中，每个drawData都是一个drawable对象
-         * $renderWebGL方法依据drawable对象的类型，调用不同的绘制方法
-         */
-        //fix for egret3d
-        //修改枚举。
-        /**
-         * @private
          * 绘制指令管理器
          * 用来维护drawData数组
          */
@@ -4336,10 +4329,10 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     var data = this.drawData[this.drawDataLen] || {};
                     data.type = 0 /* TEXTURE */;
                     data.texture = texture;
-                    data.filter = filter;
                     data.count = count;
                     data.textureWidth = textureWidth;
                     data.textureHeight = textureHeight;
+                    data.filter = filter;
                     this.drawData[this.drawDataLen] = data;
                     this.drawDataLen++;
                     this.lastDrawTextureData = null;
@@ -4375,6 +4368,9 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
              */
             WebGLDrawCmdManager.prototype.pushPushMask = function (count) {
                 if (count === void 0) { count = 1; }
+                if (this.lastProgramKey !== "primitive") {
+                    this.pushChangeProgram("primitive");
+                }
                 var data = this.drawData[this.drawDataLen] || {};
                 data.type = 1 /* PUSH_MASK */;
                 data.count = count * 2;
@@ -4387,6 +4383,9 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
              */
             WebGLDrawCmdManager.prototype.pushPopMask = function (count) {
                 if (count === void 0) { count = 1; }
+                if (this.lastProgramKey !== "primitive") {
+                    this.pushChangeProgram("primitive");
+                }
                 var data = this.drawData[this.drawDataLen] || {};
                 data.type = 2 /* POP_MASK */;
                 data.count = count * 2;
@@ -4566,6 +4565,11 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     key = "glow";
                     fragSource = wxgame.EgretShaderLib.glow_frag;
                 }
+                else if (type === "primitive") {
+                    key = "primitive";
+                    fragSource = wxgame.EgretShaderLib.primitive_frag;
+                    vertSource = wxgame.EgretShaderLib.default_vert;
+                }
                 //记录上一次的Programe类型
                 this.lastProgramKey = key;
                 var data = this.drawData[this.drawDataLen] || {};
@@ -4625,16 +4629,15 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 this.size = 2000;
                 this.vertexMaxSize = this.size * 4;
                 this.indicesMaxSize = this.size * 6;
-                this.vertSize = 5;
-                this.vertices = null;
-                this.indices = null;
-                this.indicesForMesh = null;
+                this.vertSize = 4;
                 this.vertexIndex = 0;
                 this.indexIndex = 0;
                 this.hasMesh = false;
                 var numVerts = this.vertexMaxSize * this.vertSize;
                 var numIndices = this.indicesMaxSize;
-                this.vertices = new Float32Array(numVerts);
+                var buffer = new ArrayBuffer(numVerts * 4);
+                this.float32Array = new Float32Array(buffer);
+                this.uint32Array = new Uint32Array(buffer);
                 this.indices = new Uint16Array(numIndices);
                 this.indicesForMesh = new Uint16Array(numIndices);
                 for (var i = 0, j = 0; i < numIndices; i += 6, j += 4) {
@@ -4663,7 +4666,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
              * 获取缓存完成的顶点数组
              */
             WebGLVertexArrayObject.prototype.getVertices = function () {
-                var view = this.vertices;
+                var view = this.float32Array;
                 return view;
             };
             /**
@@ -4741,7 +4744,8 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 }
                 if (meshVertices) {
                     // 计算索引位置与赋值
-                    var vertices = this.vertices;
+                    var float32Array = this.float32Array;
+                    var uint32Array = this.uint32Array;
                     var index = this.vertexIndex * this.vertSize;
                     // 缓存顶点数组
                     var i = 0, iD = 0, l = 0;
@@ -4753,19 +4757,17 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                         u = meshUVs[i];
                         v = meshUVs[i + 1];
                         // xy
-                        vertices[iD + 0] = a * x + c * y + tx;
-                        vertices[iD + 1] = b * x + d * y + ty;
+                        float32Array[iD + 0] = a * x + c * y + tx;
+                        float32Array[iD + 1] = b * x + d * y + ty;
                         // uv
                         if (rotated) {
-                            vertices[iD + 2] = (sourceX + (1.0 - v) * sourceHeight) / textureSourceWidth;
-                            vertices[iD + 3] = (sourceY + u * sourceWidth) / textureSourceHeight;
+                            uint32Array[iD + 2] = (((sourceY + u * sourceWidth) / textureSourceHeight * 65535) << 16) | ((sourceX + (1.0 - v) * sourceHeight) / textureSourceWidth * 65535);
                         }
                         else {
-                            vertices[iD + 2] = (sourceX + u * sourceWidth) / textureSourceWidth;
-                            vertices[iD + 3] = (sourceY + v * sourceHeight) / textureSourceHeight;
+                            uint32Array[iD + 2] = (((sourceY + v * sourceHeight) / textureSourceHeight * 65535) << 16) | ((sourceX + u * sourceWidth) / textureSourceWidth * 65535);
                         }
                         // alpha
-                        vertices[iD + 4] = alpha;
+                        float32Array[iD + 3] = alpha;
                     }
                     // 缓存索引数组
                     if (this.hasMesh) {
@@ -4783,80 +4785,73 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     var h = sourceHeight;
                     sourceX = sourceX / width;
                     sourceY = sourceY / height;
-                    var vertices = this.vertices;
+                    var float32Array = this.float32Array;
+                    var uint32Array = this.uint32Array;
                     var index = this.vertexIndex * this.vertSize;
                     if (rotated) {
                         var temp = sourceWidth;
                         sourceWidth = sourceHeight / width;
                         sourceHeight = temp / height;
                         // xy
-                        vertices[index++] = tx;
-                        vertices[index++] = ty;
+                        float32Array[index++] = tx;
+                        float32Array[index++] = ty;
                         // uv
-                        vertices[index++] = sourceWidth + sourceX;
-                        vertices[index++] = sourceY;
+                        uint32Array[index++] = ((sourceY * 65535) << 16) | ((sourceWidth + sourceX) * 65535);
                         // alpha
-                        vertices[index++] = alpha;
+                        float32Array[index++] = alpha;
                         // xy
-                        vertices[index++] = a * w + tx;
-                        vertices[index++] = b * w + ty;
+                        float32Array[index++] = a * w + tx;
+                        float32Array[index++] = b * w + ty;
                         // uv
-                        vertices[index++] = sourceWidth + sourceX;
-                        vertices[index++] = sourceHeight + sourceY;
+                        uint32Array[index++] = (((sourceHeight + sourceY) * 65535) << 16) | ((sourceWidth + sourceX) * 65535);
                         // alpha
-                        vertices[index++] = alpha;
+                        float32Array[index++] = alpha;
                         // xy
-                        vertices[index++] = a * w + c * h + tx;
-                        vertices[index++] = d * h + b * w + ty;
+                        float32Array[index++] = a * w + c * h + tx;
+                        float32Array[index++] = d * h + b * w + ty;
                         // uv
-                        vertices[index++] = sourceX;
-                        vertices[index++] = sourceHeight + sourceY;
+                        uint32Array[index++] = (((sourceHeight + sourceY) * 65535) << 16) | (sourceX * 65535);
                         // alpha
-                        vertices[index++] = alpha;
+                        float32Array[index++] = alpha;
                         // xy
-                        vertices[index++] = c * h + tx;
-                        vertices[index++] = d * h + ty;
+                        float32Array[index++] = c * h + tx;
+                        float32Array[index++] = d * h + ty;
                         // uv
-                        vertices[index++] = sourceX;
-                        vertices[index++] = sourceY;
+                        uint32Array[index++] = ((sourceY * 65535) << 16) | (sourceX * 65535);
                         // alpha
-                        vertices[index++] = alpha;
+                        float32Array[index++] = alpha;
                     }
                     else {
                         sourceWidth = sourceWidth / width;
                         sourceHeight = sourceHeight / height;
                         // xy
-                        vertices[index++] = tx;
-                        vertices[index++] = ty;
+                        float32Array[index++] = tx;
+                        float32Array[index++] = ty;
                         // uv
-                        vertices[index++] = sourceX;
-                        vertices[index++] = sourceY;
+                        uint32Array[index++] = ((sourceY * 65535) << 16) | (sourceX * 65535);
                         // alpha
-                        vertices[index++] = alpha;
+                        float32Array[index++] = alpha;
                         // xy
-                        vertices[index++] = a * w + tx;
-                        vertices[index++] = b * w + ty;
+                        float32Array[index++] = a * w + tx;
+                        float32Array[index++] = b * w + ty;
                         // uv
-                        vertices[index++] = sourceWidth + sourceX;
-                        vertices[index++] = sourceY;
+                        uint32Array[index++] = ((sourceY * 65535) << 16) | ((sourceWidth + sourceX) * 65535);
                         // alpha
-                        vertices[index++] = alpha;
+                        float32Array[index++] = alpha;
                         // xy
-                        vertices[index++] = a * w + c * h + tx;
-                        vertices[index++] = d * h + b * w + ty;
+                        float32Array[index++] = a * w + c * h + tx;
+                        float32Array[index++] = d * h + b * w + ty;
                         // uv
-                        vertices[index++] = sourceWidth + sourceX;
-                        vertices[index++] = sourceHeight + sourceY;
+                        uint32Array[index++] = (((sourceHeight + sourceY) * 65535) << 16) | ((sourceWidth + sourceX) * 65535);
                         // alpha
-                        vertices[index++] = alpha;
+                        float32Array[index++] = alpha;
                         // xy
-                        vertices[index++] = c * h + tx;
-                        vertices[index++] = d * h + ty;
+                        float32Array[index++] = c * h + tx;
+                        float32Array[index++] = d * h + ty;
                         // uv
-                        vertices[index++] = sourceX;
-                        vertices[index++] = sourceHeight + sourceY;
+                        uint32Array[index++] = (((sourceHeight + sourceY) * 65535) << 16) | (sourceX * 65535);
                         // alpha
-                        vertices[index++] = alpha;
+                        float32Array[index++] = alpha;
                     }
                     // 缓存索引数组
                     if (this.hasMesh) {
@@ -4987,6 +4982,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
             WebGLRenderTarget.prototype.createTexture = function () {
                 var gl = this.gl;
                 var texture = gl.createTexture();
+                texture["glContext"] = gl;
                 gl.bindTexture(gl.TEXTURE_2D, texture);
                 gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.width, this.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
@@ -5075,8 +5071,10 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 this.projectionY = NaN;
                 this.contextLost = false;
                 this.$scissorState = false;
-                this.vertSize = 5;
                 this.surface = window['canvas'];
+                if (egret.nativeRender) {
+                    return;
+                }
                 this.initWebGL();
                 this.$bufferStack = [];
                 var gl = this.context;
@@ -5354,12 +5352,12 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
             /**
              * 清除矩形区域
              */
+            //目前没有引用
             WebGLRenderContext.prototype.clearRect = function (x, y, width, height) {
                 if (x != 0 || y != 0 || width != this.surface.width || height != this.surface.height) {
                     var buffer = this.currentBuffer;
                     if (buffer.$hasScissor) {
                         this.setGlobalCompositeOperation("destination-out");
-                        // this.drawRect(x, y, width, height);
                         this.setGlobalCompositeOperation("source-over");
                     }
                     else {
@@ -5505,54 +5503,42 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     c = d1 * c;
                     d = d1 * d;
                 }
-                var vertices = this.vao.vertices;
-                var index = this.vao.vertexIndex * this.vertSize;
+                var float32Array = this.vao.float32Array;
+                var uint32Array = this.vao.uint32Array;
+                var index = this.vao.vertexIndex * this.vao.vertSize;
                 var alpha = buffer.globalAlpha;
                 var a_w = a * sourceWidth;
                 var b_w = b * sourceWidth;
                 var c_h = c * sourceHeight;
                 var d_h = d * sourceHeight;
-                var uvX_LT = node.uvX_LT;
-                var uvY_LT = node.uvY_LT;
-                var uvX_RT = node.uvX_RT;
-                var uvY_RT = node.uvY_RT;
-                var uvX_RB = node.uvX_RB;
-                var uvY_RB = node.uvY_RB;
-                var uvX_LB = node.uvX_LB;
-                var uvY_LB = node.uvY_LB;
                 // xy
-                vertices[index++] = tx;
-                vertices[index++] = ty;
+                float32Array[index++] = tx;
+                float32Array[index++] = ty;
                 // uv
-                vertices[index++] = uvX_LT;
-                vertices[index++] = uvY_LT;
+                uint32Array[index++] = node.uvs[0];
                 // alpha
-                vertices[index++] = alpha;
+                float32Array[index++] = alpha;
                 // xy
-                vertices[index++] = a_w + tx;
-                vertices[index++] = b_w + ty;
+                float32Array[index++] = a_w + tx;
+                float32Array[index++] = b_w + ty;
                 // uv
-                vertices[index++] = uvX_RT;
-                vertices[index++] = uvY_RT;
+                uint32Array[index++] = node.uvs[1];
                 // alpha
-                vertices[index++] = alpha;
+                float32Array[index++] = alpha;
                 // xy
-                vertices[index++] = a_w + c_h + tx;
-                vertices[index++] = d_h + b_w + ty;
+                float32Array[index++] = a_w + c_h + tx;
+                float32Array[index++] = d_h + b_w + ty;
                 // uv
-                vertices[index++] = uvX_RB;
-                vertices[index++] = uvY_RB;
+                uint32Array[index++] = node.uvs[2];
                 // alpha
-                vertices[index++] = alpha;
+                float32Array[index++] = alpha;
                 // xy
-                vertices[index++] = c_h + tx;
-                vertices[index++] = d_h + ty;
+                float32Array[index++] = c_h + tx;
+                float32Array[index++] = d_h + ty;
                 // uv
-                vertices[index++] = uvX_LB;
-                vertices[index++] = uvY_LB;
+                uint32Array[index++] = node.uvs[3];
                 // alpha
-                vertices[index++] = alpha;
-                // }
+                float32Array[index++] = alpha;
                 this.vao.vertexIndex += 4;
                 this.vao.indexIndex += 6;
                 if (image.source && image.source["texture"]) {
@@ -5623,7 +5609,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 }
                 var count = meshIndices ? meshIndices.length / 3 : 2;
                 // 应用$filter，因为只可能是colorMatrixFilter，最后两个参数可不传
-                this.drawCmdManager.pushDrawTexture(texture, count, this.$filter);
+                this.drawCmdManager.pushDrawTexture(texture, count, this.$filter, textureWidth, textureHeight);
                 this.vao.cacheArrays(buffer, sourceX, sourceY, sourceWidth, sourceHeight, destX, destY, destWidth, destHeight, textureWidth, textureHeight, meshUVs, meshVertices, meshIndices, rotated);
             };
             WebGLRenderContext.prototype.drawTextureByRenderNode = function (node) {
@@ -5658,7 +5644,6 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     tx = offsetX * a + offsetY * c + tx;
                     ty = offsetX * b + offsetY * d + ty;
                 }
-                var rotated = false;
                 var a1 = destWidth / sourceWidth;
                 if (a1 != 1) {
                     a = a1 * a;
@@ -5669,63 +5654,45 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     c = d1 * c;
                     d = d1 * d;
                 }
-                var vertices = this.vao.vertices;
-                var index = this.vao.vertexIndex * this.vertSize;
+                var float32Array = this.vao.float32Array;
+                var uint32Array = this.vao.uint32Array;
+                var index = this.vao.vertexIndex * this.vao.vertSize;
                 var alpha = buffer.globalAlpha;
                 var a_w = a * sourceWidth;
                 var b_w = b * sourceWidth;
                 var c_h = c * sourceHeight;
                 var d_h = d * sourceHeight;
-                var uvSize = 1;
                 // xy
-                vertices[index++] = tx;
-                vertices[index++] = ty;
+                float32Array[index++] = tx;
+                float32Array[index++] = ty;
                 // uv
-                vertices[index++] = 0;
-                vertices[index++] = 0;
+                uint32Array[index++] = 0;
                 // alpha
-                vertices[index++] = alpha;
+                float32Array[index++] = alpha;
                 // xy
-                vertices[index++] = a_w + tx;
-                vertices[index++] = b_w + ty;
+                float32Array[index++] = a_w + tx;
+                float32Array[index++] = b_w + ty;
                 // uv
-                vertices[index++] = uvSize;
-                vertices[index++] = 0;
+                uint32Array[index++] = 65535;
                 // alpha
-                vertices[index++] = alpha;
+                float32Array[index++] = alpha;
                 // xy
-                vertices[index++] = a_w + c_h + tx;
-                vertices[index++] = d_h + b_w + ty;
+                float32Array[index++] = a_w + c_h + tx;
+                float32Array[index++] = d_h + b_w + ty;
                 // uv
-                vertices[index++] = uvSize;
-                vertices[index++] = uvSize;
+                uint32Array[index++] = 65535 << 16 | 65535;
                 // alpha
-                vertices[index++] = alpha;
+                float32Array[index++] = alpha;
                 // xy
-                vertices[index++] = c_h + tx;
-                vertices[index++] = d_h + ty;
+                float32Array[index++] = c_h + tx;
+                float32Array[index++] = d_h + ty;
                 // uv
-                vertices[index++] = 0;
-                vertices[index++] = uvSize;
+                uint32Array[index++] = 65535 << 16;
                 // alpha
-                vertices[index++] = alpha;
+                float32Array[index++] = alpha;
                 this.vao.vertexIndex += 4;
                 this.vao.indexIndex += 6;
             };
-            // /**
-            //  * 绘制矩形（仅用于遮罩擦除等）
-            //  */
-            // public drawRect(x: number, y: number, width: number, height: number): void {
-            //     let buffer = this.currentBuffer;
-            //     if (this.contextLost || !buffer) {
-            //         return;
-            //     }
-            //     if (this.vao.reachMaxSize()) {
-            //         this.$drawWebGL();
-            //     }
-            //     this.drawCmdManager.pushDrawRect();
-            //     this.vao.cacheArrays(buffer, 0, 0, width, height, x, y, width, height, width, height);
-            // }
             /**
              * 绘制遮罩
              */
@@ -5779,6 +5746,9 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 buffer.$hasScissor = false;
             };
             WebGLRenderContext.prototype.$drawWebGL = function () {
+                //for 3D&2D
+                // (this as any).drawFunc();
+                //for only2D
                 if (this.drawCmdManager.drawDataLen == 0 || this.contextLost) {
                     return;
                 }
@@ -5799,7 +5769,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     if (data.type == 6 /* ACT_BUFFER */) {
                         this.activatedBuffer = data.buffer;
                     }
-                    if (data.type != 0 /* TEXTURE */ && data.type != 11 /* RECT */ && data.type != 1 /* PUSH_MASK */ && data.type != 2 /* POP_MASK */) {
+                    if (data.type != 0 /* TEXTURE */ && data.type != 1 /* PUSH_MASK */ && data.type != 2 /* POP_MASK */) {
                         continue;
                     }
                     if (this.activatedBuffer && this.activatedBuffer.$computeDrawCall) {
@@ -5828,21 +5798,17 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     case 10 /* CHANGE_PROGRAM */:
                         program = wxgame.EgretWebGLProgram.getProgram(gl, data.vertSource, data.fragSource, data.key);
                         this.activeProgram(gl, program);
-                        this.syncUniforms(program, filter, data.textureWidth, data.textureHeight);
                         break;
                     case 0 /* TEXTURE */:
+                        this.syncUniforms(this.currentProgram, filter, data.textureWidth, data.textureHeight);
                         offset += this.drawTextureElements(data, offset);
                         break;
                     case 1 /* PUSH_MASK */:
-                        program = wxgame.EgretWebGLProgram.getProgram(gl, wxgame.EgretShaderLib.default_vert, wxgame.EgretShaderLib.primitive_frag, "primitive");
-                        this.activeProgram(gl, program);
-                        this.syncUniforms(program, filter, data.textureWidth, data.textureHeight);
+                        this.syncUniforms(this.currentProgram, filter, data.textureWidth, data.textureHeight);
                         offset += this.drawPushMaskElements(data, offset);
                         break;
                     case 2 /* POP_MASK */:
-                        program = wxgame.EgretWebGLProgram.getProgram(gl, wxgame.EgretShaderLib.default_vert, wxgame.EgretShaderLib.primitive_frag, "primitive");
-                        this.activeProgram(gl, program);
-                        this.syncUniforms(program, filter, data.textureWidth, data.textureHeight);
+                        this.syncUniforms(this.currentProgram, filter, data.textureWidth, data.textureHeight);
                         offset += this.drawPopMaskElements(data, offset);
                         break;
                     case 3 /* BLEND */:
@@ -5901,15 +5867,15 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     var attribute = program.attributes;
                     for (var key in attribute) {
                         if (key === "aVertexPosition") {
-                            gl.vertexAttribPointer(attribute["aVertexPosition"].location, 2, gl.FLOAT, false, 5 * 4, 0);
+                            gl.vertexAttribPointer(attribute["aVertexPosition"].location, 2, gl.FLOAT, false, 4 * 4, 0);
                             gl.enableVertexAttribArray(attribute["aVertexPosition"].location);
                         }
                         else if (key === "aTextureCoord") {
-                            gl.vertexAttribPointer(attribute["aTextureCoord"].location, 2, gl.FLOAT, false, 5 * 4, 2 * 4);
+                            gl.vertexAttribPointer(attribute["aTextureCoord"].location, 2, gl.UNSIGNED_SHORT, true, 4 * 4, 2 * 4);
                             gl.enableVertexAttribArray(attribute["aTextureCoord"].location);
                         }
                         else if (key === "aColor") {
-                            gl.vertexAttribPointer(attribute["aColor"].location, 1, gl.FLOAT, false, 5 * 4, 4 * 4);
+                            gl.vertexAttribPointer(attribute["aColor"].location, 1, gl.FLOAT, false, 4 * 4, 3 * 4);
                             gl.enableVertexAttribArray(attribute["aColor"].location);
                         }
                     }
@@ -5945,17 +5911,6 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
             WebGLRenderContext.prototype.drawTextureElements = function (data, offset) {
                 var gl = this.context;
                 gl.bindTexture(gl.TEXTURE_2D, data.texture);
-                var size = data.count * 3;
-                gl.drawElements(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, offset * 2);
-                return size;
-            };
-            /**
-             * @private
-             * 画rect
-             **/
-            WebGLRenderContext.prototype.drawRectElements = function (data, offset) {
-                var gl = this.context;
-                // gl.bindTexture(gl.TEXTURE_2D, null);
                 var size = data.count * 3;
                 gl.drawElements(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, offset * 2);
                 return size;
@@ -6273,9 +6228,13 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
              * @param useMaxSize 若传入true，则将改变后的尺寸与已有尺寸对比，保留较大的尺寸。
              */
             WebGLRenderBuffer.prototype.resize = function (width, height, useMaxSize) {
-                this.context.pushBuffer(this);
                 width = width || 1;
                 height = height || 1;
+                if (egret.nativeRender) {
+                    this.surface.resize(width, height);
+                    return;
+                }
+                this.context.pushBuffer(this);
                 // render target 尺寸重置
                 if (width != this.rootRenderTarget.width || height != this.rootRenderTarget.height) {
                     this.context.drawCmdManager.pushResize(this, width, height);
@@ -6283,12 +6242,17 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     this.rootRenderTarget.width = width;
                     this.rootRenderTarget.height = height;
                 }
+                //for 3D&2D
+                //3D不需要主动resize,而是由3D部分进行修改
                 // 如果是舞台的渲染缓冲，执行resize，否则surface大小不随之改变
                 if (this.root) {
                     this.context.resize(width, height, useMaxSize);
                 }
                 this.context.clear();
                 this.context.popBuffer();
+            };
+            WebGLRenderBuffer.prototype.$pushResize = function (width, height) {
+                this.context.drawCmdManager.pushResize(this, width, height);
             };
             /**
              * 获取指定区域的像素
@@ -6297,26 +6261,33 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 if (width === void 0) { width = 1; }
                 if (height === void 0) { height = 1; }
                 var pixels = new Uint8Array(4 * width * height);
-                var useFrameBuffer = this.rootRenderTarget.useFrameBuffer;
-                this.rootRenderTarget.useFrameBuffer = true;
-                this.rootRenderTarget.activate();
-                this.context.getPixels(x, y, width, height, pixels);
-                this.rootRenderTarget.useFrameBuffer = useFrameBuffer;
-                this.rootRenderTarget.activate();
+                if (egret.nativeRender) {
+                    egret_native.activateBuffer(this);
+                    egret_native.nrGetPixels(x, y, width, height, pixels);
+                    egret_native.activateBuffer(null);
+                }
+                else {
+                    var useFrameBuffer = this.rootRenderTarget.useFrameBuffer;
+                    this.rootRenderTarget.useFrameBuffer = true;
+                    this.rootRenderTarget.activate();
+                    this.context.getPixels(x, y, width, height, pixels);
+                    this.rootRenderTarget.useFrameBuffer = useFrameBuffer;
+                    this.rootRenderTarget.activate();
+                }
                 //图像反转
                 var result = new Uint8Array(4 * width * height);
                 for (var i = 0; i < height; i++) {
                     for (var j = 0; j < width; j++) {
-                        result[(width * (height - i - 1) + j) * 4] = pixels[(width * i + j) * 4];
-                        result[(width * (height - i - 1) + j) * 4 + 1] = pixels[(width * i + j) * 4 + 1];
-                        result[(width * (height - i - 1) + j) * 4 + 2] = pixels[(width * i + j) * 4 + 2];
-                        result[(width * (height - i - 1) + j) * 4 + 3] = pixels[(width * i + j) * 4 + 3];
+                        var index1 = (width * (height - i - 1) + j) * 4;
+                        var index2 = (width * i + j) * 4;
+                        var a = pixels[index2 + 3];
+                        result[index1] = Math.round(pixels[index2] / a * 255);
+                        result[index1 + 1] = Math.round(pixels[index2 + 1] / a * 255);
+                        result[index1 + 2] = Math.round(pixels[index2 + 2] / a * 255);
+                        result[index1 + 3] = pixels[index2 + 3];
                     }
                 }
                 return result;
-            };
-            WebGLRenderBuffer.prototype.$pushResize = function (width, height) {
-                this.context.drawCmdManager.pushResize(this, width, height);
             };
             /**
              * 转换成base64字符串，如果图片（或者包含的图片）跨域，则返回null
@@ -6410,11 +6381,6 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 }
                 matrix.tx = tx * a1 + ty * c1 + matrix.tx;
                 matrix.ty = tx * b1 + ty * d1 + matrix.ty;
-            };
-            WebGLRenderBuffer.prototype.translate = function (dx, dy) {
-                var matrix = this.globalMatrix;
-                matrix.tx += dx;
-                matrix.ty += dy;
             };
             WebGLRenderBuffer.prototype.useOffset = function () {
                 var self = this;
@@ -6545,8 +6511,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 webglBufferContext.pushBuffer(webglBuffer);
                 //绘制显示对象
                 webglBuffer.transform(matrix.a, matrix.b, matrix.c, matrix.d, 0, 0);
-                this.$currentBuffer = webglBuffer;
-                this.drawDisplayObject(displayObject, matrix.tx, matrix.ty, true);
+                this.drawDisplayObject(displayObject, webglBuffer, matrix.tx, matrix.ty, true);
                 webglBufferContext.$drawWebGL();
                 var drawCall = webglBuffer.$drawCalls;
                 webglBuffer.onRenderFinish();
@@ -6572,8 +6537,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
              * @private
              * 绘制一个显示对象
              */
-            WebGLRenderer.prototype.drawDisplayObject = function (displayObject, offsetX, offsetY, isStage) {
-                var buffer = this.$currentBuffer;
+            WebGLRenderer.prototype.drawDisplayObject = function (displayObject, buffer, offsetX, offsetY, isStage) {
                 var drawCalls = 0;
                 var node;
                 var displayList = displayObject.$displayList;
@@ -6652,10 +6616,8 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                             savedMatrix.tx = m2.tx;
                             savedMatrix.ty = m2.ty;
                             buffer.transform(m.a, m.b, m.c, m.d, offsetX2, offsetY2);
-                            if (child.$hasAnchor) {
-                                offsetX2 = -child.$anchorOffsetX;
-                                offsetY2 = -child.$anchorOffsetY;
-                            }
+                            offsetX2 = -child.$anchorOffsetX;
+                            offsetY2 = -child.$anchorOffsetY;
                         }
                         else {
                             offsetX2 = offsetX + child.$x;
@@ -6666,7 +6628,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                             }
                         }
                         if (child.$renderMode === 1 /* DEFAULT */) {
-                            drawCalls += this.drawDisplayObject(child, offsetX2, offsetY2);
+                            drawCalls += this.drawDisplayObject(child, buffer, offsetX2, offsetY2);
                         }
                         else if (child.$renderMode === 3 /* FILTER */) {
                             drawCalls += this.drawWithFilter(child, buffer, offsetX2, offsetY2);
@@ -6733,7 +6695,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                             drawCalls += this.drawWithScrollRect(displayObject, buffer, offsetX, offsetY);
                         }
                         else {
-                            drawCalls += this.drawDisplayObject(displayObject, offsetX, offsetY);
+                            drawCalls += this.drawDisplayObject(displayObject, buffer, offsetX, offsetY);
                         }
                         buffer.context.$filter = null;
                         if (hasBlendMode) {
@@ -6753,7 +6715,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     drawCalls += this.drawWithScrollRect(displayObject, displayBuffer, -displayBoundsX, -displayBoundsY);
                 }
                 else {
-                    drawCalls += this.drawDisplayObject(displayObject, -displayBoundsX, -displayBoundsY);
+                    drawCalls += this.drawDisplayObject(displayObject, displayBuffer, -displayBoundsX, -displayBoundsY);
                 }
                 displayBuffer.context.popBuffer();
                 //绘制结果到屏幕
@@ -6847,7 +6809,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     if (hasBlendMode) {
                         buffer.context.setGlobalCompositeOperation(compositeOp);
                     }
-                    drawCalls += this.drawDisplayObject(displayObject, offsetX, offsetY);
+                    drawCalls += this.drawDisplayObject(displayObject, buffer, offsetX, offsetY);
                     if (hasBlendMode) {
                         buffer.context.setGlobalCompositeOperation(defaultCompositeOp);
                     }
@@ -6865,7 +6827,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     //绘制显示对象自身，若有scrollRect，应用clip
                     var displayBuffer = this.createRenderBuffer(displayBoundsWidth, displayBoundsHeight);
                     displayBuffer.context.pushBuffer(displayBuffer);
-                    drawCalls += this.drawDisplayObject(displayObject, -displayBoundsX, -displayBoundsY);
+                    drawCalls += this.drawDisplayObject(displayObject, displayBuffer, -displayBoundsX, -displayBoundsY);
                     //绘制遮罩
                     if (mask) {
                         var maskBuffer = this.createRenderBuffer(displayBoundsWidth, displayBoundsHeight);
@@ -6876,7 +6838,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                         maskMatrix.translate(-displayBoundsX, -displayBoundsY);
                         maskBuffer.setTransform(maskMatrix.a, maskMatrix.b, maskMatrix.c, maskMatrix.d, maskMatrix.tx, maskMatrix.ty);
                         egret.Matrix.release(maskMatrix);
-                        drawCalls += this.drawDisplayObject(mask, 0, 0);
+                        drawCalls += this.drawDisplayObject(mask, maskBuffer, 0, 0);
                         maskBuffer.context.popBuffer();
                         displayBuffer.context.setGlobalCompositeOperation("destination-in");
                         displayBuffer.setTransform(1, 0, 0, -1, 0, maskBuffer.height);
@@ -6885,6 +6847,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                         displayBuffer.context.drawTexture(maskBuffer.rootRenderTarget.texture, 0, 0, maskBufferWidth, maskBufferHeight, 0, 0, maskBufferWidth, maskBufferHeight, maskBufferWidth, maskBufferHeight);
                         displayBuffer.setTransform(1, 0, 0, 1, 0, 0);
                         displayBuffer.context.setGlobalCompositeOperation("source-over");
+                        maskBuffer.setTransform(1, 0, 0, 1, 0, 0);
                         renderBufferPool.push(maskBuffer);
                     }
                     displayBuffer.context.setGlobalCompositeOperation(defaultCompositeOp);
@@ -7003,7 +6966,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     context.enableScissor(minX, -maxY + buffer.height, maxX - minX, maxY - minY);
                     scissor = true;
                 }
-                drawCalls += this.drawDisplayObject(displayObject, offsetX, offsetY);
+                drawCalls += this.drawDisplayObject(displayObject, buffer, offsetX, offsetY);
                 if (scissor) {
                     context.disableScissor();
                 }
@@ -7076,7 +7039,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     for (var i = 0; i < length_3; i++) {
                         var child = children[i];
                         if (child.$renderMode === 1 /* DEFAULT */) {
-                            drawCalls += this.drawDisplayObject(child, 0, 0);
+                            drawCalls += this.drawDisplayObject(child, buffer, 0, 0);
                         }
                         else if (child.$renderMode === 3 /* FILTER */) {
                             drawCalls += this.drawWithFilter(child, buffer, 0, 0);

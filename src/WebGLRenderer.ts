@@ -40,7 +40,6 @@ namespace egret.wxgame {
      */
     export class WebGLRenderer implements sys.SystemRenderer {
 
-        public $currentBuffer:WebGLRenderBuffer;
 
         public constructor() {
 
@@ -66,8 +65,7 @@ namespace egret.wxgame {
 
             //绘制显示对象
             webglBuffer.transform(matrix.a, matrix.b, matrix.c, matrix.d, 0, 0);
-            this.$currentBuffer = webglBuffer;
-            this.drawDisplayObject(displayObject, matrix.tx, matrix.ty, true);
+            this.drawDisplayObject(displayObject, webglBuffer, matrix.tx, matrix.ty, true);
             webglBufferContext.$drawWebGL();
             let drawCall = webglBuffer.$drawCalls;
             webglBuffer.onRenderFinish();
@@ -96,8 +94,7 @@ namespace egret.wxgame {
          * @private
          * 绘制一个显示对象
          */
-        private drawDisplayObject(displayObject: DisplayObject,  offsetX: number, offsetY: number, isStage?: boolean): number {
-            let buffer = this.$currentBuffer;
+        private drawDisplayObject(displayObject: DisplayObject, buffer: WebGLRenderBuffer, offsetX: number, offsetY: number, isStage?: boolean): number {
             let drawCalls = 0;
             let node: sys.RenderNode;
             let displayList = displayObject.$displayList;
@@ -175,10 +172,8 @@ namespace egret.wxgame {
                         savedMatrix.tx = m2.tx;
                         savedMatrix.ty = m2.ty;
                         buffer.transform(m.a, m.b, m.c, m.d, offsetX2, offsetY2);
-                        if (child.$hasAnchor) {
-                            offsetX2 = -child.$anchorOffsetX;
-                            offsetY2 = -child.$anchorOffsetY;
-                        }
+                        offsetX2 = -child.$anchorOffsetX;
+                        offsetY2 = -child.$anchorOffsetY;
                     }
                     else {
                         offsetX2 = offsetX + child.$x;
@@ -190,7 +185,7 @@ namespace egret.wxgame {
                     }
 
                     if (child.$renderMode === RenderMode.DEFAULT) {
-                        drawCalls += this.drawDisplayObject(child, offsetX2, offsetY2);
+                        drawCalls += this.drawDisplayObject(child, buffer, offsetX2, offsetY2);
                     }
                     else if (child.$renderMode === RenderMode.FILTER) {
                         drawCalls += this.drawWithFilter(child, buffer, offsetX2, offsetY2);
@@ -262,7 +257,7 @@ namespace egret.wxgame {
                         drawCalls += this.drawWithScrollRect(displayObject, buffer, offsetX, offsetY);
                     }
                     else {
-                        drawCalls += this.drawDisplayObject(displayObject, offsetX, offsetY);
+                        drawCalls += this.drawDisplayObject(displayObject, buffer, offsetX, offsetY);
                     }
 
                     buffer.context.$filter = null;
@@ -287,7 +282,7 @@ namespace egret.wxgame {
                 drawCalls += this.drawWithScrollRect(displayObject, displayBuffer, -displayBoundsX, -displayBoundsY);
             }
             else {
-                drawCalls += this.drawDisplayObject(displayObject, -displayBoundsX, -displayBoundsY);
+                drawCalls += this.drawDisplayObject(displayObject, displayBuffer, -displayBoundsX, -displayBoundsY);
             }
 
             displayBuffer.context.popBuffer();
@@ -386,7 +381,7 @@ namespace egret.wxgame {
                 if (hasBlendMode) {
                     buffer.context.setGlobalCompositeOperation(compositeOp);
                 }
-                drawCalls += this.drawDisplayObject(displayObject, offsetX, offsetY);
+                drawCalls += this.drawDisplayObject(displayObject, buffer, offsetX, offsetY);
                 if (hasBlendMode) {
                     buffer.context.setGlobalCompositeOperation(defaultCompositeOp);
                 }
@@ -404,7 +399,7 @@ namespace egret.wxgame {
                 //绘制显示对象自身，若有scrollRect，应用clip
                 let displayBuffer = this.createRenderBuffer(displayBoundsWidth, displayBoundsHeight);
                 displayBuffer.context.pushBuffer(displayBuffer);
-                drawCalls += this.drawDisplayObject(displayObject, -displayBoundsX, -displayBoundsY);
+                drawCalls += this.drawDisplayObject(displayObject, displayBuffer, -displayBoundsX, -displayBoundsY);
                 //绘制遮罩
                 if (mask) {
                     let maskBuffer = this.createRenderBuffer(displayBoundsWidth, displayBoundsHeight);
@@ -415,7 +410,7 @@ namespace egret.wxgame {
                     maskMatrix.translate(-displayBoundsX, -displayBoundsY);
                     maskBuffer.setTransform(maskMatrix.a, maskMatrix.b, maskMatrix.c, maskMatrix.d, maskMatrix.tx, maskMatrix.ty);
                     Matrix.release(maskMatrix);
-                    drawCalls += this.drawDisplayObject(mask, 0, 0);
+                    drawCalls += this.drawDisplayObject(mask, maskBuffer, 0, 0);
                     maskBuffer.context.popBuffer();
                     displayBuffer.context.setGlobalCompositeOperation("destination-in");
                     displayBuffer.setTransform(1, 0, 0, -1, 0, maskBuffer.height);
@@ -425,6 +420,7 @@ namespace egret.wxgame {
                         0, 0, maskBufferWidth, maskBufferHeight, maskBufferWidth, maskBufferHeight);
                     displayBuffer.setTransform(1, 0, 0, 1, 0, 0);
                     displayBuffer.context.setGlobalCompositeOperation("source-over");
+                    maskBuffer.setTransform(1, 0, 0, 1, 0, 0);
                     renderBufferPool.push(maskBuffer);
                 }
 
@@ -551,7 +547,7 @@ namespace egret.wxgame {
                 context.enableScissor(minX, -maxY + buffer.height, maxX - minX, maxY - minY);
                 scissor = true;
             }
-            drawCalls += this.drawDisplayObject(displayObject, offsetX, offsetY);
+            drawCalls += this.drawDisplayObject(displayObject, buffer, offsetX, offsetY);
             if (scissor) {
                 context.disableScissor();
             } else {
@@ -624,7 +620,7 @@ namespace egret.wxgame {
                     let child = children[i];
 
                     if (child.$renderMode === RenderMode.DEFAULT) {
-                        drawCalls += this.drawDisplayObject(child, 0, 0);
+                        drawCalls += this.drawDisplayObject(child, buffer, 0, 0);
                     }
                     else if (child.$renderMode === RenderMode.FILTER) {
                         drawCalls += this.drawWithFilter(child, buffer, 0, 0);

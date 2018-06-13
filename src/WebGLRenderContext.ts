@@ -43,6 +43,11 @@ namespace egret.wxgame {
         public firstTimeUploadVertices: boolean;
 
         /**
+         * 当前program key值
+         */
+        public currentProgramKey: string;
+
+        /**
          * 渲染上下文
          */
         public context: WebGLRenderingContext;
@@ -179,6 +184,10 @@ namespace egret.wxgame {
 
             this.surface = window['canvas'];
 
+            if (egret.nativeRender) {
+                return;
+            }
+
             this.initWebGL();
 
             this.$bufferStack = [];
@@ -196,6 +205,7 @@ namespace egret.wxgame {
             this.setGlobalCompositeOperation("source-over");
 
             this.firstTimeUploadVertices = true;
+
         }
 
         /**
@@ -430,12 +440,12 @@ namespace egret.wxgame {
         /**
          * 清除矩形区域
          */
+        //目前没有引用
         public clearRect(x: number, y: number, width: number, height: number): void {
             if (x != 0 || y != 0 || width != this.surface.width || height != this.surface.height) {
                 let buffer = this.currentBuffer;
                 if (buffer.$hasScissor) {
                     this.setGlobalCompositeOperation("destination-out");
-                    // this.drawRect(x, y, width, height);
                     this.setGlobalCompositeOperation("source-over");
                 } else {
                     let m = buffer.globalMatrix;
@@ -510,9 +520,6 @@ namespace egret.wxgame {
                 buffer.restoreTransform();
             }
         }
-
-
-
 
         /**
          * 绘制图片，image参数可以是BitmapData或者renderTarget
@@ -602,57 +609,44 @@ namespace egret.wxgame {
                 d = d1 * d;
             }
 
-            let vertices = this.vao.vertices;
-            let index = this.vao.vertexIndex * this.vertSize;
+            let float32Array = this.vao.float32Array;
+            let uint32Array = this.vao.uint32Array;
+            let index = this.vao.vertexIndex * this.vao.vertSize;
             let alpha = buffer.globalAlpha;
             let a_w = a * sourceWidth;
             let b_w = b * sourceWidth;
             let c_h = c * sourceHeight;
             let d_h = d * sourceHeight;
 
-            let uvX_LT = node.uvX_LT;
-            let uvY_LT = node.uvY_LT;
-            let uvX_RT = node.uvX_RT;
-            let uvY_RT = node.uvY_RT;
-            let uvX_RB = node.uvX_RB;
-            let uvY_RB = node.uvY_RB;
-            let uvX_LB = node.uvX_LB;
-            let uvY_LB = node.uvY_LB;
+            // xy
+            float32Array[index++] = tx;
+            float32Array[index++] = ty;
+            // uv
+            uint32Array[index++] = node.uvs[0];
+            // alpha
+            float32Array[index++] = alpha;
+            // xy
+            float32Array[index++] = a_w + tx;
+            float32Array[index++] = b_w + ty;
+            // uv
+            uint32Array[index++] = node.uvs[1];
+            // alpha
+            float32Array[index++] = alpha;
+            // xy
+            float32Array[index++] = a_w + c_h + tx;
+            float32Array[index++] = d_h + b_w + ty;
+            // uv
+            uint32Array[index++] = node.uvs[2];
+            // alpha
+            float32Array[index++] = alpha;
+            // xy
+            float32Array[index++] = c_h + tx;
+            float32Array[index++] = d_h + ty;
+            // uv
+            uint32Array[index++] = node.uvs[3];
+            // alpha
+            float32Array[index++] = alpha;
 
-            // xy
-            vertices[index++] = tx;
-            vertices[index++] = ty;
-
-            // uv
-            vertices[index++] = uvX_LT;
-            vertices[index++] = uvY_LT;
-            // alpha
-            vertices[index++] = alpha;
-            // xy
-            vertices[index++] = a_w + tx;
-            vertices[index++] = b_w + ty;
-            // uv
-            vertices[index++] = uvX_RT;
-            vertices[index++] = uvY_RT;
-            // alpha
-            vertices[index++] = alpha;
-            // xy
-            vertices[index++] = a_w + c_h + tx;
-            vertices[index++] = d_h + b_w + ty;
-            // uv
-            vertices[index++] = uvX_RB;
-            vertices[index++] = uvY_RB;
-            // alpha
-            vertices[index++] = alpha;
-            // xy
-            vertices[index++] = c_h + tx;
-            vertices[index++] = d_h + ty;
-            // uv
-            vertices[index++] = uvX_LB;
-            vertices[index++] = uvY_LB;
-            // alpha
-            vertices[index++] = alpha;
-            // }
             this.vao.vertexIndex += 4;
             this.vao.indexIndex += 6;
 
@@ -662,8 +656,6 @@ namespace egret.wxgame {
                 buffer.restoreTransform();
             }
         }
-
-
 
         /**
          * 绘制Mesh
@@ -744,18 +736,12 @@ namespace egret.wxgame {
 
             let count = meshIndices ? meshIndices.length / 3 : 2;
             // 应用$filter，因为只可能是colorMatrixFilter，最后两个参数可不传
-            this.drawCmdManager.pushDrawTexture(texture, count, this.$filter);
+            this.drawCmdManager.pushDrawTexture(texture, count, this.$filter, textureWidth, textureHeight);
 
             this.vao.cacheArrays(buffer, sourceX, sourceY, sourceWidth, sourceHeight,
                 destX, destY, destWidth, destHeight, textureWidth, textureHeight,
                 meshUVs, meshVertices, meshIndices, rotated);
         }
-
-
-
-
-
-
 
         public drawTextureByRenderNode(node: sys.TextNode | sys.GraphicsNode): void {
             let texture = node.$texture;
@@ -795,8 +781,6 @@ namespace egret.wxgame {
                 ty = offsetX * b + offsetY * d + ty;
             }
 
-            let rotated = false;
-
             let a1 = destWidth / sourceWidth;
             if (a1 != 1) {
                 a = a1 * a;
@@ -808,74 +792,47 @@ namespace egret.wxgame {
                 d = d1 * d;
             }
 
-            let vertices = this.vao.vertices;
-            let index = this.vao.vertexIndex * this.vertSize;
+            let float32Array = this.vao.float32Array;
+            let uint32Array = this.vao.uint32Array;
+            let index = this.vao.vertexIndex * this.vao.vertSize;
             let alpha = buffer.globalAlpha;
             let a_w = a * sourceWidth;
             let b_w = b * sourceWidth;
             let c_h = c * sourceHeight;
             let d_h = d * sourceHeight;
 
-            let uvSize = 1;
-
             // xy
-            vertices[index++] = tx;
-            vertices[index++] = ty;
-
+            float32Array[index++] = tx;
+            float32Array[index++] = ty;
             // uv
-            vertices[index++] = 0;
-            vertices[index++] = 0;
+            uint32Array[index++] = 0;
             // alpha
-            vertices[index++] = alpha;
+            float32Array[index++] = alpha;
             // xy
-            vertices[index++] = a_w + tx;
-            vertices[index++] = b_w + ty;
+            float32Array[index++] = a_w + tx;
+            float32Array[index++] = b_w + ty;
             // uv
-            vertices[index++] = uvSize;
-            vertices[index++] = 0;
+            uint32Array[index++] = 65535;
             // alpha
-            vertices[index++] = alpha;
+            float32Array[index++] = alpha;
             // xy
-            vertices[index++] = a_w + c_h + tx;
-            vertices[index++] = d_h + b_w + ty;
+            float32Array[index++] = a_w + c_h + tx;
+            float32Array[index++] = d_h + b_w + ty;
             // uv
-            vertices[index++] = uvSize;
-            vertices[index++] = uvSize;
+            uint32Array[index++] = 65535 << 16 | 65535;
             // alpha
-            vertices[index++] = alpha;
+            float32Array[index++] = alpha;
             // xy
-            vertices[index++] = c_h + tx;
-            vertices[index++] = d_h + ty;
+            float32Array[index++] = c_h + tx;
+            float32Array[index++] = d_h + ty;
             // uv
-            vertices[index++] = 0;
-            vertices[index++] = uvSize;
+            uint32Array[index++] = 65535 << 16;
             // alpha
-            vertices[index++] = alpha;
+            float32Array[index++] = alpha;
 
             this.vao.vertexIndex += 4;
             this.vao.indexIndex += 6;
         }
-
-
-
-
-        // /**
-        //  * 绘制矩形（仅用于遮罩擦除等）
-        //  */
-        // public drawRect(x: number, y: number, width: number, height: number): void {
-        //     let buffer = this.currentBuffer;
-        //     if (this.contextLost || !buffer) {
-        //         return;
-        //     }
-
-        //     if (this.vao.reachMaxSize()) {
-        //         this.$drawWebGL();
-        //     }
-
-        //     this.drawCmdManager.pushDrawRect();
-
-        //     this.vao.cacheArrays(buffer, 0, 0, width, height, x, y, width, height, width, height);
-        // }
 
         /**
          * 绘制遮罩
@@ -942,6 +899,11 @@ namespace egret.wxgame {
          */
         public activatedBuffer: WebGLRenderBuffer;
         public $drawWebGL() {
+
+            //for 3D&2D
+            // (this as any).drawFunc();
+
+            //for only2D
             if (this.drawCmdManager.drawDataLen == 0 || this.contextLost) {
                 return;
             }
@@ -957,18 +919,15 @@ namespace egret.wxgame {
             let offset = 0;
             for (let i = 0; i < length; i++) {
                 let data = this.drawCmdManager.drawData[i];
-
                 if (!data) {
                     continue;
                 }
-
                 offset = this.drawData(data, offset);
                 // 计算draw call
                 if (data.type == DRAWABLE_TYPE.ACT_BUFFER) {
                     this.activatedBuffer = data.buffer;
                 }
-
-                if (data.type != DRAWABLE_TYPE.TEXTURE && data.type != DRAWABLE_TYPE.RECT && data.type != DRAWABLE_TYPE.PUSH_MASK && data.type != DRAWABLE_TYPE.POP_MASK) {
+                if (data.type != DRAWABLE_TYPE.TEXTURE && data.type != DRAWABLE_TYPE.PUSH_MASK && data.type != DRAWABLE_TYPE.POP_MASK) {
                     continue;
                 }
                 if (this.activatedBuffer && this.activatedBuffer.$computeDrawCall) {
@@ -994,36 +953,26 @@ namespace egret.wxgame {
                 return;
             }
 
-            let gl = this.context;
+            const gl = this.context;
             let program: EgretWebGLProgram;
-            let filter = data.filter;
+            const filter = data.filter;
 
             switch (data.type) {
                 case DRAWABLE_TYPE.CHANGE_PROGRAM:
                     program = EgretWebGLProgram.getProgram(gl, data.vertSource, data.fragSource, data.key);
                     this.activeProgram(gl, program);
-                    this.syncUniforms(program, filter, data.textureWidth, data.textureHeight);
                     break;
-
-
                 case DRAWABLE_TYPE.TEXTURE:
+                    this.syncUniforms(this.currentProgram, filter, data.textureWidth, data.textureHeight);
                     offset += this.drawTextureElements(data, offset);
                     break;
 
                 case DRAWABLE_TYPE.PUSH_MASK:
-
-                    program = EgretWebGLProgram.getProgram(gl, EgretShaderLib.default_vert, EgretShaderLib.primitive_frag, "primitive");
-                    this.activeProgram(gl, program);
-                    this.syncUniforms(program, filter, data.textureWidth, data.textureHeight);
-
+                    this.syncUniforms(this.currentProgram, filter, data.textureWidth, data.textureHeight);
                     offset += this.drawPushMaskElements(data, offset);
                     break;
                 case DRAWABLE_TYPE.POP_MASK:
-
-                    program = EgretWebGLProgram.getProgram(gl, EgretShaderLib.default_vert, EgretShaderLib.primitive_frag, "primitive");
-                    this.activeProgram(gl, program);
-                    this.syncUniforms(program, filter, data.textureWidth, data.textureHeight);
-
+                    this.syncUniforms(this.currentProgram, filter, data.textureWidth, data.textureHeight);
                     offset += this.drawPopMaskElements(data, offset);
                     break;
                 case DRAWABLE_TYPE.BLEND:
@@ -1087,13 +1036,13 @@ namespace egret.wxgame {
 
                 for (let key in attribute) {
                     if (key === "aVertexPosition") {
-                        gl.vertexAttribPointer(attribute["aVertexPosition"].location, 2, gl.FLOAT, false, 5 * 4, 0);
+                        gl.vertexAttribPointer(attribute["aVertexPosition"].location, 2, gl.FLOAT, false, 4 * 4, 0);
                         gl.enableVertexAttribArray(attribute["aVertexPosition"].location);
                     } else if (key === "aTextureCoord") {
-                        gl.vertexAttribPointer(attribute["aTextureCoord"].location, 2, gl.FLOAT, false, 5 * 4, 2 * 4);
+                        gl.vertexAttribPointer(attribute["aTextureCoord"].location, 2, gl.UNSIGNED_SHORT, true, 4 * 4, 2 * 4);
                         gl.enableVertexAttribArray(attribute["aTextureCoord"].location);
                     } else if (key === "aColor") {
-                        gl.vertexAttribPointer(attribute["aColor"].location, 1, gl.FLOAT, false, 5 * 4, 4 * 4);
+                        gl.vertexAttribPointer(attribute["aColor"].location, 1, gl.FLOAT, false, 4 * 4, 3 * 4);
                         gl.enableVertexAttribArray(attribute["aColor"].location);
                     }
                 }
@@ -1129,18 +1078,6 @@ namespace egret.wxgame {
         private drawTextureElements(data: any, offset: number): number {
             let gl: any = this.context;
             gl.bindTexture(gl.TEXTURE_2D, data.texture);
-            let size = data.count * 3;
-            gl.drawElements(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, offset * 2);
-            return size;
-        }
-
-        /**
-         * @private
-         * 画rect
-         **/
-        private drawRectElements(data: any, offset: number): number {
-            let gl: any = this.context;
-            // gl.bindTexture(gl.TEXTURE_2D, null);
             let size = data.count * 3;
             gl.drawElements(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, offset * 2);
             return size;
@@ -1213,8 +1150,6 @@ namespace egret.wxgame {
 
             return size;
         }
-
-        private vertSize: number = 5;
 
         /**
          * 设置混色

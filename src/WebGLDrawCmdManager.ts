@@ -28,28 +28,12 @@
 //////////////////////////////////////////////////////////////////////////////////////
 namespace egret.wxgame {
     /**
-     * @private
      * draw类型，所有的绘图操作都会缓存在drawData中，每个drawData都是一个drawable对象
      * $renderWebGL方法依据drawable对象的类型，调用不同的绘制方法
      */
-    //fix for egret3d
-    //修改枚举。
-
-    //原枚举
-    // export const enum DRAWABLE_TYPE {
-    //     TEXTURE,
-    //     RECT,
-    //     PUSH_MASK,
-    //     POP_MASK,
-    //     BLEND,
-    //     RESIZE_TARGET,
-    //     CLEAR_COLOR,
-    //     ACT_BUFFER,
-    //     ENABLE_SCISSOR,
-    //     DISABLE_SCISSOR,
-    //     SMOOTHING
-    // }
-
+    //for 3D&2D
+    //2D与3D的DRAWABLE_TYPE有区别，且3D是写死的
+    //暂时不要更改
     export const enum DRAWABLE_TYPE {
         TEXTURE = 0,
         PUSH_MASK = 1,
@@ -61,9 +45,9 @@ namespace egret.wxgame {
         ENABLE_SCISSOR = 7,
         DISABLE_SCISSOR = 8,
         SMOOTHING = 9,
-        CHANGE_PROGRAM = 10,
-        RECT = 11
+        CHANGE_PROGRAM = 10
     }
+
 
     /**
      * @private
@@ -101,10 +85,10 @@ namespace egret.wxgame {
                 let data = this.drawData[this.drawDataLen] || {};
                 data.type = DRAWABLE_TYPE.TEXTURE;
                 data.texture = texture;
-                data.filter = filter;
                 data.count = count;
                 data.textureWidth = textureWidth;
                 data.textureHeight = textureHeight;
+                data.filter = filter;
                 this.drawData[this.drawDataLen] = data;
                 this.drawDataLen++;
                 this.lastDrawTextureData = null;
@@ -142,6 +126,9 @@ namespace egret.wxgame {
          * 压入pushMask指令
          */
         public pushPushMask(count: number = 1): void {
+            if (this.lastProgramKey !== "primitive") {
+                this.pushChangeProgram("primitive");
+            }
             let data = this.drawData[this.drawDataLen] || {};
             data.type = DRAWABLE_TYPE.PUSH_MASK;
             data.count = count * 2;
@@ -154,6 +141,9 @@ namespace egret.wxgame {
          * 压入popMask指令
          */
         public pushPopMask(count: number = 1): void {
+            if (this.lastProgramKey !== "primitive") {
+                this.pushChangeProgram("primitive");
+            }
             let data = this.drawData[this.drawDataLen] || {};
             data.type = DRAWABLE_TYPE.POP_MASK;
             data.count = count * 2;
@@ -173,7 +163,7 @@ namespace egret.wxgame {
                 let data = this.drawData[i];
 
                 if (data) {
-                    if (data.type == DRAWABLE_TYPE.TEXTURE ) {
+                    if (data.type == DRAWABLE_TYPE.TEXTURE) {
                         drawState = true;
                     }
 
@@ -344,6 +334,10 @@ namespace egret.wxgame {
             } else if (type === "glow") {
                 key = "glow";
                 fragSource = EgretShaderLib.glow_frag;
+            } else if (type === "primitive") {
+                key = "primitive";
+                fragSource = EgretShaderLib.primitive_frag;
+                vertSource = EgretShaderLib.default_vert;
             }
             //记录上一次的Programe类型
             this.lastProgramKey = key;
