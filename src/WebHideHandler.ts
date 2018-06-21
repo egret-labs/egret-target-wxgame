@@ -32,66 +32,12 @@ namespace egret.wxgame {
      * @private
      */
     export let WebLifeCycleHandler: egret.lifecycle.LifecyclePlugin = (context) => {
+        wx.onShow(() => {
+            context.resume();
+        });
 
-
-        let handleVisibilityChange = function () {
-            if (!document[hidden]) {
-                context.resume();
-            }
-            else {
-                context.pause();
-            }
-        };
-
-        window.addEventListener("focus", context.resume, false);
-        window.addEventListener("blur", context.pause, false);
-
-        let hidden, visibilityChange;
-        if (typeof document.hidden !== "undefined") {
-            hidden = "hidden";
-            visibilityChange = "visibilitychange";
-        } else if (typeof document["mozHidden"] !== "undefined") {
-            hidden = "mozHidden";
-            visibilityChange = "mozvisibilitychange";
-        } else if (typeof document["msHidden"] !== "undefined") {
-            hidden = "msHidden";
-            visibilityChange = "msvisibilitychange";
-        } else if (typeof document["webkitHidden"] !== "undefined") {
-            hidden = "webkitHidden";
-            visibilityChange = "webkitvisibilitychange";
-        } else if (typeof document["oHidden"] !== "undefined") {
-            hidden = "oHidden";
-            visibilityChange = "ovisibilitychange";
-        }
-        if ("onpageshow" in window && "onpagehide" in window) {
-            window.addEventListener("pageshow", context.resume, false);
-            window.addEventListener("pagehide", context.pause, false);
-        }
-        if (hidden && visibilityChange) {
-            document.addEventListener(visibilityChange, handleVisibilityChange, false);
-        }
-
-        let ua = navigator.userAgent;
-        let isWX = /micromessenger/gi.test(ua);
-        let isQQBrowser = /mqq/ig.test(ua);
-        let isQQ = /mobile.*qq/gi.test(ua);
-
-        if (isQQ || isWX) {
-            isQQBrowser = false;
-        }
-        if (isQQBrowser) {
-            let browser = window["browser"] || {};
-            browser.execWebFn = browser.execWebFn || {};
-            browser.execWebFn.postX5GamePlayerMessage = function (event) {
-                let eventType = event.type;
-                if (eventType == "app_enter_background") {
-                    context.pause();
-                }
-                else if (eventType == "app_enter_foreground") {
-                    context.resume();
-                }
-            };
-            window["browser"] = browser;
-        }
+        wx.onHide(() => {
+            context.pause();
+        });
     }
 }

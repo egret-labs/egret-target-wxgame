@@ -379,7 +379,9 @@ namespace egret.wxgame {
          */
         public createTexture(bitmapData: BitmapData): WebGLTexture {
             let gl: any = this.context;
-
+            if (bitmapData == window["sharedCanvas"] && gl.wxBindCanvasTexture != null) {
+                return bitmapData;
+            }
             let texture = gl.createTexture();
 
             if (!texture) {
@@ -1077,7 +1079,11 @@ namespace egret.wxgame {
          **/
         private drawTextureElements(data: any, offset: number): number {
             let gl: any = this.context;
-            gl.bindTexture(gl.TEXTURE_2D, data.texture);
+            if (data.texture == window["sharedCanvas"]) {
+                gl.wxBindCanvasTexture(gl.TEXTURE_2D, window["sharedCanvas"]);
+            } else {
+                gl.bindTexture(gl.TEXTURE_2D, data.texture);
+            }
             let size = data.count * 3;
             gl.drawElements(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, offset * 2);
             return size;
