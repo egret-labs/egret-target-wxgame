@@ -3031,7 +3031,6 @@ if (window['HTMLVideoElement'] == undefined) {
                 wxgame.WebGLRenderContext.antialias = !!antialias;
                 // WebGLRenderContext.antialias = (typeof antialias == undefined) ? true : antialias;
             }
-            egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
             egret.sys.CanvasRenderBuffer = wxgame.CanvasRenderBuffer;
             setRenderMode(options.renderMode);
             var canvasScaleFactor;
@@ -3135,6 +3134,7 @@ if (true) {
     if (language in egret.$locale_strings)
         egret.$language = language;
 }
+egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
 //////////////////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2014-present, Egret Technology.

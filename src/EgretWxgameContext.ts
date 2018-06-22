@@ -89,8 +89,6 @@ namespace egret.wxgame {
             // WebGLRenderContext.antialias = (typeof antialias == undefined) ? true : antialias;
         }
 
-        Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
-
         sys.CanvasRenderBuffer = CanvasRenderBuffer;
         setRenderMode(options.renderMode);
 
@@ -211,3 +209,5 @@ if (DEBUG) {
     if (language in egret.$locale_strings)
         egret.$language = language;
 }
+
+egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
