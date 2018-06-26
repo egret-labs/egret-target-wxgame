@@ -355,9 +355,9 @@ namespace egret.wxgame {
         /**
          * 创建一个WebGLTexture
          */
-        public createTexture(bitmapData: BitmapData): WebGLTexture {
+        public createTexture(bitmapData: any): WebGLTexture {
             let gl: any = this.context;
-            if (bitmapData == window["sharedCanvas"] && gl.wxBindCanvasTexture != null) {
+            if (bitmapData.isCanvas && gl.wxBindCanvasTexture != null) {
                 return bitmapData;
             }
             let texture = gl.createTexture();
@@ -390,7 +390,7 @@ namespace egret.wxgame {
         /**
          * 更新材质的bitmapData
          */
-        public updateTexture(texture: WebGLTexture, bitmapData: BitmapData): void {
+        public updateTexture(texture: WebGLTexture, bitmapData: any): void {
             let gl: any = this.context;
             gl.bindTexture(gl.TEXTURE_2D, texture);
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, bitmapData);
@@ -868,8 +868,8 @@ namespace egret.wxgame {
          **/
         private drawTextureElements(data: any, offset: number): number {
             let gl: any = this.context;
-            if (data.texture == window["sharedCanvas"]) {
-                gl.wxBindCanvasTexture(gl.TEXTURE_2D, window["sharedCanvas"]);
+            if (data.texture.isCanvas) {
+                gl.wxBindCanvasTexture(gl.TEXTURE_2D, data.texture);
             } else {
                 gl.bindTexture(gl.TEXTURE_2D, data.texture);
             }
@@ -1083,3 +1083,5 @@ namespace egret.wxgame {
     WebGLRenderContext.initBlendMode();
 
 }
+
+window["sharedCanvas"].isCanvas = true;

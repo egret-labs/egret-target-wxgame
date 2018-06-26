@@ -846,12 +846,23 @@ namespace egret.wxgame {
                 node.$canvasScaleY = canvasScaleY;
                 node.dirtyRender = true;
             }
-            if (!this.canvasRenderBuffer || !this.canvasRenderBuffer.context) {
-                this.canvasRenderer = new CanvasRenderer();
-                this.canvasRenderBuffer = new CanvasRenderBuffer(width, height);
+            const wxBindCanvasTexture = !!WebGLRenderContext.getInstance(0, 0).context["wxBindCanvasTexture"];
+            if (wxBindCanvasTexture) {
+                if (!this.canvasRenderer) {
+                    this.canvasRenderer = new CanvasRenderer();
+                }
+                if (node.dirtyRender) {
+                    this.canvasRenderBuffer = new CanvasRenderBuffer(width, height);
+                }
             }
-            else if (node.dirtyRender) {
-                this.canvasRenderBuffer.resize(width, height);
+            else {
+                if (!this.canvasRenderBuffer || !this.canvasRenderBuffer.context) {
+                    this.canvasRenderer = new CanvasRenderer();
+                    this.canvasRenderBuffer = new CanvasRenderBuffer(width, height);
+                }
+                else if (node.dirtyRender) {
+                    this.canvasRenderBuffer.resize(width, height);
+                }
             }
 
             if (!this.canvasRenderBuffer.context) {
@@ -876,14 +887,20 @@ namespace egret.wxgame {
                 let surface = this.canvasRenderBuffer.surface;
                 this.canvasRenderer.renderText(node, this.canvasRenderBuffer.context);
 
-                // 拷贝canvas到texture
-                let texture = node.$texture;
-                if (!texture) {
-                    texture = buffer.context.createTexture(<BitmapData><any>surface);
-                    node.$texture = texture;
-                } else {
-                    // 重新拷贝新的图像
-                    buffer.context.updateTexture(texture, <BitmapData><any>surface);
+                if (wxBindCanvasTexture) {
+                    surface["isCanvas"] = true;
+                    node.$texture = surface;
+                }
+                else {
+                    // 拷贝canvas到texture
+                    let texture = node.$texture;
+                    if (!texture) {
+                        texture = buffer.context.createTexture(<BitmapData><any>surface);
+                        node.$texture = texture;
+                    } else {
+                        // 重新拷贝新的图像
+                        buffer.context.updateTexture(texture, <BitmapData><any>surface);
+                    }
                 }
                 // 保存材质尺寸
                 node.$textureWidth = surface.width;
@@ -931,12 +948,23 @@ namespace egret.wxgame {
             canvasScaleY *= height2 / height;
             width = width2;
             height = height2;
-            if (!this.canvasRenderBuffer || !this.canvasRenderBuffer.context) {
-                this.canvasRenderer = new CanvasRenderer();
-                this.canvasRenderBuffer = new CanvasRenderBuffer(width, height);
+            const wxBindCanvasTexture = !!WebGLRenderContext.getInstance(0, 0).context["wxBindCanvasTexture"];
+            if (wxBindCanvasTexture) {
+                if (!this.canvasRenderer) {
+                    this.canvasRenderer = new CanvasRenderer();
+                }
+                if (node.dirtyRender) {
+                    this.canvasRenderBuffer = new CanvasRenderBuffer(width, height);
+                }
             }
-            else if (node.dirtyRender || forHitTest) {
-                this.canvasRenderBuffer.resize(width, height);
+            else {
+                if (!this.canvasRenderBuffer || !this.canvasRenderBuffer.context) {
+                    this.canvasRenderer = new CanvasRenderer();
+                    this.canvasRenderBuffer = new CanvasRenderBuffer(width, height);
+                }
+                else if (node.dirtyRender) {
+                    this.canvasRenderBuffer.resize(width, height);
+                }
             }
             if (!this.canvasRenderBuffer.context) {
                 return;
@@ -953,21 +981,34 @@ namespace egret.wxgame {
             let surface = this.canvasRenderBuffer.surface;
             if (forHitTest) {
                 this.canvasRenderer.renderGraphics(node, this.canvasRenderBuffer.context, true);
-                WebGLUtils.deleteWebGLTexture(surface);
-                let texture = buffer.context.getWebGLTexture(<BitmapData><any>surface);
+                let texture;
+                if (wxBindCanvasTexture) {
+                    console.log("forHitTest");
+                    surface["isCanvas"] = true;
+                    texture = surface;
+                }
+                else {
+                    WebGLUtils.deleteWebGLTexture(surface);
+                    texture = buffer.context.getWebGLTexture(<BitmapData><any>surface);
+                }
                 buffer.context.drawTexture(texture, 0, 0, width, height, 0, 0, width, height, surface.width, surface.height);
             } else {
                 if (node.dirtyRender) {
                     this.canvasRenderer.renderGraphics(node, this.canvasRenderBuffer.context);
-
-                    // 拷贝canvas到texture
-                    let texture: WebGLTexture = node.$texture;
-                    if (!texture) {
-                        texture = buffer.context.createTexture(<BitmapData><any>surface);
-                        node.$texture = texture;
-                    } else {
-                        // 重新拷贝新的图像
-                        buffer.context.updateTexture(texture, <BitmapData><any>surface);
+                    if (wxBindCanvasTexture) {
+                        surface["isCanvas"] = true;
+                        node.$texture = surface;
+                    }
+                    else {
+                        // 拷贝canvas到texture
+                        let texture = node.$texture;
+                        if (!texture) {
+                            texture = buffer.context.createTexture(<BitmapData><any>surface);
+                            node.$texture = texture;
+                        } else {
+                            // 重新拷贝新的图像
+                            buffer.context.updateTexture(texture, <BitmapData><any>surface);
+                        }
                     }
                     // 保存材质尺寸
                     node.$textureWidth = surface.width;
