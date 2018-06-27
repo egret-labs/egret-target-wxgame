@@ -1,6 +1,6 @@
 {
-  "engineVersion": "5.2.3",
-  "compilerVersion": "5.2.3",
+  "engineVersion": "5.1.7",
+  "compilerVersion": "5.1.7",
   "template": {},
   "target": {
     "current": "wxgame"
@@ -29,6 +29,15 @@
     },
     {
       "name": "game"
+    },
+    {
+      "name": "dragonBones"
+    },
+    {
+      "name": "socket"
+    },
+    {
+      "name": "promise"
     }
   ]
 }

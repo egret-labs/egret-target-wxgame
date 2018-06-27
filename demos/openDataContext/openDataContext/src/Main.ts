@@ -134,6 +134,13 @@ class Main extends eui.UILayer {
         this.addChild(this.btnClose);
         this.btnClose.addEventListener(egret.TouchEvent.TOUCH_TAP, this.onButtonClick, this);
 
+        //加载资源
+        const platform:any = window.platform;
+        platform.openDataContext.postMessage({
+            command:'loadRes'
+        });
+
+
         let sharedBtn = new eui.Button();
         sharedBtn.y = 35;
         sharedBtn.label = 'btnShared';
