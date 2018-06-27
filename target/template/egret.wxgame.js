@@ -5191,7 +5191,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
              */
             WebGLRenderContext.prototype.createTexture = function (bitmapData) {
                 var gl = this.context;
-                if (bitmapData == window["sharedCanvas"] && gl.wxBindCanvasTexture != null) {
+                if (bitmapData.isCanvas && gl.wxBindCanvasTexture != null) {
                     return bitmapData;
                 }
                 var texture = gl.createTexture();
@@ -5632,8 +5632,8 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
              **/
             WebGLRenderContext.prototype.drawTextureElements = function (data, offset) {
                 var gl = this.context;
-                if (data.texture == window["sharedCanvas"]) {
-                    gl.wxBindCanvasTexture(gl.TEXTURE_2D, window["sharedCanvas"]);
+                if (data.texture.isCanvas) {
+                    gl.wxBindCanvasTexture(gl.TEXTURE_2D, data.texture);
                 }
                 else {
                     gl.bindTexture(gl.TEXTURE_2D, data.texture);
@@ -5807,6 +5807,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
         WebGLRenderContext.initBlendMode();
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
+window["sharedCanvas"].isCanvas = true;
 //////////////////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2014-present, Egret Technology.
@@ -6975,12 +6976,23 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                     node.$canvasScaleY = canvasScaleY;
                     node.dirtyRender = true;
                 }
-                if (!this.canvasRenderBuffer || !this.canvasRenderBuffer.context) {
-                    this.canvasRenderer = new egret.CanvasRenderer();
-                    this.canvasRenderBuffer = new wxgame.CanvasRenderBuffer(width, height);
+                var wxBindCanvasTexture = !!wxgame.WebGLRenderContext.getInstance(0, 0).context["wxBindCanvasTexture"];
+                if (wxBindCanvasTexture) {
+                    if (!this.canvasRenderer) {
+                        this.canvasRenderer = new egret.CanvasRenderer();
+                    }
+                    if (node.dirtyRender) {
+                        this.canvasRenderBuffer = new wxgame.CanvasRenderBuffer(width, height);
+                    }
                 }
-                else if (node.dirtyRender) {
-                    this.canvasRenderBuffer.resize(width, height);
+                else {
+                    if (!this.canvasRenderBuffer || !this.canvasRenderBuffer.context) {
+                        this.canvasRenderer = new egret.CanvasRenderer();
+                        this.canvasRenderBuffer = new wxgame.CanvasRenderBuffer(width, height);
+                    }
+                    else if (node.dirtyRender) {
+                        this.canvasRenderBuffer.resize(width, height);
+                    }
                 }
                 if (!this.canvasRenderBuffer.context) {
                     return;
@@ -7000,15 +7012,21 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 if (node.dirtyRender) {
                     var surface = this.canvasRenderBuffer.surface;
                     this.canvasRenderer.renderText(node, this.canvasRenderBuffer.context);
-                    // 拷贝canvas到texture
-                    var texture = node.$texture;
-                    if (!texture) {
-                        texture = buffer.context.createTexture(surface);
-                        node.$texture = texture;
+                    if (wxBindCanvasTexture) {
+                        surface["isCanvas"] = true;
+                        node.$texture = surface;
                     }
                     else {
-                        // 重新拷贝新的图像
-                        buffer.context.updateTexture(texture, surface);
+                        // 拷贝canvas到texture
+                        var texture = node.$texture;
+                        if (!texture) {
+                            texture = buffer.context.createTexture(surface);
+                            node.$texture = texture;
+                        }
+                        else {
+                            // 重新拷贝新的图像
+                            buffer.context.updateTexture(texture, surface);
+                        }
                     }
                     // 保存材质尺寸
                     node.$textureWidth = surface.width;
@@ -7053,12 +7071,23 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 canvasScaleY *= height2 / height;
                 width = width2;
                 height = height2;
-                if (!this.canvasRenderBuffer || !this.canvasRenderBuffer.context) {
-                    this.canvasRenderer = new egret.CanvasRenderer();
-                    this.canvasRenderBuffer = new wxgame.CanvasRenderBuffer(width, height);
+                var wxBindCanvasTexture = !!wxgame.WebGLRenderContext.getInstance(0, 0).context["wxBindCanvasTexture"];
+                if (wxBindCanvasTexture) {
+                    if (!this.canvasRenderer) {
+                        this.canvasRenderer = new egret.CanvasRenderer();
+                    }
+                    if (node.dirtyRender) {
+                        this.canvasRenderBuffer = new wxgame.CanvasRenderBuffer(width, height);
+                    }
                 }
-                else if (node.dirtyRender || forHitTest) {
-                    this.canvasRenderBuffer.resize(width, height);
+                else {
+                    if (!this.canvasRenderBuffer || !this.canvasRenderBuffer.context) {
+                        this.canvasRenderer = new egret.CanvasRenderer();
+                        this.canvasRenderBuffer = new wxgame.CanvasRenderBuffer(width, height);
+                    }
+                    else if (node.dirtyRender) {
+                        this.canvasRenderBuffer.resize(width, height);
+                    }
                 }
                 if (!this.canvasRenderBuffer.context) {
                     return;
@@ -7075,22 +7104,36 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 var surface = this.canvasRenderBuffer.surface;
                 if (forHitTest) {
                     this.canvasRenderer.renderGraphics(node, this.canvasRenderBuffer.context, true);
-                    egret.WebGLUtils.deleteWebGLTexture(surface);
-                    var texture = buffer.context.getWebGLTexture(surface);
+                    var texture = void 0;
+                    if (wxBindCanvasTexture) {
+                        console.log("forHitTest");
+                        surface["isCanvas"] = true;
+                        texture = surface;
+                    }
+                    else {
+                        egret.WebGLUtils.deleteWebGLTexture(surface);
+                        texture = buffer.context.getWebGLTexture(surface);
+                    }
                     buffer.context.drawTexture(texture, 0, 0, width, height, 0, 0, width, height, surface.width, surface.height);
                 }
                 else {
                     if (node.dirtyRender) {
                         this.canvasRenderer.renderGraphics(node, this.canvasRenderBuffer.context);
-                        // 拷贝canvas到texture
-                        var texture = node.$texture;
-                        if (!texture) {
-                            texture = buffer.context.createTexture(surface);
-                            node.$texture = texture;
+                        if (wxBindCanvasTexture) {
+                            surface["isCanvas"] = true;
+                            node.$texture = surface;
                         }
                         else {
-                            // 重新拷贝新的图像
-                            buffer.context.updateTexture(texture, surface);
+                            // 拷贝canvas到texture
+                            var texture = node.$texture;
+                            if (!texture) {
+                                texture = buffer.context.createTexture(surface);
+                                node.$texture = texture;
+                            }
+                            else {
+                                // 重新拷贝新的图像
+                                buffer.context.updateTexture(texture, surface);
+                            }
                         }
                         // 保存材质尺寸
                         node.$textureWidth = surface.width;
