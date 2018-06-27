@@ -2740,15 +2740,22 @@ if (window['HTMLVideoElement'] == undefined) {
 (function (egret) {
     var wxgame;
     (function (wxgame) {
+        var isShow = true;
         /**
          * @private
          */
         wxgame.WebLifeCycleHandler = function (context) {
             wx.onShow(function () {
-                context.resume();
+                if (!isShow) {
+                    context.resume();
+                    isShow = true;
+                }
             });
             wx.onHide(function () {
-                context.pause();
+                if (isShow) {
+                    context.pause();
+                    isShow = false;
+                }
             });
         };
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
