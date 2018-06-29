@@ -128,7 +128,7 @@ namespace egret.wxgame {
         /**
          * 启用RenderBuffer
          */
-        private activateBuffer(buffer: WebGLRenderBuffer): void {
+        private activateBuffer(buffer: WebGLRenderBuffer, width:number, height:number): void {
 
             buffer.rootRenderTarget.activate();
 
@@ -140,7 +140,7 @@ namespace egret.wxgame {
 
             buffer.restoreScissor();
 
-            this.onResize(buffer.width, buffer.height);
+            this.onResize(width, height);
         }
 
         /**
@@ -782,7 +782,7 @@ namespace egret.wxgame {
                     }
                     break;
                 case DRAWABLE_TYPE.ACT_BUFFER:
-                    this.activateBuffer(data.buffer);
+                    this.activateBuffer(data.buffer, data.width, data.height);
                     break;
                 case DRAWABLE_TYPE.ENABLE_SCISSOR:
                     let buffer = this.activatedBuffer;

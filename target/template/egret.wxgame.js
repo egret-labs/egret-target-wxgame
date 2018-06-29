@@ -5029,14 +5029,14 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
             /**
              * 启用RenderBuffer
              */
-            WebGLRenderContext.prototype.activateBuffer = function (buffer) {
+            WebGLRenderContext.prototype.activateBuffer = function (buffer, width, height) {
                 buffer.rootRenderTarget.activate();
                 if (!this.bindIndices) {
                     this.uploadIndicesArray(this.vao.getIndices());
                 }
                 buffer.restoreStencil();
                 buffer.restoreScissor();
-                this.onResize(buffer.width, buffer.height);
+                this.onResize(width, height);
             };
             /**
              * 上传顶点数据
@@ -5556,7 +5556,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                         }
                         break;
                     case 6 /* ACT_BUFFER */:
-                        this.activateBuffer(data.buffer);
+                        this.activateBuffer(data.buffer, data.width, data.height);
                         break;
                     case 7 /* ENABLE_SCISSOR */:
                         var buffer = this.activatedBuffer;
