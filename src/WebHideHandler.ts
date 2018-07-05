@@ -28,16 +28,23 @@
 //////////////////////////////////////////////////////////////////////////////////////
 
 namespace egret.wxgame {
+    let isShow = true;
     /**
      * @private
      */
     export let WebLifeCycleHandler: egret.lifecycle.LifecyclePlugin = (context) => {
         wx.onShow(() => {
-            context.resume();
+            if (!isShow) {
+                context.resume();
+                isShow = true;
+            }
         });
 
         wx.onHide(() => {
-            context.pause();
+            if (isShow) {
+                context.pause();
+                isShow = false;
+            }
         });
     }
 }

@@ -138,7 +138,7 @@ namespace egret.wxgame {
         /**
          * 启用RenderBuffer
          */
-        private activateBuffer(buffer: WebGLRenderBuffer): void {
+        private activateBuffer(buffer: WebGLRenderBuffer, width:number, height:number): void {
 
             buffer.rootRenderTarget.activate();
 
@@ -150,7 +150,7 @@ namespace egret.wxgame {
 
             buffer.restoreScissor();
 
-            this.onResize(buffer.width, buffer.height);
+            this.onResize(width, height);
         }
 
         /**
@@ -377,9 +377,9 @@ namespace egret.wxgame {
         /**
          * 创建一个WebGLTexture
          */
-        public createTexture(bitmapData: BitmapData): WebGLTexture {
+        public createTexture(bitmapData: any): WebGLTexture {
             let gl: any = this.context;
-            if (bitmapData == window["sharedCanvas"] && gl.wxBindCanvasTexture != null) {
+            if (bitmapData.isCanvas && gl.wxBindCanvasTexture != null) {
                 return bitmapData;
             }
             let texture = gl.createTexture();
@@ -412,7 +412,7 @@ namespace egret.wxgame {
         /**
          * 更新材质的bitmapData
          */
-        public updateTexture(texture: WebGLTexture, bitmapData: BitmapData): void {
+        public updateTexture(texture: WebGLTexture, bitmapData: any): void {
             let gl: any = this.context;
             gl.bindTexture(gl.TEXTURE_2D, texture);
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, bitmapData);
@@ -993,7 +993,7 @@ namespace egret.wxgame {
                     }
                     break;
                 case DRAWABLE_TYPE.ACT_BUFFER:
-                    this.activateBuffer(data.buffer);
+                    this.activateBuffer(data.buffer, data.width, data.height);
                     break;
                 case DRAWABLE_TYPE.ENABLE_SCISSOR:
                     let buffer = this.activatedBuffer;
@@ -1079,8 +1079,8 @@ namespace egret.wxgame {
          **/
         private drawTextureElements(data: any, offset: number): number {
             let gl: any = this.context;
-            if (data.texture == window["sharedCanvas"]) {
-                gl.wxBindCanvasTexture(gl.TEXTURE_2D, window["sharedCanvas"]);
+            if (data.texture.isCanvas) {
+                gl.wxBindCanvasTexture(gl.TEXTURE_2D, data.texture);
             } else {
                 gl.bindTexture(gl.TEXTURE_2D, data.texture);
             }
@@ -1280,3 +1280,5 @@ namespace egret.wxgame {
     WebGLRenderContext.initBlendMode();
 
 }
+
+window["sharedCanvas"].isCanvas = true;
