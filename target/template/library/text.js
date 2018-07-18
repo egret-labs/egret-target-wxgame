@@ -30,7 +30,7 @@ class TextProcessor {
                     const targetFilename = tempDir + xhrURL.replace(resource.root, "");
 
                     if (fileutil.fs.existsSync(targetFilename)) {
-                        fileutil.fs.read(targetFilename,'utf-8').then((data)=>{
+                        fileutil.fs.readSync(targetFilename,'utf-8').then((data)=>{
                             resolve(data)
                         })
                     }
@@ -38,7 +38,7 @@ class TextProcessor {
                         loadText(xhrURL).then((content) => {
                             const dirname = path.dirname(targetFilename);
                             fileutil.fs.mkdirsSync(dirname)
-                            fileutil.fs.write(targetFilename, content)
+                            fileutil.fs.writeSync(targetFilename, content)
                             resolve(content);
                         }).catch((e) => {
                             reject(e);
