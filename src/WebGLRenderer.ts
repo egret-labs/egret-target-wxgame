@@ -217,7 +217,7 @@ namespace egret.wxgame {
         private drawWithFilter(displayObject: DisplayObject, buffer: WebGLRenderBuffer, offsetX: number, offsetY: number): number {
             let drawCalls = 0;
             if (displayObject.$children && displayObject.$children.length == 0 && (!displayObject.$renderNode || displayObject.$renderNode.$getRenderCount() == 0)) {
-                return;
+                return drawCalls;
             }
             let filters = displayObject.$filters;
             let hasBlendMode = (displayObject.$blendMode !== 0);
@@ -229,8 +229,12 @@ namespace egret.wxgame {
                 }
             }
 
-            let displayBounds = displayObject.$getOriginalBounds();
-            if (displayBounds.width <= 0 || displayBounds.height <= 0) {
+            const displayBounds = displayObject.$getOriginalBounds();
+            const displayBoundsX = displayBounds.x;
+            const displayBoundsY = displayBounds.y;
+            const displayBoundsWidth = displayBounds.width;
+            const displayBoundsHeight = displayBounds.height;
+            if (displayBoundsWidth <= 0 || displayBoundsHeight <= 0) {
                 return drawCalls;
             }
 
@@ -263,18 +267,18 @@ namespace egret.wxgame {
             }
 
             // 为显示对象创建一个新的buffer
-            let displayBuffer = this.createRenderBuffer(displayBounds.width, displayBounds.height);
+            let displayBuffer = this.createRenderBuffer(displayBoundsWidth, displayBoundsHeight);
             displayBuffer.context.pushBuffer(displayBuffer);
 
             //todo 可以优化减少draw次数
             if (displayObject.$mask) {
-                drawCalls += this.drawWithClip(displayObject, displayBuffer, -displayBounds.x, -displayBounds.y);
+                drawCalls += this.drawWithClip(displayObject, displayBuffer, -displayBoundsX, -displayBoundsY);
             }
             else if (displayObject.$scrollRect || displayObject.$maskRect) {
-                drawCalls += this.drawWithScrollRect(displayObject, displayBuffer, -displayBounds.x, -displayBounds.y);
+                drawCalls += this.drawWithScrollRect(displayObject, displayBuffer, -displayBoundsX, -displayBoundsY);
             }
             else {
-                drawCalls += this.drawDisplayObject(displayObject, displayBuffer, -displayBounds.x, -displayBounds.y);
+                drawCalls += this.drawDisplayObject(displayObject, displayBuffer, -displayBoundsX, -displayBoundsY);
             }
 
             displayBuffer.context.popBuffer();
@@ -286,8 +290,8 @@ namespace egret.wxgame {
                 }
                 drawCalls++;
                 // 绘制结果的时候，应用滤镜
-                buffer.$offsetX = offsetX + displayBounds.x;
-                buffer.$offsetY = offsetY + displayBounds.y;
+                buffer.$offsetX = offsetX + displayBoundsX;
+                buffer.$offsetY = offsetY + displayBoundsY;
                 let savedMatrix = Matrix.create();
                 let curMatrix = buffer.globalMatrix;
                 savedMatrix.a = curMatrix.a;
@@ -314,19 +318,30 @@ namespace egret.wxgame {
         }
 
         private getRenderCount(displayObject: DisplayObject): number {
-            let childrenDrawCount = 0;
+            let drawCount = 0;
+            const node = displayObject.$getRenderNode();
+            if (node) {
+                drawCount += node.$getRenderCount();
+            }
             if (displayObject.$children) {
-                for (let child of displayObject.$children) {
-                    let node = child.$getRenderNode();
-                    if (node) {
-                        childrenDrawCount += node.$getRenderCount();
+                for (const child of displayObject.$children) {
+                    const filters = child.$filters;
+                    // 特殊处理有滤镜的对象
+                    if (filters && filters.length > 0) {
+                        return 2;
                     }
-                    if (child.$children) {
-                        childrenDrawCount += this.getRenderCount(child);
+                    else if (child.$children) {
+                        drawCount += this.getRenderCount(child);
+                    }
+                    else {
+                        const node = child.$getRenderNode();
+                        if (node) {
+                            drawCount += node.$getRenderCount();
+                        }
                     }
                 }
             }
-            return childrenDrawCount;
+            return drawCount;
         }
 
         /**
@@ -373,31 +388,35 @@ namespace egret.wxgame {
             }
             else {
                 let displayBounds = displayObject.$getOriginalBounds();
+                const displayBoundsX = displayBounds.x;
+                const displayBoundsY = displayBounds.y;
+                const displayBoundsWidth = displayBounds.width;
+                const displayBoundsHeight = displayBounds.height;
                 //绘制显示对象自身，若有scrollRect，应用clip
-                let displayBuffer = this.createRenderBuffer(displayBounds.width, displayBounds.height);
+                let displayBuffer = this.createRenderBuffer(displayBoundsWidth, displayBoundsHeight);
                 displayBuffer.context.pushBuffer(displayBuffer);
-                drawCalls += this.drawDisplayObject(displayObject, displayBuffer, -displayBounds.x, -displayBounds.y);
+                drawCalls += this.drawDisplayObject(displayObject, displayBuffer, -displayBoundsX, -displayBoundsY);
                 //绘制遮罩
                 if (mask) {
-                    let maskBuffer = this.createRenderBuffer(displayBounds.width, displayBounds.height);
+                    let maskBuffer = this.createRenderBuffer(displayBoundsWidth, displayBoundsHeight);
                     maskBuffer.context.pushBuffer(maskBuffer);
                     let maskMatrix = Matrix.create();
                     maskMatrix.copyFrom(mask.$getConcatenatedMatrix());
                     mask.$getConcatenatedMatrixAt(displayObject, maskMatrix);
-                    maskMatrix.translate(-displayBounds.x, -displayBounds.y);
+                    maskMatrix.translate(-displayBoundsX, -displayBoundsY);
                     maskBuffer.setTransform(maskMatrix.a, maskMatrix.b, maskMatrix.c, maskMatrix.d, maskMatrix.tx, maskMatrix.ty);
                     Matrix.release(maskMatrix);
                     drawCalls += this.drawDisplayObject(mask, maskBuffer, 0, 0);
                     maskBuffer.context.popBuffer();
                     displayBuffer.context.setGlobalCompositeOperation("destination-in");
                     displayBuffer.setTransform(1, 0, 0, -1, 0, maskBuffer.height);
-                    displayBuffer.globalAlpha = 1;
                     let maskBufferWidth = maskBuffer.rootRenderTarget.width;
                     let maskBufferHeight = maskBuffer.rootRenderTarget.height;
                     displayBuffer.context.drawTexture(maskBuffer.rootRenderTarget.texture, 0, 0, maskBufferWidth, maskBufferHeight,
                         0, 0, maskBufferWidth, maskBufferHeight, maskBufferWidth, maskBufferHeight);
                     displayBuffer.setTransform(1, 0, 0, 1, 0, 0);
                     displayBuffer.context.setGlobalCompositeOperation("source-over");
+                    maskBuffer.setTransform(1, 0, 0, 1, 0, 0);
                     renderBufferPool.push(maskBuffer);
                 }
 
@@ -413,7 +432,6 @@ namespace egret.wxgame {
                     if (scrollRect) {
                         buffer.context.pushMask(scrollRect.x + offsetX, scrollRect.y + offsetY, scrollRect.width, scrollRect.height);
                     }
-                    buffer.globalAlpha = 1;
                     let savedMatrix = Matrix.create();
                     let curMatrix = buffer.globalMatrix;
                     savedMatrix.a = curMatrix.a;
@@ -422,7 +440,7 @@ namespace egret.wxgame {
                     savedMatrix.d = curMatrix.d;
                     savedMatrix.tx = curMatrix.tx;
                     savedMatrix.ty = curMatrix.ty;
-                    curMatrix.append(1, 0, 0, -1, offsetX + displayBounds.x, offsetY + displayBounds.y + displayBuffer.height);
+                    curMatrix.append(1, 0, 0, -1, offsetX + displayBoundsX, offsetY + displayBoundsY + displayBuffer.height);
                     let displayBufferWidth = displayBuffer.rootRenderTarget.width;
                     let displayBufferHeight = displayBuffer.rootRenderTarget.height;
                     buffer.context.drawTexture(displayBuffer.rootRenderTarget.texture, 0, 0, displayBufferWidth, displayBufferHeight,
