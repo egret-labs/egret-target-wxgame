@@ -24,7 +24,7 @@ class ImageProcessor {
 
         const { root, url } = resource;
         const imageSrc = root + url;
-        if (fileutil.path.isRemotePath(root)) {
+        if (fileutil.path.isRemotePath(root)||fileutil.path.isRemotePath(url)) {
             if (fileutil.path.isRemotePath(url) || !needCache(root,url)) {
                 return loadImage(imageSrc);
             }

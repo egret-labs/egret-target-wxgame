@@ -24,7 +24,7 @@ class TextProcessor {
 
         return new Promise((resolve, reject) => {
 
-            if (path.isRemotePath(root)) {
+            if (path.isRemotePath(root)||path.isRemotePath(url)) {
               const xhrURL = url.indexOf('://') >= 0 ? url : root + url;
                 if (needCache(root,url)) {
                     const targetFilename = tempDir + xhrURL.replace(resource.root, "");

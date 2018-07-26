@@ -14,13 +14,20 @@
  * 资源加载组，将所需资源地址以及引用名进行注册
  * 之后可通过assets.引用名方式进行获取
  */
-const assets = {
+const assetsUrl = {
   icon: "openDataContext/assets/icon.png",
   box: "openDataContext/assets/box.png",
   panel: "openDataContext/assets/panel.png",
   button: "openDataContext/assets/button.png",
   title: "openDataContext/assets/rankingtitle.png"
 };
+
+/**
+ * 资源加载组，将所需资源地址以及引用名进行注册
+ * 之后可通过assets.引用名方式进行获取
+ */
+let assets = {};
+console.log();
 /**
  * canvas 大小
  * 这里暂时写死
@@ -144,13 +151,13 @@ const totalGroup = [{
  */
 function drawRankPanel() {
   //绘制背景
-  context.drawImage(assets.panel, offsetX_rankToBorder, offsetY_rankToBorder, rankWidth, rankHeight);
+  context_drawImage(assets.panel, offsetX_rankToBorder, offsetY_rankToBorder, rankWidth, rankHeight);
   //绘制标题
   const title = assets.title;
   //根据title的宽高计算一下位置;
   const titleX = offsetX_rankToBorder + (rankWidth - title.width) / 2;
   const titleY = offsetY_rankToBorder + title.height + 40;
-  context.drawImage(title, titleX, titleY);
+  context_drawImage(title, titleX, titleY);
   //获取当前要渲染的数据组
 
   //起始id
@@ -198,8 +205,8 @@ function init() {
  * 创建两个点击按钮
  */
 function drawButton() {
-  context.drawImage(assets.button, nextButtonX, nextButtonY, buttonWidth, buttonHeight);
-  context.drawImage(assets.button, lastButtonX, lastButtonY, buttonWidth, buttonHeight);
+  context_drawImage(assets.button, nextButtonX, nextButtonY, buttonWidth, buttonHeight);
+  context_drawImage(assets.button, lastButtonX, lastButtonY, buttonWidth, buttonHeight);
 }
 
 
@@ -219,7 +226,7 @@ function drawRankByGroup(currentGroup) {
 function drawByData(data, i) {
   let x = startX;
   //绘制底框
-  context.drawImage(assets.box, startX, startY + i * preOffsetY, barWidth, barHeight);
+  context_drawImage(assets.box, startX, startY + i * preOffsetY, barWidth, barHeight);
   x += 10;
   //设置字体
   context.font = fontSize + "px Arial";
@@ -227,7 +234,7 @@ function drawByData(data, i) {
   context.fillText(data.key + "", x, startY + i * preOffsetY + textOffsetY, textMaxSize);
   x += indexWidth + intervalX;
   //绘制头像
-  context.drawImage(assets.icon, x, startY + i * preOffsetY + (barHeight - avatarSize) / 2, avatarSize, avatarSize);
+  context_drawImage(assets.icon, x, startY + i * preOffsetY + (barHeight - avatarSize) / 2, avatarSize, avatarSize);
   x += avatarSize + intervalX;
   //绘制名称
   context.fillText(data.name + "", x, startY + i * preOffsetY + textOffsetY, textMaxSize);
@@ -432,17 +439,18 @@ let hasLoadRes;
 function preloadAssets() {
   let preloaded = 0;
   let count = 0;
-  for (let asset in assets) {
+  for (let asset in assetsUrl) {
     count++;
     const img = wx.createImage();
-    img.onload = function () {
+    img.onload = () => {
       preloaded++;
       if (preloaded == count) {
         // console.log("加载完成");
         hasLoadRes = true;
       }
+
     }
-    img.src = assets[asset];
+    img.src = assetsUrl[asset];
     assets[asset] = img;
   }
 }
@@ -453,7 +461,7 @@ function preloadAssets() {
  * 这个函数会在加载完所有资源之后被调用
  */
 function createScene() {
-  if (sharedCanvas.width && sharedCanvas.height && hasLoadRes) {
+  if (sharedCanvas.width && sharedCanvas.height) {
     // console.log('初始化完成')
     stageWidth = sharedCanvas.width;
     stageHeight = sharedCanvas.height;
@@ -513,4 +521,17 @@ function loop() {
     renderDirty = false;
   }
   requestAnimationFrameID = requestAnimationFrame(loop);
+}
+
+/**
+ * 图片绘制函数
+ */
+function context_drawImage(image, x, y, width, height) {
+  if (image.width != 0 && image.height != 0 && context) {
+    if (width && height) {
+      context.drawImage(image, x, y, width, height);
+    } else {
+      context.drawImage(image, x, y);
+    }
+  }
 }
