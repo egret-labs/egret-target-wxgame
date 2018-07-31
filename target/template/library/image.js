@@ -4,7 +4,7 @@ const fs = wx.getFileSystemManager();
 
 
 
-const tempDir = `temp_image`//下载总目录
+const tempDir = `temp_image` //下载总目录
 // 开发者应在微信的 updateManager 判断有包更新时手动删除此文件夹，清除缓存
 // fileutil.fs.remove(tempDir)
 
@@ -22,21 +22,22 @@ class ImageProcessor {
 
     onLoadStart(host, resource) {
 
-        const { root, url } = resource;
+        const {
+            root,
+            url
+        } = resource;
         const imageSrc = root + url;
-        if (fileutil.path.isRemotePath(root)||fileutil.path.isRemotePath(url)) {
-            if (fileutil.path.isRemotePath(url) || !needCache(root,url)) {
+        if (fileutil.path.isRemotePath(root) || fileutil.path.isRemotePath(url)) {
+            if (!needCache(root, url)) {
                 return loadImage(imageSrc);
-            }
-            else {
+            } else {
                 const fullname = `${tempDir}/${imageSrc.replace(root, "")}`;
                 return download(imageSrc, fullname)
                     .then(() => {
                         return loadImage(wx.env.USER_DATA_PATH + '/' + fullname);
                     })
             }
-        }
-        else {
+        } else {
             return loadImage(root + url);
         }
     }
@@ -81,8 +82,7 @@ function download(url, target) {
         if (fileutil.fs.existsSync(target)) {
             // console.log('缓存命中:', url, target)
             resolve();
-        }
-        else {
+        } else {
 
             const dirname = path.dirname(target);
             fileutil.fs.mkdirsSync(dirname)
@@ -91,15 +91,14 @@ function download(url, target) {
             wx.downloadFile({
                 url: url,
                 filePath: target,
-                success: (v)=>{
-                  if (v.statusCode >= 400){
-                    const message = `加载失败:${url}`;
-                    console.error(message)
-                    reject(message);
-                  }
-                  else{
-                    resolve()
-                  }               
+                success: (v) => {
+                    if (v.statusCode >= 400) {
+                        const message = `加载失败:${url}`;
+                        console.error(message)
+                        reject(message);
+                    } else {
+                        resolve()
+                    }
                 },
                 fail: (e) => {
                     console.error(e)
@@ -114,13 +113,12 @@ function download(url, target) {
  * 由于微信小游戏限制只有50M的资源可以本地存储，
  * 所以开发者应根据URL进行判断，将特定资源进行本地缓存
  */
-function needCache(root,url) {
-  if (root.indexOf("miniGame/resource/") >= 0){
-    return true;
-  }
-  else{
-    return false;
-  }
+function needCache(root, url) {
+    if (root.indexOf("miniGame/resource/") >= 0) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 
