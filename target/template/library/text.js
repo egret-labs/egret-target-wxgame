@@ -2,14 +2,6 @@ const fileutil = require('./file-util');
 const path = fileutil.path;
 const fs = wx.getFileSystemManager();
 
-
-const tempDir = `temp_text/` //下载总目录
-
-
-// 开发者应在微信的 updateManager 判断有包更新时手动删除此文件夹，清除缓存
-// fileutil.fs.remove(tempDir)
-
-
 /**
  * 重写的文本加载器，代替引擎默认的文本加载器
  * 该代码中包含了大量日志用于辅助开发者调试
@@ -27,20 +19,23 @@ class TextProcessor {
 
         return new Promise((resolve, reject) => {
 
-            if (path.isRemotePath(root) || path.isRemotePath(url)) {
-                const xhrURL = url.indexOf('://') >= 0 ? url : root + url;
+            if (path.isRemotePath(root) || path.isRemotePath(url)) { //判断是本地加载还是网络加载
+                const xhrURL = url.indexOf('://') >= 0 ? url : root + url; //获取网络加载url
                 if (needCache(root, url)) {
-                    const targetFilename = tempDir + xhrURL.replace(resource.root, "");
-
+                    //通过缓存机制判断是否本地加载
+                    // const targetFilename = tempDir + xhrURL.replace(resource.root, "");
+                    const targetFilename = path.getLocalFilePath(xhrURL);
                     if (fileutil.fs.existsSync(targetFilename)) {
-                        fileutil.fs.readSync(targetFilename, 'utf-8').then((data) => {
-                            resolve(data)
-                        })
+                        //缓存命中
+                        // console.log('缓存命中')
+                        let data = fileutil.fs.readSync(targetFilename, 'utf-8');
+                        resolve(data);
                     } else {
+                        //通过url加载，加载成功后加入本地缓存
                         loadText(xhrURL).then((content) => {
                             const dirname = path.dirname(targetFilename);
-                            fileutil.fs.mkdirsSync(dirname)
-                            fileutil.fs.writeSync(targetFilename, content)
+                            fileutil.fs.mkdirsSync(dirname);
+                            fileutil.fs.writeSync(targetFilename, content);
                             resolve(content);
                         }).catch((e) => {
                             reject(e);
@@ -48,6 +43,7 @@ class TextProcessor {
                     }
 
                 } else {
+                    //无需缓存，正常url加载
                     loadText(xhrURL).then((content) => {
                         resolve(content);
                     }).catch((e) => {
@@ -55,6 +51,7 @@ class TextProcessor {
                     })
                 }
             } else {
+                //本地加载
                 const content = fs.readFileSync(root + url, 'utf-8');
                 resolve(content);
             }
@@ -99,7 +96,7 @@ function loadText(xhrURL) {
  */
 function needCache(root, url) {
     if (root.indexOf("miniGame/resource/") >= 0) {
-        return true;
+    return true;
     } else {
         return false;
     }

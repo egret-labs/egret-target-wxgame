@@ -117,6 +117,8 @@ export const fs = {
 
                 }
             }
+        } else {
+            return;
         }
         const time2 = Date.now() - time1;
         console.log(`mkdir: ${p} ${time2} ms`)
@@ -162,19 +164,42 @@ export const path = {
 
     normailze: (p) => {
         let arr = p.split("/");
+        let original = p.split("/");
         for (let a of arr) {
             if (a == '' || a == null) {
-                let index = arr.indexOf(a);
-                arr.splice(index, 1);
+                let index = original.indexOf(a);
+                original.splice(index, 1);
             }
         }
-        if (arr.length > 0) {
-            return arr.join('/');
+        if (original.length > 0) {
+            return original.join('/');
         }
+    },
+    // 根据key值表获取本地缓存路径
+    // 通过本函数可将网络地址转化为本地缓存地址
+    // 可通过编辑key值表来创建多个缓存路径
+    getLocalFilePath: (p) => {
+        for (let key in path.localFileMap) {
+            if (p.indexOf(key) >= 0) {
+                p = p.replace(key, path.localFileMap[key]);
+                return path.normailze(p);
+            }
+        }
+        //未设置key值，将按照地址名整理出资源路径，进行存储
+        if (p.indexOf(":") >= 0 || p.indexOf('#') >= 0 || p.indexOf('?') >= 0) {
+            p = p.replace(/[^a-z0-9.]/gi, "/");
+        }
+        return p;
+    },
+    // 本地资源文件key值表
+    // 可按照网络资源地址分配本地地址，可修改
+    // 以下为示例，开发者可根据需要进行修改
+    localFileMap: {
+        // 'http://XXXXX/resource/assets/': 'temp_image/',
+        // 'http://XXXXX/resource/config/': 'temp_text/'
     }
-
-
 }
 
-
 window.fs_cache = fs_cache;
+window.fs = fs;
+window.path = path;
