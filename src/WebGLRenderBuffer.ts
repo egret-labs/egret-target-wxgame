@@ -63,7 +63,7 @@ namespace egret.wxgame {
         public constructor(width?: number, height?: number, root?: boolean) {
             super();
             // 获取webglRenderContext
-            this.context = WebGLRenderContext.getInstance(width, height);
+            this.context = WebGLRenderContext.getInstance();
             // buffer 对应的 render target
             this.rootRenderTarget = new WebGLRenderTarget(this.context.context, 3, 3);
             if (width && height) {

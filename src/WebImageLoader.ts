@@ -133,7 +133,7 @@ namespace egret.wxgame {
             }
             this.data = new egret.BitmapData(image);
             if(wxgame.preUploadTexture && Capabilities.renderMode == "webgl") {
-                WebGLRenderContext.getInstance(null, null).getWebGLTexture(this.data);
+                WebGLRenderContext.getInstance().getWebGLTexture(this.data);
             }
             let self = this;
             window.setTimeout(function (): void {

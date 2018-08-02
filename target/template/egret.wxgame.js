@@ -2031,7 +2031,7 @@ if (window['HTMLVideoElement'] == undefined) {
                 }
                 this.data = new egret.BitmapData(image);
                 if (wxgame.preUploadTexture && egret.Capabilities.renderMode == "webgl") {
-                    wxgame.WebGLRenderContext.getInstance(null, null).getWebGLTexture(this.data);
+                    wxgame.WebGLRenderContext.getInstance().getWebGLTexture(this.data);
                 }
                 var self = this;
                 window.setTimeout(function () {
@@ -5019,7 +5019,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
          * 抽象出此类，以实现共用一个context
          */
         var WebGLRenderContext = (function () {
-            function WebGLRenderContext(width, height) {
+            function WebGLRenderContext() {
                 this.glID = null;
                 this.projectionX = NaN;
                 this.projectionY = NaN;
@@ -5041,11 +5041,11 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 this.setGlobalCompositeOperation("source-over");
                 this.firstTimeUploadVertices = true;
             }
-            WebGLRenderContext.getInstance = function (width, height) {
+            WebGLRenderContext.getInstance = function () {
                 if (this.instance) {
                     return this.instance;
                 }
-                this.instance = new WebGLRenderContext(width, height);
+                this.instance = new WebGLRenderContext();
                 return this.instance;
             };
             /**
@@ -6094,7 +6094,7 @@ window["sharedCanvas"].isCanvas = true;
                 _this.$offsetX = 0;
                 _this.$offsetY = 0;
                 // 获取webglRenderContext
-                _this.context = wxgame.WebGLRenderContext.getInstance(width, height);
+                _this.context = wxgame.WebGLRenderContext.getInstance();
                 // buffer 对应的 render target
                 _this.rootRenderTarget = new wxgame.WebGLRenderTarget(_this.context.context, 3, 3);
                 if (width && height) {
@@ -7223,7 +7223,7 @@ window["sharedCanvas"].isCanvas = true;
                     node.$canvasScaleY = canvasScaleY;
                     node.dirtyRender = true;
                 }
-                var wxBindCanvasTexture = !!wxgame.WebGLRenderContext.getInstance(0, 0).context["wxBindCanvasTexture"];
+                var wxBindCanvasTexture = !!wxgame.WebGLRenderContext.getInstance().context["wxBindCanvasTexture"];
                 if (wxBindCanvasTexture) {
                     if (!this.canvasRenderer) {
                         this.canvasRenderer = new egret.CanvasRenderer();
@@ -7316,7 +7316,7 @@ window["sharedCanvas"].isCanvas = true;
                 canvasScaleY *= height2 / height;
                 width = width2;
                 height = height2;
-                var wxBindCanvasTexture = !!wxgame.WebGLRenderContext.getInstance(0, 0).context["wxBindCanvasTexture"];
+                var wxBindCanvasTexture = !!wxgame.WebGLRenderContext.getInstance().context["wxBindCanvasTexture"];
                 if (wxBindCanvasTexture) {
                     if (!this.canvasRenderer) {
                         this.canvasRenderer = new egret.CanvasRenderer();

@@ -852,7 +852,7 @@ namespace egret.wxgame {
                 node.$canvasScaleY = canvasScaleY;
                 node.dirtyRender = true;
             }
-            const wxBindCanvasTexture = !!WebGLRenderContext.getInstance(0, 0).context["wxBindCanvasTexture"];
+            const wxBindCanvasTexture = !!WebGLRenderContext.getInstance().context["wxBindCanvasTexture"];
             if (wxBindCanvasTexture) {
                 if (!this.canvasRenderer) {
                     this.canvasRenderer = new CanvasRenderer();
@@ -951,7 +951,7 @@ namespace egret.wxgame {
             canvasScaleY *= height2 / height;
             width = width2;
             height = height2;
-            const wxBindCanvasTexture = !!WebGLRenderContext.getInstance(0, 0).context["wxBindCanvasTexture"];
+            const wxBindCanvasTexture = !!WebGLRenderContext.getInstance().context["wxBindCanvasTexture"];
             if (wxBindCanvasTexture) {
                 if (!this.canvasRenderer) {
                     this.canvasRenderer = new CanvasRenderer();

@@ -60,11 +60,11 @@ namespace egret.wxgame {
          * WebGLRenderContext单例
          */
         private static instance: WebGLRenderContext;
-        public static getInstance(width: number, height: number): WebGLRenderContext {
+        public static getInstance(): WebGLRenderContext {
             if (this.instance) {
                 return this.instance;
             }
-            this.instance = new WebGLRenderContext(width, height);
+            this.instance = new WebGLRenderContext();
             return this.instance;
         }
 
@@ -180,7 +180,7 @@ namespace egret.wxgame {
         private vertexBuffer;
         private indexBuffer;
 
-        public constructor(width?: number, height?: number) {
+        public constructor() {
 
             this.surface = window['canvas'];
 
