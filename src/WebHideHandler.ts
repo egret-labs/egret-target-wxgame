@@ -33,18 +33,22 @@ namespace egret.wxgame {
      * @private
      */
     export let WebLifeCycleHandler: egret.lifecycle.LifecyclePlugin = (context) => {
-        wx.onShow(() => {
-            if (!isShow) {
-                context.resume();
-                isShow = true;
-            }
-        });
+        if (wx.onShow) {
+            wx.onShow(() => {
+                if (!isShow) {
+                    context.resume();
+                    isShow = true;
+                }
+            });
+        }
 
-        wx.onHide(() => {
-            if (isShow) {
-                context.pause();
-                isShow = false;
-            }
-        });
+        if (wx.onHide) {
+            wx.onHide(() => {
+                if (isShow) {
+                    context.pause();
+                    isShow = false;
+                }
+            });
+        }
     }
 }
