@@ -27,10 +27,9 @@ class BinaryProcessor {
 
 
         return new Promise((resolve, reject) => {
-
+            const xhrURL = url.indexOf('://') >= 0 ? url : root + url;
             if (path.isRemotePath(root) || path.isRemotePath(url)) {
                 if (needCache(url)) {
-                    const xhrURL = url.indexOf('://') >= 0 ? url : root + url;
                     const targetFilename = path.getLocalFilePath(xhrURL);
                     if (fileutil.fs.existsSync(targetFilename)) {
                         //缓存命中
@@ -92,7 +91,7 @@ function loadBinary(xhrURL) {
  * 所以开发者应根据URL进行判断，将特定资源进行本地缓存
  */
 function needCache(url) {
-    if (root.indexOf("miniGame/resource/") >= 0) {
+    if (url.indexOf("miniGame/resource/") >= 0) {
         return true;
     } else {
         return false;
