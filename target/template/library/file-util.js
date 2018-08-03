@@ -92,15 +92,16 @@ export const fs = {
         wxFs.writeFileSync(WX_ROOT + p, content);
     },
 
-    readSync: (p) => {
-        return wxFs.readFileSync(WX_ROOT + p, 'utf-8');
+    readSync: (p, format) => {
+        format = format || 'utf-8';
+        return wxFs.readFileSync(WX_ROOT + p, format);
     },
 
     /**
      * 创建文件夹
      */
     mkdirsSync: (p) => {
-        console.log(`mkdir: ${p}`)
+        // console.log(`mkdir: ${p}`)
         const time1 = Date.now();
 
         if (!fs.existsSync(p)) {
@@ -110,7 +111,6 @@ export const fs = {
                 const dir = dirs[i]
                 current += dir + "/";
                 if (!fs.existsSync(current)) {
-                    console.log(fs_cache[current])
                     let p = path.normailze(current);
                     fs_cache[p] = 1;
                     wxFs.mkdirSync(WX_ROOT + current)
@@ -121,7 +121,7 @@ export const fs = {
             return;
         }
         const time2 = Date.now() - time1;
-        console.log(`mkdir: ${p} ${time2} ms`)
+        // console.log(`mkdir: ${p} ${time2} ms`)
     },
 
 
@@ -146,6 +146,10 @@ export const fs = {
                 }
             })
         })
+    },
+    /////
+    setFsCache: (p, value) => {
+        fs_cache[p] = value;
     }
 }
 
@@ -189,14 +193,15 @@ export const path = {
         if (p.indexOf(":") >= 0 || p.indexOf('#') >= 0 || p.indexOf('?') >= 0) {
             p = p.replace(/[^a-z0-9.]/gi, "/");
         }
-        return p;
+        return path.normailze(p);
     },
     // 本地资源文件key值表
     // 可按照网络资源地址分配本地地址，可修改
     // 以下为示例，开发者可根据需要进行修改
     localFileMap: {
         // 'http://XXXXX/resource/assets/': 'temp_image/',
-        // 'http://XXXXX/resource/config/': 'temp_text/'
+        // 'http://XXXXX/resource/config/': 'temp_text/',
+        // 'http://XXXXX/resource/bin/': 'temp_bin/'
     }
 }
 

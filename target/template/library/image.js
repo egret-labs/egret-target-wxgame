@@ -19,7 +19,7 @@ class ImageProcessor {
             url
         } = resource;
         const imageSrc = root + url;
-        if (fileutil.path.isRemotePath(root) || fileutil.path.isRemotePath(url)) { //判断是本地加载还是网络加载
+        if (fileutil.path.isRemotePath(imageSrc)) { //判断是本地加载还是网络加载
             if (!needCache(root, url)) {
                 //无需缓存加载
                 return loadImage(imageSrc);
@@ -28,12 +28,13 @@ class ImageProcessor {
                 const fullname = path.getLocalFilePath(`${imageSrc}`);
                 return download(imageSrc, fullname)
                     .then(() => {
+                        fileutil.fs.setFsCache(fullname, 1);
                         return loadImage(wx.env.USER_DATA_PATH + '/' + fullname);
                     })
             }
         } else {
             //正常本地加载
-            return loadImage(root + url);
+            return loadImage(imageSrc);
         }
     }
 
@@ -97,7 +98,8 @@ function download(url, target) {
                 },
                 fail: (e) => {
                     console.error(e)
-                    reject()
+                    var e = new RES.ResourceManagerError(1001, url);
+                    reject(e);
                 }
             })
         }
@@ -110,7 +112,7 @@ function download(url, target) {
  */
 function needCache(root, url) {
     if (root.indexOf("miniGame/resource/") >= 0) {
-    return true;
+        return true;
     } else {
         return false;
     }
