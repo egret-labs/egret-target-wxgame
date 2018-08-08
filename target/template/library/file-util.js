@@ -195,6 +195,10 @@ export const path = {
         }
         return path.normailze(p);
     },
+    // 获取微信的用户缓存地址
+    getWxUserPath: (p) => {
+        return WX_ROOT + p;
+    },
     // 本地资源文件key值表
     // 可按照网络资源地址分配本地地址，可修改
     // 以下为示例，开发者可根据需要进行修改

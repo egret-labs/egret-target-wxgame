@@ -4,13 +4,11 @@ const fs = wx.getFileSystemManager();
 
 
 /**
- * 重写的图片加载器，代替引擎默认的图片加载器
+ * 重写的声音加载器，代替引擎默认的声音加载器
  * 该代码中包含了大量日志用于辅助开发者调试
  * 正式上线时请开发者手动删除这些注释
  */
-class ImageProcessor {
-
-
+class SoundProcessor {
 
     onLoadStart(host, resource) {
 
@@ -18,18 +16,18 @@ class ImageProcessor {
             root,
             url
         } = resource;
-        const imageSrc = root + url;
-        if (fileutil.path.isRemotePath(imageSrc)) { //判断是本地加载还是网络加载
+        const soundSrc = root + url;
+        if (path.isRemotePath(soundSrc)) { //判断是本地加载还是网络加载
             if (!needCache(root, url)) {
                 //无需缓存加载
-                return loadImage(imageSrc);
+                return loadSound(soundSrc);
             } else {
                 //通过缓存机制加载
-                const fullname = path.getLocalFilePath(imageSrc);
-                return download(imageSrc, fullname)
+                const fullname = path.getLocalFilePath(soundSrc);
+                return download(soundSrc, fullname)
                     .then((filePath) => {
                             fileutil.fs.setFsCache(filePath, 1);
-                            return loadImage(path.getWxUserPath(filePath));
+                            return loadSound(path.getWxUserPath(filePath));
                         },
                         (error) => {
                             console.error(error);
@@ -38,7 +36,7 @@ class ImageProcessor {
             }
         } else {
             //正常本地加载
-            return loadImage(imageSrc);
+            return loadSound(soundSrc);
         }
     }
 
@@ -51,26 +49,20 @@ class ImageProcessor {
 
 
 
-function loadImage(imageURL) {
+function loadSound(soundURL) {
     return new Promise((resolve, reject) => {
-        const image = wx.createImage();
-
-
-        image.onload = () => {
-            const bitmapdata = new egret.BitmapData(image);
-            const texture = new egret.Texture();
-            texture._setBitmapData(bitmapdata);
-            setTimeout(() => {
-                resolve(texture);
-            }, 0)
-
+        let sound = new egret.Sound();
+        sound.load(soundURL);
+        let onSuccess = () => {
+            resolve(sound);
         }
-        image.onerror = (e) => {
-            console.error(e);
-            var e = new RES.ResourceManagerError(1001, imageURL);
+
+        let onError = () => {
+            let e = new RES.ResourceManagerError(1001, soundURL);
             reject(e);
         }
-        image.src = imageURL;
+        sound.addEventListener(egret.Event.COMPLETE, onSuccess, this);
+        sound.addEventListener(egret.IOErrorEvent.IO_ERROR, onError, this);
     })
 }
 
@@ -80,7 +72,6 @@ function download(url, target) {
     return new Promise((resolve, reject) => {
 
         if (fileutil.fs.existsSync(target)) {
-            // console.log('缓存命中:', url, target)
             resolve(target);
         } else {
 
@@ -126,5 +117,5 @@ function needCache(root, url) {
 }
 
 
-const processor = new ImageProcessor();
-RES.processor.map("image", processor)
+const processor = new SoundProcessor();
+RES.processor.map("sound", processor);

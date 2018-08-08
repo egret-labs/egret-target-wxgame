@@ -1,21 +1,7 @@
 const fileutil = require('./file-util');
 const path = fileutil.path;
 const fs = wx.getFileSystemManager();
-const WX_ROOT = wx.env.USER_DATA_PATH + "/";
 
-
-// const tempDir = `temp1_binary/` //下载总目录
-
-
-// 开发者应在微信的 updateManager 判断有包更新时手动删除此文件夹，清除缓存
-// fileutil.fs.remove(tempDir)
-
-
-/**
- * 重写的文本加载器，代替引擎默认的文本加载器
- * 该代码中包含了大量注释用于辅助开发者调试
- * 正式上线时请开发者手动删除这些注释
- */
 class BinaryProcessor {
 
     onLoadStart(host, resource) {
@@ -33,7 +19,7 @@ class BinaryProcessor {
                     const targetFilename = path.getLocalFilePath(xhrURL);
                     if (fileutil.fs.existsSync(targetFilename)) {
                         //缓存命中
-                        let data = fs.readFileSync(WX_ROOT + targetFilename);
+                        let data = fs.readFileSync(path.getWxUserPath(targetFilename));
                         resolve(data);
                     } else {
                         loadBinary(xhrURL).then((content) => {
@@ -47,7 +33,7 @@ class BinaryProcessor {
                     }
 
                 } else {
-                    // console.log('此文件不会缓存:', xhrURL)
+                    // console.log('此文件不会缓存:', xhrURL);
                     loadBinary(xhrURL).then((content) => {
                         resolve(content);
                     }).catch((e) => {
