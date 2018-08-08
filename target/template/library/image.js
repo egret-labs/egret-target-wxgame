@@ -14,6 +14,14 @@ class ImageProcessor {
 
     onLoadStart(host, resource) {
 
+
+        const r = host.resourceConfig.getResource(resource.name);
+        let scale9Grid;
+        if (r && r.scale9grid) {
+            const list = r.scale9grid.split(",");
+            scale9Grid = new egret.Rectangle(parseInt(list[0]), parseInt(list[1]), parseInt(list[2]), parseInt(list[3]));
+        }
+
         const {
             root,
             url
@@ -22,23 +30,41 @@ class ImageProcessor {
         if (fileutil.path.isRemotePath(imageSrc)) { //判断是本地加载还是网络加载
             if (!needCache(root, url)) {
                 //无需缓存加载
-                return loadImage(imageSrc);
+                return loadImage(imageSrc, scale9Grid).then((texture) => {
+                    if (scale9Grid) {
+                        texture["scale9Grid"] = scale9Grid;
+                    }
+                    return texture;
+                });
             } else {
                 //通过缓存机制加载
                 const fullname = path.getLocalFilePath(imageSrc);
-                return download(imageSrc, fullname)
-                    .then((filePath) => {
-                            fileutil.fs.setFsCache(filePath, 1);
-                            return loadImage(path.getWxUserPath(filePath));
-                        },
-                        (error) => {
-                            console.error(error);
-                            return;
-                        })
+                return download(imageSrc, fullname).then(
+                    (filePath) => {
+                        fileutil.fs.setFsCache(filePath, 1);
+                        return loadImage(path.getWxUserPath(filePath), scale9Grid).then((texture) => {
+                            if (scale9Grid) {
+                                texture["scale9Grid"] = scale9Grid;
+                            }
+                            return texture;
+                        });
+                    },
+
+                    (error) => {
+                        console.error(error);
+                        return;
+                    });
+
+
             }
         } else {
             //正常本地加载
-            return loadImage(imageSrc);
+            return loadImage(imageSrc, scale9Grid).then((texture) => {
+                if (scale9Grid) {
+                    texture["scale9Grid"] = scale9Grid;
+                }
+                return texture;
+            });
         }
     }
 
