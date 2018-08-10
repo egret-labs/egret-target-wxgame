@@ -1,6 +1,7 @@
 const fileutil = require('./file-util');
 const path = fileutil.path;
-const fs = wx.getFileSystemManager();
+const fs = fileutil.fs;
+const WXFS = wx.getFileSystemManager();
 
 class BinaryProcessor {
 
@@ -14,34 +15,33 @@ class BinaryProcessor {
 
         return new Promise((resolve, reject) => {
             const xhrURL = url.indexOf('://') >= 0 ? url : root + url;
-            if (path.isRemotePath(root) || path.isRemotePath(url)) {
-                if (needCache(url)) {
+            if (path.isRemotePath(xhrURL)) {
+                if (needCache(xhrURL)) {
                     const targetFilename = path.getLocalFilePath(xhrURL);
-                    if (fileutil.fs.existsSync(targetFilename)) {
+                    if (fs.existsSync(targetFilename)) {
                         //缓存命中
-                        let data = fs.readFileSync(path.getWxUserPath(targetFilename));
+                        let data = WXFS.readFileSync(path.getWxUserPath(targetFilename));
                         resolve(data);
                     } else {
                         loadBinary(xhrURL).then((content) => {
                             const dirname = path.dirname(targetFilename);
-                            fileutil.fs.mkdirsSync(dirname)
-                            fileutil.fs.writeSync(targetFilename, content)
+                            fs.mkdirsSync(dirname);
+                            fs.writeSync(targetFilename, content);
                             resolve(content);
                         }).catch((e) => {
                             reject(e);
-                        })
+                        });
                     }
 
                 } else {
-                    // console.log('此文件不会缓存:', xhrURL);
                     loadBinary(xhrURL).then((content) => {
                         resolve(content);
                     }).catch((e) => {
                         reject(e);
-                    })
+                    });
                 }
             } else {
-                const content = fs.readFileSync(root + url);
+                const content = WXFS.readFileSync(xhrURL);
                 resolve(content);
             }
         });
@@ -62,13 +62,13 @@ function loadBinary(xhrURL) {
             resolve(xhr.response);
         }
         xhr.onerror = (e) => {
-            var error = new RES.ResourceManagerError(1001, xhrURL);
-            console.error(e)
-            reject(error)
+            const error = new RES.ResourceManagerError(1001, xhrURL);
+            console.error(e);
+            reject(error);
         }
         xhr.open("get", xhrURL);
         xhr.send();
-    })
+    });
 
 }
 
@@ -87,4 +87,4 @@ function needCache(url) {
 
 
 const processor = new BinaryProcessor();
-RES.processor.map("bin", processor)
+RES.processor.map("bin", processor);

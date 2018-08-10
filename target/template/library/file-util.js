@@ -208,7 +208,3 @@ export const path = {
         // 'http://XXXXX/resource/bin/': 'temp_bin/'
     }
 }
-
-window.fs_cache = fs_cache;
-window.fs = fs;
-window.path = path;

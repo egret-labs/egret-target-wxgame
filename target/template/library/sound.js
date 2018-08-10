@@ -1,6 +1,7 @@
 const fileutil = require('./file-util');
 const path = fileutil.path;
-const fs = wx.getFileSystemManager();
+const fs = fileutil.fs;
+const WXFS = wx.getFileSystemManager();
 
 
 /**
@@ -24,15 +25,19 @@ class SoundProcessor {
             } else {
                 //通过缓存机制加载
                 const fullname = path.getLocalFilePath(soundSrc);
-                return download(soundSrc, fullname)
-                    .then((filePath) => {
-                            fileutil.fs.setFsCache(filePath, 1);
-                            return loadSound(path.getWxUserPath(filePath));
-                        },
-                        (error) => {
-                            console.error(error);
-                            return;
-                        })
+                if (fs.existsSync(fullname)) {
+                    return loadSound(path.getWxUserPath(fullname));
+                } else {
+                    return download(soundSrc, fullname)
+                        .then((filePath) => {
+                                fs.setFsCache(fullname, 1);
+                                return loadSound(filePath);
+                            },
+                            (error) => {
+                                console.error(error);
+                                return;
+                            });
+                }
             }
         } else {
             //正常本地加载
@@ -41,8 +46,6 @@ class SoundProcessor {
     }
 
     onRemoveStart(host, resource) {
-        let texture = host.get(resource);
-        texture.dispose();
         return Promise.resolve();
     }
 }
@@ -58,7 +61,7 @@ function loadSound(soundURL) {
         }
 
         let onError = () => {
-            let e = new RES.ResourceManagerError(1001, soundURL);
+            const e = new RES.ResourceManagerError(1001, soundURL);
             reject(e);
         }
         sound.addEventListener(egret.Event.COMPLETE, onSuccess, this);
@@ -70,38 +73,32 @@ function loadSound(soundURL) {
 function download(url, target) {
 
     return new Promise((resolve, reject) => {
+        const dirname = path.dirname(target);
+        fs.mkdirsSync(dirname);
+        const file_target = path.getWxUserPath(target);
+        wx.downloadFile({
+            url: url,
+            filePath: file_target,
+            success: (v) => {
+                if (v.statusCode >= 400) {
+                    try {
+                        WXFS.accessSync(file_target);
+                        WXFS.unlinkSync(file_target);
+                    } catch (e) {
 
-        if (fileutil.fs.existsSync(target)) {
-            resolve(target);
-        } else {
-
-            const dirname = path.dirname(target);
-            fileutil.fs.mkdirsSync(dirname);
-            const file_target = path.getWxUserPath(target);
-            wx.downloadFile({
-                url: url,
-                filePath: file_target,
-                success: (v) => {
-                    if (v.statusCode >= 400) {
-                        try {
-                            fs.accessSync(file_target);
-                            fs.unlinkSync(file_target);
-                        } catch (e) {
-
-                        }
-                        const message = `加载失败:${url}`;
-                        reject(message);
-                    } else {
-                        resolve(target);
                     }
-                },
-                fail: (e) => {
-                    var e = new RES.ResourceManagerError(1001, url);
-                    reject(e);
+                    const message = `加载失败:${url}`;
+                    reject(message);
+                } else {
+                    resolve(file_target);
                 }
-            })
-        }
-    })
+            },
+            fail: (e) => {
+                const error = new RES.ResourceManagerError(1001, url);
+                reject(error);
+            }
+        });
+    });
 }
 
 /**
