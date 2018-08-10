@@ -98,7 +98,7 @@ namespace egret.wxgame {
             option.contentWidth = options.contentWidth || 640;
             option.contentHeight = options.contentHeight || 1136;
             option.orientation = options.orientation || egret.OrientationMode.AUTO;
-            option.maxTouches = 2;
+            option.maxTouches = options.maxTouches;
             option.textureScaleFactor = 1;
 
             option.showFPS = false;
