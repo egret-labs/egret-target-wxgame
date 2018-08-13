@@ -19,7 +19,10 @@ class TextProcessor {
 
 
         return new Promise((resolve, reject) => {
-            const xhrURL = url.indexOf('://') >= 0 ? url : root + url; //获取网络加载url
+            let xhrURL = url.indexOf('://') >= 0 ? url : root + url; //获取网络加载url
+            if (RES['getVirtualUrl']) {
+                xhrURL = RES['getVirtualUrl'](xhrURL);
+            }
             if (path.isRemotePath(xhrURL)) { //判断是本地加载还是网络加载
                 if (needCache(root, url)) {
                     //通过缓存机制判断是否本地加载

@@ -27,7 +27,10 @@ class ImageProcessor {
             scale9Grid = new egret.Rectangle(parseInt(list[0]), parseInt(list[1]), parseInt(list[2]), parseInt(list[3]));
         }
 
-        const imageSrc = root + url;
+        let imageSrc = root + url;
+        if (RES['getVirtualUrl']) {
+            imageSrc = RES['getVirtualUrl'](imageSrc);
+        }
         if (path.isRemotePath(imageSrc)) { //判断是本地加载还是网络加载
             if (!needCache(root, url)) {
                 //无需缓存加载
