@@ -17,7 +17,10 @@ class SoundProcessor {
             root,
             url
         } = resource;
-        const soundSrc = root + url;
+        let soundSrc = root + url;
+        if (RES['getVirtualUrl']) {
+            soundSrc = RES['getVirtualUrl'](soundSrc);
+        }
         if (path.isRemotePath(soundSrc)) { //判断是本地加载还是网络加载
             if (!needCache(root, url)) {
                 //无需缓存加载
@@ -30,13 +33,13 @@ class SoundProcessor {
                 } else {
                     return download(soundSrc, fullname)
                         .then((filePath) => {
-                                fs.setFsCache(fullname, 1);
-                                return loadSound(filePath);
-                            },
-                            (error) => {
-                                console.error(error);
-                                return;
-                            });
+                            fs.setFsCache(fullname, 1);
+                            return loadSound(filePath);
+                        },
+                        (error) => {
+                            console.error(error);
+                            return;
+                        });
                 }
             }
         } else {

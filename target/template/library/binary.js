@@ -12,9 +12,12 @@ class BinaryProcessor {
             url
         } = resource;
 
-
         return new Promise((resolve, reject) => {
-            const xhrURL = url.indexOf('://') >= 0 ? url : root + url;
+
+            let xhrURL = url.indexOf('://') >= 0 ? url : root + url;
+            if (RES['getVirtualUrl']) {
+                xhrURL = RES['getVirtualUrl'](xhrURL);
+            }
             if (path.isRemotePath(xhrURL)) {
                 if (needCache(xhrURL)) {
                     const targetFilename = path.getLocalFilePath(xhrURL);
