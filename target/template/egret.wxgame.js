@@ -2989,7 +2989,7 @@ if (window['HTMLVideoElement'] == undefined) {
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "1.1.6";
+        wxgame.version = "1.1.7";
         /**
          * 运行环境是否为子域
          */
@@ -3781,6 +3781,21 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
         function getPixels(x, y, width, height) {
             if (width === void 0) { width = 1; }
             if (height === void 0) { height = 1; }
+            //webgl环境下不需要转换成canvas获取像素信息
+            if (egret.Capabilities.renderMode == "webgl") {
+                var renderTexture = void 0;
+                //webgl下非RenderTexture纹理先画到RenderTexture
+                if (!this.$renderBuffer) {
+                    renderTexture = new egret.RenderTexture();
+                    renderTexture.drawToTexture(new egret.Bitmap(this));
+                }
+                else {
+                    renderTexture = this;
+                }
+                //从RenderTexture中读取像素数据
+                var pixels = renderTexture.$renderBuffer.getPixels(x, y, width, height);
+                return pixels;
+            }
             try {
                 var surface = convertImageToCanvas(this);
                 var result = sharedContext.getImageData(x, y, width, height).data;
