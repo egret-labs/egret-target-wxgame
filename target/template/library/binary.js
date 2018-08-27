@@ -30,6 +30,10 @@ class BinaryProcessor {
                             const dirname = path.dirname(targetFilename);
                             fs.mkdirsSync(dirname);
                             fs.writeSync(targetFilename, content);
+                            let needRead = needReadFile();
+                            if (needRead) {
+                                content = WXFS.readFileSync(path.getWxUserPath(targetFilename));
+                            }
                             resolve(content);
                         }).catch((e) => {
                             reject(e);
@@ -55,7 +59,16 @@ class BinaryProcessor {
     }
 }
 
+let wxSystemInfo;
 
+function needReadFile() {
+    if (!wxSystemInfo) {
+        wxSystemInfo = wx.getSystemInfoSync();
+    }
+    let sdkVersion = wxSystemInfo.SDKVersion;
+    let platform = wxSystemInfo.system.split(" ").shift();
+    return (sdkVersion <= '2.2.3') && (platform == 'iOS');
+}
 
 function loadBinary(xhrURL) {
     return new Promise((resolve, reject) => {
