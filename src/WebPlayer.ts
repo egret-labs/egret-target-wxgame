@@ -87,11 +87,11 @@ namespace egret.wxgame {
         /**
          * 读取初始化参数
          */
-        private readOption(container: any, options: runEgretOptions): PlayerOption {
+        private readOption(container: any, options: any): PlayerOption {
             let option: PlayerOption = {};
             option.entryClassName = options.entryClassName || "Main";
             option.scaleMode = options.scaleMode || egret.StageScaleMode.FIXED_WIDTH;
-            if(option.scaleMode == egret.StageScaleMode.SHOW_ALL) {
+            if (option.scaleMode == egret.StageScaleMode.SHOW_ALL) {
                 throw new Error("小游戏不支持 showAll 适配模式，推荐使用 fixedWidth 模式");
             }
             option.frameRate = options.frameRate || 30;
@@ -101,8 +101,8 @@ namespace egret.wxgame {
             option.maxTouches = options.maxTouches;
             option.textureScaleFactor = 1;
 
-            option.showFPS = false;
-            var styleStr = "x:0,y:0,size:12,textColor:0xffffff,bgAlpha:0.9";
+            option.showFPS = options.showFPS;
+            var styleStr = options.fpsStyles || "x:0,y:0,size:12,textColor:0xffffff,bgAlpha:0.9";
 
             let stylesArr = styleStr.split(",");
             let styles = {};
