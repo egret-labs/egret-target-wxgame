@@ -77,22 +77,10 @@ namespace egret.wxgame {
             }
             //从RenderTexture中读取像素数据，填入canvas
             let pixels = renderTexture.$renderBuffer.getPixels(rect.x, rect.y, iWidth, iHeight);
-            var x = 0;
-            var y = 0;
-            for (var i = 0; i < pixels.length; i += 4) {
-                sharedContext.fillStyle =
-                    'rgba(' + pixels[i]
-                    + ',' + pixels[i + 1]
-                    + ',' + pixels[i + 2]
-                    + ',' + (pixels[i + 3] / 255) + ')';
-                sharedContext.fillRect(x, y, 1, 1);
-                x++;
-                if (x == iWidth) {
-                    x = 0;
-                    y++;
-                }
-            }
-
+			let imgData = sharedContext.createImageData(iWidth, iHeight);
+            imgData.data.set(new Uint8ClampedArray(pixels));
+			this.sharedContext.putImageData(imgData, 0, 0);
+            
             if (!(<RenderTexture>texture).$renderBuffer) {
                 renderTexture.dispose();
             }
