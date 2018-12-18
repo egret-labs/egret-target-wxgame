@@ -2700,7 +2700,7 @@ if (window['HTMLVideoElement'] == undefined) {
              * 更新同时触摸点的数量
              */
             WebTouchHandler.prototype.$updateMaxTouches = function () {
-                this.touch.$initMaxTouches();
+                this.touch.$updateMaxTouches();
             };
             return WebTouchHandler;
         }(egret.HashObject));
