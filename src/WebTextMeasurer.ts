@@ -61,7 +61,7 @@ namespace egret.wxgame {
         context.font = font;
         const metrics = context.measureText(text);
         if (!metrics) {
-            egret.log('context.measureText result is null or undefined = ' + text);
+            egret.warn('context.measureText result is null or undefined = ' + text);
             return 0;
         }
         return metrics.width;
