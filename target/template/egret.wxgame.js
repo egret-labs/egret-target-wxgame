@@ -36,7 +36,7 @@ r.prototype = e.prototype, t.prototype = new r();
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -160,7 +160,7 @@ if (window['HTMLDivElement'] == undefined) {
 if (window['HTMLVideoElement'] == undefined) {
     window['HTMLVideoElement'] = HTMLDivElement;
 }
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -210,7 +210,7 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var localStorage;
     (function (localStorage) {
@@ -292,7 +292,7 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -490,7 +490,7 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -642,7 +642,7 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -844,7 +844,7 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -1019,7 +1019,7 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -1564,7 +1564,7 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -1812,7 +1812,7 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -1986,7 +1986,7 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -2142,7 +2142,7 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -2174,7 +2174,12 @@ if (window['HTMLVideoElement'] == undefined) {
             font += (fontSize || 12) + "px ";
             font += (fontFamily || "Arial");
             context.font = font;
-            return context.measureText(text).width;
+            var metrics = context.measureText(text);
+            if (!metrics) {
+                egret.warn('context.measureText result is null or undefined = ' + text);
+                return 0;
+            }
+            return metrics.width;
         }
         /**
          * @private
@@ -2215,7 +2220,7 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -2412,7 +2417,7 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -2611,7 +2616,7 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -2667,7 +2672,7 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -2857,14 +2862,14 @@ if (window['HTMLVideoElement'] == undefined) {
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "1.1.8";
+        wxgame.version = "1.0.7";
         /**
          * 运行环境是否为子域
          */
@@ -3049,7 +3054,7 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -3164,7 +3169,7 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -3272,7 +3277,7 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -3315,7 +3320,7 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -3542,7 +3547,7 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -3714,7 +3719,7 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -3854,7 +3859,7 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
         egret.XML = { parse: parse };
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -3898,7 +3903,7 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
 egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -3973,7 +3978,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
         egret.Geolocation = egret.wxgame.WebGeolocation;
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -4060,7 +4065,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -4145,7 +4150,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -4410,7 +4415,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -4705,7 +4710,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -4853,7 +4858,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -5737,7 +5742,7 @@ window["sharedCanvas"].isCanvas = true;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -6106,7 +6111,7 @@ window["sharedCanvas"].isCanvas = true;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -7158,7 +7163,7 @@ window["sharedCanvas"].isCanvas = true;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -7264,7 +7269,7 @@ window["sharedCanvas"].isCanvas = true;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -7369,7 +7374,7 @@ window["sharedCanvas"].isCanvas = true;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
@@ -7603,7 +7608,7 @@ window["sharedCanvas"].isCanvas = true;
         __reflect(EgretWebGLUniform.prototype, "egret.wxgame.EgretWebGLUniform");
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
-
+var egret;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
