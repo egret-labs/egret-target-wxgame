@@ -59,7 +59,12 @@ namespace egret.wxgame {
         font += (fontSize || 12) + "px ";
         font += (fontFamily || "Arial");
         context.font = font;
-        return context.measureText(text).width;
+        const metrics = context.measureText(text);
+        if (!metrics) {
+            egret.log('context.measureText result is null or undefined = ' + text);
+            return 0;
+        }
+        return metrics.width;
     }
 
     /**
