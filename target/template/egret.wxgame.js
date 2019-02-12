@@ -153,34 +153,341 @@ r.prototype = e.prototype, t.prototype = new r();
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-if (window['HTMLDivElement'] == undefined) {
-    window['HTMLDivElement'] = HTMLElement;
-}
-// There is no HTMLDivElement in webkit for air
-if (window['HTMLVideoElement'] == undefined) {
-    window['HTMLVideoElement'] = HTMLDivElement;
-}
 
 (function (egret) {
     var wxgame;
     (function (wxgame) {
-        var className = "egret.BitmapData";
-        egret.registerClass(HTMLImageElement, className);
-        egret.registerClass(HTMLCanvasElement, className);
-        egret.registerClass(HTMLVideoElement, className);
+        /**
+         * A BitmapData object contains an array of pixel data. This data can represent either a fully opaque bitmap or a
+         * transparent bitmap that contains alpha channel data. Either type of BitmapData object is stored as a buffer of 32-bit
+         * integers. Each 32-bit integer determines the properties of a single pixel in the bitmap.<br/>
+         * Each 32-bit integer is a combination of four 8-bit channel values (from 0 to 255) that describe the alpha transparency
+         * and the red, green, and blue (ARGB) values of the pixel. (For ARGB values, the most significant byte represents the
+         * alpha channel value, followed by red, green, and blue.)
+         * @see egret.Bitmap
+         * @version Egret 2.4
+         * @platform Web,Native
+         * @language en_US
+         */
+        /**
+         * BitmapData 对象是一个包含像素数据的数组。此数据可以表示完全不透明的位图，或表示包含 Alpha 通道数据的透明位图。
+         * 以上任一类型的 BitmapData 对象都作为 32 位整数的缓冲区进行存储。每个 32 位整数确定位图中单个像素的属性。<br/>
+         * 每个 32 位整数都是四个 8 位通道值（从 0 到 255）的组合，这些值描述像素的 Alpha 透明度以及红色、绿色、蓝色 (ARGB) 值。
+         * （对于 ARGB 值，最高有效字节代表 Alpha 通道值，其后的有效字节分别代表红色、绿色和蓝色通道值。）
+         * @see egret.Bitmap
+         * @version Egret 2.4
+         * @platform Web,Native
+         * @language zh_CN
+         */
+        var BitmapData = (function (_super) {
+            __extends(BitmapData, _super);
+            /**
+             * Initializes a BitmapData object to refer to the specified source object.
+             * @param source The source object being referenced.
+             * @version Egret 2.4
+             * @platform Web,Native
+             * @language en_US
+             */
+            /**
+             * 创建一个引用指定 source 实例的 BitmapData 对象
+             * @param source 被引用的 source 实例
+             * @version Egret 2.4
+             * @platform Web,Native
+             * @language zh_CN
+             */
+            function BitmapData(source) {
+                var _this = _super.call(this) || this;
+                /**
+                 * Texture format.
+                 * @version Egret 2.4
+                 * @platform Web,Native
+                 * @language en_US
+                 */
+                /**
+                 * 纹理格式。
+                 * @version Egret 2.4
+                 * @platform Web,Native
+                 * @language zh_CN
+                 */
+                _this.format = "image";
+                /**
+                 * @private
+                 * webgl纹理生成后，是否删掉原始图像数据
+                 */
+                _this.$deleteSource = true;
+                _this.source = source;
+                _this.width = source.width;
+                _this.height = source.height;
+                return _this;
+            }
+            Object.defineProperty(BitmapData.prototype, "source", {
+                get: function () {
+                    return this.$source;
+                },
+                set: function (value) {
+                    this.$source = value;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            BitmapData.create = function (type, data, callback) {
+                var base64 = "";
+                if (type === "arraybuffer") {
+                    base64 = egret.Base64Util.encode(data);
+                }
+                else {
+                    base64 = data;
+                }
+                var imageType = "image/png"; //default value
+                if (base64.charAt(0) === '/') {
+                    imageType = "image/jpeg";
+                }
+                else if (base64.charAt(0) === 'R') {
+                    imageType = "image/gif";
+                }
+                else if (base64.charAt(0) === 'i') {
+                    imageType = "image/png";
+                }
+                var img = new Image();
+                img.src = "data:" + imageType + ";base64," + base64;
+                img.crossOrigin = '*';
+                var bitmapData = new BitmapData(img);
+                img.onload = function () {
+                    img.onload = undefined;
+                    bitmapData.source = img;
+                    bitmapData.height = img.height;
+                    bitmapData.width = img.width;
+                    if (callback) {
+                        callback(bitmapData);
+                    }
+                };
+                return bitmapData;
+            };
+            BitmapData.prototype.$dispose = function () {
+                if (egret.Capabilities.renderMode == "webgl" && this.webGLTexture) {
+                    egret.WebGLUtils.deleteWebGLTexture(this.webGLTexture);
+                    this.webGLTexture = null;
+                }
+                //native or WebGLRenderTarget
+                if (this.source && this.source.dispose) {
+                    this.source.dispose();
+                }
+                if (this.source && this.source.src) {
+                    this.source.src = "";
+                }
+                this.source = null;
+                BitmapData.$dispose(this);
+            };
+            BitmapData.$addDisplayObject = function (displayObject, bitmapData) {
+                if (!bitmapData) {
+                    return;
+                }
+                var hashCode = bitmapData.hashCode;
+                if (!hashCode) {
+                    return;
+                }
+                if (!BitmapData._displayList[hashCode]) {
+                    BitmapData._displayList[hashCode] = [displayObject];
+                    return;
+                }
+                var tempList = BitmapData._displayList[hashCode];
+                if (tempList.indexOf(displayObject) < 0) {
+                    tempList.push(displayObject);
+                }
+            };
+            BitmapData.$removeDisplayObject = function (displayObject, bitmapData) {
+                if (!bitmapData) {
+                    return;
+                }
+                var hashCode = bitmapData.hashCode;
+                if (!hashCode) {
+                    return;
+                }
+                if (!BitmapData._displayList[hashCode]) {
+                    return;
+                }
+                var tempList = BitmapData._displayList[hashCode];
+                var index = tempList.indexOf(displayObject);
+                if (index >= 0) {
+                    tempList.splice(index, 1);
+                }
+            };
+            BitmapData.$invalidate = function (bitmapData) {
+                if (!bitmapData) {
+                    return;
+                }
+                var hashCode = bitmapData.hashCode;
+                if (!hashCode) {
+                    return;
+                }
+                if (!BitmapData._displayList[hashCode]) {
+                    return;
+                }
+                var tempList = BitmapData._displayList[hashCode];
+                for (var i = 0; i < tempList.length; i++) {
+                    if (tempList[i] instanceof egret.Bitmap) {
+                        tempList[i].$refreshImageData();
+                    }
+                    var bitmap = tempList[i];
+                    bitmap.$renderDirty = true;
+                    var p = bitmap.$parent;
+                    if (p && !p.$cacheDirty) {
+                        p.$cacheDirty = true;
+                        p.$cacheDirtyUp();
+                    }
+                    var maskedObject = bitmap.$maskedObject;
+                    if (maskedObject && !maskedObject.$cacheDirty) {
+                        maskedObject.$cacheDirty = true;
+                        maskedObject.$cacheDirtyUp();
+                    }
+                }
+            };
+            BitmapData.$dispose = function (bitmapData) {
+                if (!bitmapData) {
+                    return;
+                }
+                var hashCode = bitmapData.hashCode;
+                if (!hashCode) {
+                    return;
+                }
+                if (!BitmapData._displayList[hashCode]) {
+                    return;
+                }
+                var tempList = BitmapData._displayList[hashCode];
+                for (var _i = 0, tempList_1 = tempList; _i < tempList_1.length; _i++) {
+                    var node = tempList_1[_i];
+                    if (node instanceof egret.Bitmap) {
+                        node.$bitmapData = null;
+                    }
+                    node.$renderDirty = true;
+                    var p = node.$parent;
+                    if (p && !p.$cacheDirty) {
+                        p.$cacheDirty = true;
+                        p.$cacheDirtyUp();
+                    }
+                    var maskedObject = node.$maskedObject;
+                    if (maskedObject && !maskedObject.$cacheDirty) {
+                        maskedObject.$cacheDirty = true;
+                        maskedObject.$cacheDirtyUp();
+                    }
+                }
+                delete BitmapData._displayList[hashCode];
+            };
+            BitmapData._displayList = egret.createMap();
+            return BitmapData;
+        }(egret.HashObject));
+        wxgame.BitmapData = BitmapData;
+        __reflect(BitmapData.prototype, "egret.wxgame.BitmapData");
+        egret.BitmapData = BitmapData;
+    })(wxgame = egret.wxgame || (egret.wxgame = {}));
+})(egret || (egret = {}));
+//////////////////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2014-present, Egret Technology.
+//  All rights reserved.
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions are met:
+//
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//     * Neither the name of the Egret nor the
+//       names of its contributors may be used to endorse or promote products
+//       derived from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY EGRET AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+//  OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+//  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+//  IN NO EVENT SHALL EGRET AND CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+//  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;LOSS OF USE, DATA,
+//  OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+//  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+//  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+//  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////////////////
+
+(function (egret) {
+    var wxgame;
+    (function (wxgame) {
+        /**
+         * @private
+         */
+        var WebExternalInterface = (function () {
+            function WebExternalInterface() {
+            }
+            /**
+             * @private
+             * @param functionName
+             * @param value
+             */
+            WebExternalInterface.call = function (functionName, value) {
+            };
+            /**
+             * @private
+             * @param functionName
+             * @param listener
+             */
+            WebExternalInterface.addCallback = function (functionName, listener) {
+            };
+            return WebExternalInterface;
+        }());
+        wxgame.WebExternalInterface = WebExternalInterface;
+        __reflect(WebExternalInterface.prototype, "egret.wxgame.WebExternalInterface", ["egret.ExternalInterface"]);
+        var ua = navigator.userAgent.toLowerCase();
+        if (ua.indexOf("egretnative") < 0) {
+            egret.ExternalInterface = WebExternalInterface;
+        }
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
 (function (egret) {
-    /**
-     * 转换 Image，Canvas，Video 为 Egret 框架内使用的 BitmapData 对象。
-     * @param data 需要转换的对象，包括HTMLImageElement|HTMLCanvasElement|HTMLVideoElement
-     * @deprecated
-     */
-    function $toBitmapData(data) {
-        data["hashCode"] = data["$hashCode"] = egret.$hashCount++;
-        return data;
-    }
-    egret.$toBitmapData = $toBitmapData;
+    var wxgame;
+    (function (wxgame) {
+        var callBackDic = {};
+        /**
+         * @private
+         */
+        var NativeExternalInterface = (function () {
+            function NativeExternalInterface() {
+            }
+            NativeExternalInterface.call = function (functionName, value) {
+                var data = {};
+                data.functionName = functionName;
+                data.value = value;
+                egret_native.sendInfoToPlugin(JSON.stringify(data));
+            };
+            NativeExternalInterface.addCallback = function (functionName, listener) {
+                callBackDic[functionName] = listener;
+            };
+            return NativeExternalInterface;
+        }());
+        wxgame.NativeExternalInterface = NativeExternalInterface;
+        __reflect(NativeExternalInterface.prototype, "egret.wxgame.NativeExternalInterface", ["egret.ExternalInterface"]);
+        /**
+         * @private
+         * @param info
+         */
+        function onReceivedPluginInfo(info) {
+            var data = JSON.parse(info);
+            var functionName = data.functionName;
+            var listener = callBackDic[functionName];
+            if (listener) {
+                var value = data.value;
+                listener.call(null, value);
+            }
+            else {
+                egret.$warn(1050, functionName);
+            }
+        }
+        var ua = navigator.userAgent.toLowerCase();
+        if (ua.indexOf("egretnative") >= 0) {
+            egret.ExternalInterface = NativeExternalInterface;
+            egret_native.receivedPluginInfo = onReceivedPluginInfo;
+        }
+    })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
 //////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1400,7 +1707,7 @@ if (window['HTMLVideoElement'] == undefined) {
                     if (!this._bitmapData) {
                         this.video.width = this.video.videoWidth;
                         this.video.height = this.video.videoHeight;
-                        this._bitmapData = new egret.BitmapData(this.video);
+                        this._bitmapData = new wxgame.BitmapData(this.video);
                         this._bitmapData.$deleteSource = false;
                     }
                     return this._bitmapData;
@@ -2864,7 +3171,7 @@ if (window['HTMLVideoElement'] == undefined) {
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "1.1.8";
+        wxgame.version = "1.1.9";
         /**
          * 运行环境是否为子域
          */
@@ -3001,8 +3308,8 @@ if (window['HTMLVideoElement'] == undefined) {
             }
             requestAnimationFrame(onTick);
             function onTick() {
-                ticker.update();
                 requestAnimationFrame(onTick);
+                ticker.update();
             }
         }
         egret.runEgret = runEgret;
@@ -3164,85 +3471,34 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
+if (window['HTMLDivElement'] == undefined) {
+    window['HTMLDivElement'] = HTMLElement;
+}
+// There is no HTMLDivElement in webkit for air
+if (window['HTMLVideoElement'] == undefined) {
+    window['HTMLVideoElement'] = HTMLDivElement;
+}
 
 (function (egret) {
     var wxgame;
     (function (wxgame) {
-        /**
-         * @private
-         */
-        var WebExternalInterface = (function () {
-            function WebExternalInterface() {
-            }
-            /**
-             * @private
-             * @param functionName
-             * @param value
-             */
-            WebExternalInterface.call = function (functionName, value) {
-            };
-            /**
-             * @private
-             * @param functionName
-             * @param listener
-             */
-            WebExternalInterface.addCallback = function (functionName, listener) {
-            };
-            return WebExternalInterface;
-        }());
-        wxgame.WebExternalInterface = WebExternalInterface;
-        __reflect(WebExternalInterface.prototype, "egret.wxgame.WebExternalInterface", ["egret.ExternalInterface"]);
-        var ua = navigator.userAgent.toLowerCase();
-        if (ua.indexOf("egretnative") < 0) {
-            egret.ExternalInterface = WebExternalInterface;
-        }
+        var className = "egret.BitmapData";
+        egret.registerClass(HTMLImageElement, className);
+        egret.registerClass(HTMLCanvasElement, className);
+        egret.registerClass(HTMLVideoElement, className);
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
 (function (egret) {
-    var wxgame;
-    (function (wxgame) {
-        var callBackDic = {};
-        /**
-         * @private
-         */
-        var NativeExternalInterface = (function () {
-            function NativeExternalInterface() {
-            }
-            NativeExternalInterface.call = function (functionName, value) {
-                var data = {};
-                data.functionName = functionName;
-                data.value = value;
-                egret_native.sendInfoToPlugin(JSON.stringify(data));
-            };
-            NativeExternalInterface.addCallback = function (functionName, listener) {
-                callBackDic[functionName] = listener;
-            };
-            return NativeExternalInterface;
-        }());
-        wxgame.NativeExternalInterface = NativeExternalInterface;
-        __reflect(NativeExternalInterface.prototype, "egret.wxgame.NativeExternalInterface", ["egret.ExternalInterface"]);
-        /**
-         * @private
-         * @param info
-         */
-        function onReceivedPluginInfo(info) {
-            var data = JSON.parse(info);
-            var functionName = data.functionName;
-            var listener = callBackDic[functionName];
-            if (listener) {
-                var value = data.value;
-                listener.call(null, value);
-            }
-            else {
-                egret.$warn(1050, functionName);
-            }
-        }
-        var ua = navigator.userAgent.toLowerCase();
-        if (ua.indexOf("egretnative") >= 0) {
-            egret.ExternalInterface = NativeExternalInterface;
-            egret_native.receivedPluginInfo = onReceivedPluginInfo;
-        }
-    })(wxgame = egret.wxgame || (egret.wxgame = {}));
+    /**
+     * 转换 Image，Canvas，Video 为 Egret 框架内使用的 BitmapData 对象。
+     * @param data 需要转换的对象，包括HTMLImageElement|HTMLCanvasElement|HTMLVideoElement
+     * @deprecated
+     */
+    function $toBitmapData(data) {
+        data["hashCode"] = data["$hashCode"] = egret.$hashCount++;
+        return data;
+    }
+    egret.$toBitmapData = $toBitmapData;
 })(egret || (egret = {}));
 //////////////////////////////////////////////////////////////////////////////////////
 //
@@ -5109,6 +5365,9 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+                if (bitmapData.source) {
+                    bitmapData.source.src = "";
+                }
                 return texture;
             };
             WebGLRenderContext.prototype.createTextureFromCompressedData = function (data, width, height, levels, internalFormat) {
@@ -5135,6 +5394,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                         bitmapData.webGLTexture = this.createTextureFromCompressedData(bitmapData.source.pvrtcData, bitmapData.width, bitmapData.height, bitmapData.source.mipmapsCount, bitmapData.source.format);
                     }
                     if (bitmapData.$deleteSource && bitmapData.webGLTexture) {
+                        bitmapData.source.src = "";
                         bitmapData.source = null;
                     }
                     //todo 默认值

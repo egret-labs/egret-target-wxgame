@@ -128,7 +128,7 @@ namespace egret.wxgame {
         /**
          * 启用RenderBuffer
          */
-        private activateBuffer(buffer: WebGLRenderBuffer, width:number, height:number): void {
+        private activateBuffer(buffer: WebGLRenderBuffer, width: number, height: number): void {
 
             buffer.rootRenderTarget.activate();
 
@@ -380,6 +380,10 @@ namespace egret.wxgame {
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
+            if (bitmapData.source) {
+                bitmapData.source.src = "";
+            }
+
             return texture;
         }
 
@@ -409,6 +413,7 @@ namespace egret.wxgame {
                     bitmapData.webGLTexture = this.createTextureFromCompressedData(bitmapData.source.pvrtcData, bitmapData.width, bitmapData.height, bitmapData.source.mipmapsCount, bitmapData.source.format);
                 }
                 if (bitmapData.$deleteSource && bitmapData.webGLTexture) {
+                    bitmapData.source.src = "";
                     bitmapData.source = null;
                 }
                 //todo 默认值
