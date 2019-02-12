@@ -209,6 +209,7 @@ namespace egret.wxgame {
             if (this.source && this.source.dispose) {
                 this.source.dispose();
             }
+            // clean buffer for wechat
             if(this.source && this.source.src){
                 this.source.src = "";
             }
