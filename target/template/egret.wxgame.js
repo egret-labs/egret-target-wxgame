@@ -272,6 +272,7 @@ r.prototype = e.prototype, t.prototype = new r();
                 if (this.source && this.source.dispose) {
                     this.source.dispose();
                 }
+                // clean buffer for wechat
                 if (this.source && this.source.src) {
                     this.source.src = "";
                 }
@@ -2481,7 +2482,12 @@ r.prototype = e.prototype, t.prototype = new r();
             font += (fontSize || 12) + "px ";
             font += (fontFamily || "Arial");
             context.font = font;
-            return context.measureText(text).width;
+            var metrics = context.measureText(text);
+            if (!metrics) {
+                egret.warn("wxcontext.measureText resule is null or undefined;text is " + text + "; font is " + font);
+                return 1;
+            }
+            return metrics.width;
         }
         /**
          * @private
