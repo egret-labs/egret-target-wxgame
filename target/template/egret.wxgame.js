@@ -3177,7 +3177,7 @@ r.prototype = e.prototype, t.prototype = new r();
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "1.1.9";
+        wxgame.version = "1.1.10";
         /**
          * 运行环境是否为子域
          */
@@ -3329,6 +3329,9 @@ r.prototype = e.prototype, t.prototype = new r();
 })(egret || (egret = {}));
 if (true) {
     var language = navigator.language || navigator["browserLanguage"] || "en_US";
+    if (language == 'zh-cn') {
+        language = "zh_CN";
+    }
     language = language.replace("-", "_");
     if (language in egret.$locale_strings)
         egret.$language = language;
@@ -3636,8 +3639,10 @@ if (window['HTMLVideoElement'] == undefined) {
                 var option = {};
                 option.entryClassName = options.entryClassName || "Main";
                 option.scaleMode = options.scaleMode || egret.StageScaleMode.FIXED_WIDTH;
-                if (option.scaleMode == egret.StageScaleMode.SHOW_ALL) {
-                    throw new Error("小游戏不支持 showAll 适配模式，推荐使用 fixedWidth 模式");
+                if (!option.scaleMode || option.scaleMode == egret.StageScaleMode.SHOW_ALL) {
+                    option.scaleMode = egret.StageScaleMode.FIXED_WIDE;
+                    var message = egret.sys.tr(4500, "showAll", "fixedWidth");
+                    console.warn(message);
                 }
                 option.frameRate = options.frameRate || 30;
                 option.contentWidth = options.contentWidth || 640;

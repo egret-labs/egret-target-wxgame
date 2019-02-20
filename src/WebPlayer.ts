@@ -91,8 +91,10 @@ namespace egret.wxgame {
             let option: PlayerOption = {};
             option.entryClassName = options.entryClassName || "Main";
             option.scaleMode = options.scaleMode || egret.StageScaleMode.FIXED_WIDTH;
-            if (option.scaleMode == egret.StageScaleMode.SHOW_ALL) {
-                throw new Error("小游戏不支持 showAll 适配模式，推荐使用 fixedWidth 模式");
+            if (!option.scaleMode || option.scaleMode == egret.StageScaleMode.SHOW_ALL) {
+                option.scaleMode = egret.StageScaleMode.FIXED_WIDE;
+                let message = egret.sys.tr(4500, "showAll", "fixedWidth")
+                console.warn(message)
             }
             option.frameRate = options.frameRate || 30;
             option.contentWidth = options.contentWidth || 640;
