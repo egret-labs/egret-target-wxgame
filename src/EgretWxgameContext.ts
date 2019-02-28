@@ -205,11 +205,11 @@ namespace egret.wxgame {
 if (DEBUG) {
     let systemInfo = wx.getSystemInfoSync();
     let language = systemInfo.language;
-    if (language == 'zh-cn'){
+    if (language == 'zh-cn') {
         language = "zh_CN"
+    } else {
+        language = "en_US"
     }
-    language = language.replace("-", "_");
-
     if (language in egret.$locale_strings) {
         egret.$language = language;
     }
