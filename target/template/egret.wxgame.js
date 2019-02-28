@@ -438,56 +438,7 @@ r.prototype = e.prototype, t.prototype = new r();
         }());
         wxgame.WebExternalInterface = WebExternalInterface;
         __reflect(WebExternalInterface.prototype, "egret.wxgame.WebExternalInterface", ["egret.ExternalInterface"]);
-        var ua = navigator.userAgent.toLowerCase();
-        if (ua.indexOf("egretnative") < 0) {
-            egret.ExternalInterface = WebExternalInterface;
-        }
-    })(wxgame = egret.wxgame || (egret.wxgame = {}));
-})(egret || (egret = {}));
-(function (egret) {
-    var wxgame;
-    (function (wxgame) {
-        var callBackDic = {};
-        /**
-         * @private
-         */
-        var NativeExternalInterface = (function () {
-            function NativeExternalInterface() {
-            }
-            NativeExternalInterface.call = function (functionName, value) {
-                var data = {};
-                data.functionName = functionName;
-                data.value = value;
-                egret_native.sendInfoToPlugin(JSON.stringify(data));
-            };
-            NativeExternalInterface.addCallback = function (functionName, listener) {
-                callBackDic[functionName] = listener;
-            };
-            return NativeExternalInterface;
-        }());
-        wxgame.NativeExternalInterface = NativeExternalInterface;
-        __reflect(NativeExternalInterface.prototype, "egret.wxgame.NativeExternalInterface", ["egret.ExternalInterface"]);
-        /**
-         * @private
-         * @param info
-         */
-        function onReceivedPluginInfo(info) {
-            var data = JSON.parse(info);
-            var functionName = data.functionName;
-            var listener = callBackDic[functionName];
-            if (listener) {
-                var value = data.value;
-                listener.call(null, value);
-            }
-            else {
-                egret.$warn(1050, functionName);
-            }
-        }
-        var ua = navigator.userAgent.toLowerCase();
-        if (ua.indexOf("egretnative") >= 0) {
-            egret.ExternalInterface = NativeExternalInterface;
-            egret_native.receivedPluginInfo = onReceivedPluginInfo;
-        }
+        egret.ExternalInterface = WebExternalInterface;
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
 //////////////////////////////////////////////////////////////////////////////////////
@@ -645,11 +596,6 @@ r.prototype = e.prototype, t.prototype = new r();
                 var audio = new Audio(url);
                 audio.addEventListener("canplaythrough", onAudioLoaded);
                 audio.addEventListener("error", onAudioError);
-                var ua = navigator.userAgent.toLowerCase();
-                if (ua.indexOf("firefox") >= 0) {
-                    audio.autoplay = !0;
-                    audio.muted = true;
-                }
                 // audio.load();     wxgame没有此接口
                 this.originAudio = audio;
                 if (HtmlSound.clearAudios[this.url]) {
@@ -658,10 +604,6 @@ r.prototype = e.prototype, t.prototype = new r();
                 HtmlSound.$recycle(this.url, audio);
                 function onAudioLoaded() {
                     removeListeners();
-                    if (ua.indexOf("firefox") >= 0) {
-                        audio.pause();
-                        audio.muted = false;
-                    }
                     self.loaded = true;
                     self.dispatchEventWith(egret.Event.COMPLETE);
                 }
@@ -3019,8 +2961,8 @@ r.prototype = e.prototype, t.prototype = new r();
              *
              */
             Html5Capatibility.$init = function () {
-                var ua = navigator.userAgent.toLowerCase();
-                Html5Capatibility.ua = ua;
+                var systemInfo = wx.getSystemInfoSync();
+                Html5Capatibility.systemInfo = systemInfo;
                 Html5Capatibility._canUseBlob = false;
                 var canUseWebAudio = window["AudioContext"] || window["webkitAudioContext"] || window["mozAudioContext"];
                 if (canUseWebAudio) {
@@ -3042,12 +2984,13 @@ r.prototype = e.prototype, t.prototype = new r();
                     checkAudioType = true;
                     Html5Capatibility.setAudioType(AudioType.HTML5_AUDIO);
                 }
-                if (ua.indexOf("android") >= 0) {
+                var platformStr = systemInfo.platform;
+                if (platformStr.indexOf("android") >= 0) {
                     if (checkAudioType && canUseWebAudio) {
                         Html5Capatibility.setAudioType(AudioType.WEB_AUDIO);
                     }
                 }
-                else if (ua.indexOf("iphone") >= 0 || ua.indexOf("ipad") >= 0 || ua.indexOf("ipod") >= 0) {
+                else if (platformStr.indexOf("iphone") >= 0 || platformStr.indexOf("ipad") >= 0 || platformStr.indexOf("ipod") >= 0) {
                     if (Html5Capatibility.getIOSVersion() >= 7) {
                         Html5Capatibility._canUseBlob = true;
                         if (checkAudioType && canUseWebAudio) {
@@ -3058,10 +3001,6 @@ r.prototype = e.prototype, t.prototype = new r();
                 var winURL = window["URL"] || window["webkitURL"];
                 if (!winURL) {
                     Html5Capatibility._canUseBlob = false;
-                }
-                if (ua.indexOf("egretnative") >= 0) {
-                    Html5Capatibility.setAudioType(AudioType.HTML5_AUDIO);
-                    Html5Capatibility._canUseBlob = true;
                 }
                 egret.Sound = Html5Capatibility._AudioClass;
             };
@@ -3082,17 +3021,13 @@ r.prototype = e.prototype, t.prototype = new r();
              * @returns {string}
              */
             Html5Capatibility.getIOSVersion = function () {
-                var value = Html5Capatibility.ua.toLowerCase().match(/cpu [^\d]*\d.*like mac os x/)[0];
-                return parseInt(value.match(/\d+(_\d)*/)[0]) || 0;
+                var systemStr = Html5Capatibility.systemInfo.system;
+                return parseInt(systemStr.match(/\d+(_\d)*/)[0]) || 0;
             };
             //当前浏览器版本是否支持blob
             Html5Capatibility._canUseBlob = false;
             //当前浏览器版本是否支持webaudio
             Html5Capatibility._audioType = 0;
-            /**
-             * @private
-             */
-            Html5Capatibility.ua = "";
             return Html5Capatibility;
         }(egret.HashObject));
         wxgame.Html5Capatibility = Html5Capatibility;
@@ -3177,7 +3112,7 @@ r.prototype = e.prototype, t.prototype = new r();
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "1.1.10";
+        wxgame.version = "1.1.11";
         /**
          * 运行环境是否为子域
          */
@@ -3328,13 +3263,15 @@ r.prototype = e.prototype, t.prototype = new r();
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
 if (true) {
-    var language = navigator.language || navigator["browserLanguage"] || "en_US";
+    var systemInfo = wx.getSystemInfoSync();
+    var language = systemInfo.language;
     if (language == 'zh-cn') {
         language = "zh_CN";
     }
     language = language.replace("-", "_");
-    if (language in egret.$locale_strings)
+    if (language in egret.$locale_strings) {
         egret.$language = language;
+    }
 }
 egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
 //////////////////////////////////////////////////////////////////////////////////////
@@ -3381,69 +3318,21 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
              */
             WebCapability.detect = function () {
                 var capabilities = egret.Capabilities;
-                var ua = navigator.userAgent.toLowerCase();
-                capabilities["isMobile" + ""] = (ua.indexOf('mobile') != -1 || ua.indexOf('android') != -1);
-                if (capabilities.isMobile) {
-                    if (ua.indexOf("windows") < 0 && (ua.indexOf("iphone") != -1 || ua.indexOf("ipad") != -1 || ua.indexOf("ipod") != -1)) {
-                        capabilities["os" + ""] = "iOS";
-                    }
-                    else if (ua.indexOf("android") != -1 && ua.indexOf("linux") != -1) {
-                        capabilities["os" + ""] = "Android";
-                    }
-                    else if (ua.indexOf("windows") != -1) {
-                        capabilities["os" + ""] = "Windows Phone";
-                    }
+                capabilities["isMobile" + ""] = true;
+                var systemInfo = wx.getSystemInfoSync();
+                var systemStr = systemInfo.system.toLowerCase();
+                if ((systemStr.indexOf("iphone") != -1 || systemStr.indexOf("ipad") != -1 || systemStr.indexOf("ipod") != -1)) {
+                    capabilities["os" + ""] = "iOS";
                 }
-                else {
-                    if (ua.indexOf("windows nt") != -1) {
-                        capabilities["os" + ""] = "Windows PC";
-                    }
-                    else if (ua.indexOf("mac os") != -1) {
-                        capabilities["os" + ""] = "Mac OS";
-                    }
+                else if (systemStr.indexOf("android") != -1) {
+                    capabilities["os" + ""] = "Android";
                 }
-                var language = (navigator.language || navigator["browserLanguage"]).toLowerCase();
+                var language = systemInfo.language;
                 var strings = language.split("-");
                 if (strings.length > 1) {
                     strings[1] = strings[1].toUpperCase();
                 }
                 capabilities["language" + ""] = strings.join("-");
-                WebCapability.injectUIntFixOnIE9();
-            };
-            WebCapability.injectUIntFixOnIE9 = function () {
-                if (/msie 9.0/i.test(navigator.userAgent) && !/opera/i.test(navigator.userAgent)) {
-                    var IEBinaryToArray_ByteStr_Script = "<!-- IEBinaryToArray_ByteStr -->\r\n" +
-                        "<script type='text/vbscript' language='VBScript'>\r\n" +
-                        "Function IEBinaryToArray_ByteStr(Binary)\r\n" +
-                        "   IEBinaryToArray_ByteStr = CStr(Binary)\r\n" +
-                        "End Function\r\n" +
-                        "Function IEBinaryToArray_ByteStr_Last(Binary)\r\n" +
-                        "   Dim lastIndex\r\n" +
-                        "   lastIndex = LenB(Binary)\r\n" +
-                        "   if lastIndex mod 2 Then\r\n" +
-                        "       IEBinaryToArray_ByteStr_Last = Chr( AscB( MidB( Binary, lastIndex, 1 ) ) )\r\n" +
-                        "   Else\r\n" +
-                        "       IEBinaryToArray_ByteStr_Last = " + '""' + "\r\n" +
-                        "   End If\r\n" +
-                        "End Function\r\n" + "<\/script>\r\n" +
-                        "<!-- convertResponseBodyToText -->\r\n" +
-                        "<script>\r\n" +
-                        "let convertResponseBodyToText = function (binary) {\r\n" +
-                        "   let byteMapping = {};\r\n" +
-                        "   for ( let i = 0; i < 256; i++ ) {\r\n" +
-                        "       for ( let j = 0; j < 256; j++ ) {\r\n" +
-                        "           byteMapping[ String.fromCharCode( i + j * 256 ) ] =\r\n" +
-                        "           String.fromCharCode(i) + String.fromCharCode(j);\r\n" +
-                        "       }\r\n" +
-                        "   }\r\n" +
-                        "   let rawBytes = IEBinaryToArray_ByteStr(binary);\r\n" +
-                        "   let lastChr = IEBinaryToArray_ByteStr_Last(binary);\r\n" +
-                        "   return rawBytes.replace(/[\\s\\S]/g," +
-                        "                           function( match ) { return byteMapping[match]; }) + lastChr;\r\n" +
-                        "};\r\n" +
-                        "<\/script>\r\n";
-                    document.write(IEBinaryToArray_ByteStr_Script);
-                }
             };
             return WebCapability;
         }());

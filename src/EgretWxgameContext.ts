@@ -203,14 +203,16 @@ namespace egret.wxgame {
 }
 
 if (DEBUG) {
-    let language = navigator.language || navigator["browserLanguage"] || "en_US";
-    if(language == 'zh-cn'){
+    let systemInfo = wx.getSystemInfoSync();
+    let language = systemInfo.language;
+    if (language == 'zh-cn'){
         language = "zh_CN"
     }
     language = language.replace("-", "_");
 
-    if (language in egret.$locale_strings)
+    if (language in egret.$locale_strings) {
         egret.$language = language;
+    }
 }
 
 egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
