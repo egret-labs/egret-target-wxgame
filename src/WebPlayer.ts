@@ -47,6 +47,7 @@ namespace egret.wxgame {
             stage.$orientation = option.orientation;
             stage.$maxTouches = option.maxTouches;
             stage.frameRate = option.frameRate;
+            wx.setPreferredFramesPerSecond(stage.frameRate);
             stage.textureScaleFactor = option.textureScaleFactor;
 
             let buffer = new sys.RenderBuffer(undefined, undefined, true);

@@ -3315,7 +3315,7 @@ r.prototype = e.prototype, t.prototype = new r();
             requestAnimationFrame(onTick);
             function onTick() {
                 requestAnimationFrame(onTick);
-                ticker.update();
+                ticker.update(true);
             }
         }
         egret.runEgret = runEgret;
@@ -3603,6 +3603,7 @@ if (window['HTMLVideoElement'] == undefined) {
                 stage.$orientation = option.orientation;
                 stage.$maxTouches = option.maxTouches;
                 stage.frameRate = option.frameRate;
+                wx.setPreferredFramesPerSecond(stage.frameRate);
                 stage.textureScaleFactor = option.textureScaleFactor;
                 var buffer = new egret.sys.RenderBuffer(undefined, undefined, true);
                 var canvas = buffer.surface;
