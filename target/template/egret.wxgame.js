@@ -2426,7 +2426,7 @@ r.prototype = e.prototype, t.prototype = new r();
             context.font = font;
             var metrics = context.measureText(text);
             if (!metrics) {
-                egret.warn("wxcontext.measureText resule is null or undefined;text is " + text + "; font is " + font);
+                egret.warn("wxcontext.measureText result is null or undefined;text is " + text + "; font is " + font);
                 return 1;
             }
             return metrics.width;
