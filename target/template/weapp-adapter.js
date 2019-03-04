@@ -961,6 +961,14 @@
                     get: function get() {
                         return _innerAudioContext.get(this).paused;
                     }
+                }, {
+                    key: 'volume',
+                    get: function get() {
+                        return _innerAudioContext.get(this).volume;
+                    },
+                    set: function set(value) {
+                        _innerAudioContext.get(this).volume = value;
+                    }
                 }]);
 
                 return Audio;

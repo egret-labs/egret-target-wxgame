@@ -185,8 +185,8 @@ namespace egret.wxgame {
 
         requestAnimationFrame(onTick);
         function onTick(): void {
-            ticker.update();
             requestAnimationFrame(onTick);
+            ticker.update(true);
         }
     }
 
@@ -203,11 +203,16 @@ namespace egret.wxgame {
 }
 
 if (DEBUG) {
-    let language = navigator.language || navigator["browserLanguage"] || "en_US";
-    language = language.replace("-", "_");
-
-    if (language in egret.$locale_strings)
+    let systemInfo = wx.getSystemInfoSync();
+    let language = systemInfo.language;
+    if (language == 'zh-cn') {
+        language = "zh_CN"
+    } else {
+        language = "en_US"
+    }
+    if (language in egret.$locale_strings) {
         egret.$language = language;
+    }
 }
 
 egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;

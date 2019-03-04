@@ -68,15 +68,15 @@ namespace egret.wxgame {
         /**
          * @private
          */
-        private static ua: string = "";
+        private static systemInfo: any;
 
         /**
          * @private
          *
          */
         public static $init(): void {
-            let ua: string = navigator.userAgent.toLowerCase();
-            Html5Capatibility.ua = ua;
+            let systemInfo = wx.getSystemInfoSync();
+            Html5Capatibility.systemInfo = systemInfo;
 
             Html5Capatibility._canUseBlob = false;
             let canUseWebAudio = window["AudioContext"] || window["webkitAudioContext"] || window["mozAudioContext"];
@@ -100,12 +100,13 @@ namespace egret.wxgame {
                 Html5Capatibility.setAudioType(AudioType.HTML5_AUDIO);
             }
 
-            if (ua.indexOf("android") >= 0) {//android
+            var platformStr = systemInfo.platform;
+            if (platformStr.indexOf("android") >= 0) {//android
                 if (checkAudioType && canUseWebAudio) {
                     Html5Capatibility.setAudioType(AudioType.WEB_AUDIO);
                 }
             }
-            else if (ua.indexOf("iphone") >= 0 || ua.indexOf("ipad") >= 0 || ua.indexOf("ipod") >= 0) {//ios
+            else if (platformStr.indexOf("iphone") >= 0 || platformStr.indexOf("ipad") >= 0 || platformStr.indexOf("ipod") >= 0) {//ios
                 if (Html5Capatibility.getIOSVersion() >= 7) {
                     Html5Capatibility._canUseBlob = true;
                     if (checkAudioType && canUseWebAudio) {
@@ -117,11 +118,6 @@ namespace egret.wxgame {
             let winURL = window["URL"] || window["webkitURL"];
             if (!winURL) {
                 Html5Capatibility._canUseBlob = false;
-            }
-
-            if (ua.indexOf("egretnative") >= 0) {// Egret Native
-                Html5Capatibility.setAudioType(AudioType.HTML5_AUDIO);
-                Html5Capatibility._canUseBlob = true;
             }
 
             egret.Sound = Html5Capatibility._AudioClass;
@@ -145,8 +141,8 @@ namespace egret.wxgame {
          * @returns {string}
          */
         private static getIOSVersion(): number {
-            let value = Html5Capatibility.ua.toLowerCase().match(/cpu [^\d]*\d.*like mac os x/)[0];
-            return parseInt(value.match(/\d+(_\d)*/)[0]) || 0;
+            let systemStr = Html5Capatibility.systemInfo.system;
+            return parseInt(systemStr.match(/\d+(_\d)*/)[0]) || 0;
         }
     }
 

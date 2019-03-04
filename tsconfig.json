@@ -4,6 +4,7 @@
 		"outFile": "./target/template/egret.wxgame.js"
 	},
 	"files": [
+		"src/BitmapData.ts",
 		"src/WebBitmapData.ts",
 		"src/WebExternalInterface.ts",
 		"src/WebLocalStorage.ts",

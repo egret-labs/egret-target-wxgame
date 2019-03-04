@@ -43,114 +43,31 @@ r.prototype = e.prototype, t.prototype = new r();
         /**
          * @private
          */
+        var fpsText = new egret.TextField();
+        /**
+         * @private
+         */
         var WebFps = (function (_super) {
             __extends(WebFps, _super);
             function WebFps(stage, showFPS, showLog, logFilter, styles) {
                 var _this = _super.call(this) || this;
-                _this.showPanle = true;
-                _this.fpsHeight = 0;
-                _this.WIDTH = 101;
-                _this.HEIGHT = 20;
-                _this.bgCanvasColor = "#18304b";
-                _this.fpsFrontColor = "#18fefe";
-                _this.WIDTH_COST = 50;
-                _this.cost1Color = "#18fefe";
-                // private cost2Color = "#ffff00";
-                _this.cost3Color = "#ff0000";
                 _this.arrFps = [];
                 _this.arrCost = [];
-                _this.arrLog = [];
-                if (showFPS || showLog) {
-                    if (egret.Capabilities.renderMode == 'canvas') {
-                        _this.renderMode = "Canvas";
-                    }
-                    else {
-                        _this.renderMode = "WebGL";
-                    }
-                    _this.panelX = styles["x"] === undefined ? 0 : parseInt(styles['x']);
-                    _this.panelY = styles["y"] === undefined ? 0 : parseInt(styles['y']);
-                    _this.fontColor = styles["textColor"] === undefined ? '#ffffff' : styles['textColor'].replace("0x", "#");
-                    _this.fontSize = styles["size"] === undefined ? 12 : parseInt(styles['size']);
-                    if (egret.Capabilities.isMobile) {
-                        _this.fontSize -= 2;
-                    }
-                    var all = document.createElement('div');
-                    all.style.position = 'absolute';
-                    all.style.background = "rgba(0,0,0," + styles['bgAlpha'] + ")";
-                    all.style.left = _this.panelX + 'px';
-                    all.style.top = _this.panelY + 'px';
-                    all.style.pointerEvents = 'none';
-                    document.body.appendChild(all);
-                    var container = document.createElement('div');
-                    container.style.color = _this.fontColor;
-                    container.style.fontSize = _this.fontSize + 'px';
-                    container.style.lineHeight = _this.fontSize + 'px';
-                    container.style.margin = '4px 4px 4px 4px';
-                    _this.container = container;
-                    all.appendChild(container);
-                    if (showFPS)
-                        _this.addFps();
-                    if (showLog)
-                        _this.addLog();
+                if (!showFPS && !showLog) {
+                    return _this;
                 }
+                _this.arrFps = [];
+                _this.arrCost = [];
+                fpsText.x = styles["x"] == undefined ? 0 : parseInt(styles["x"]);
+                fpsText.y = styles["y"] == undefined ? 0 : parseInt(styles["y"]);
+                fpsText.textColor = styles["textColor"] == undefined ? '#ffffff' : styles['textColor'].replace("0x", "#");
+                var fontSize = styles["size"] == undefined ? 12 : parseInt(styles['size']);
+                fpsText.size = fontSize;
                 return _this;
             }
             WebFps.prototype.addFps = function () {
-                var div = document.createElement('div');
-                div.style.display = 'inline-block';
-                this.containerFps = div;
-                this.container.appendChild(div);
-                var fps = document.createElement('div');
-                fps.style.paddingBottom = '2px';
-                this.fps = fps;
-                this.containerFps.appendChild(fps);
-                fps.innerHTML = "0 FPS " + this.renderMode + "<br/>min0 max0 avg0";
-                var canvas = document.createElement('canvas');
-                this.containerFps.appendChild(canvas);
-                canvas.width = this.WIDTH;
-                canvas.height = this.HEIGHT;
-                this.canvasFps = canvas;
-                var context = canvas.getContext('2d');
-                this.contextFps = context;
-                context.fillStyle = this.bgCanvasColor;
-                context.fillRect(0, 0, this.WIDTH, this.HEIGHT);
-                var divDatas = document.createElement('div');
-                this.divDatas = divDatas;
-                this.containerFps.appendChild(divDatas);
-                var left = document.createElement('div');
-                left.style['float'] = 'left';
-                left.innerHTML = "Draw<br/>Cost";
-                divDatas.appendChild(left);
-                var right = document.createElement('div');
-                right.style.paddingLeft = left.offsetWidth + 20 + "px";
-                divDatas.appendChild(right);
-                var draw = document.createElement('div');
-                this.divDraw = draw;
-                draw.innerHTML = "0<br/>";
-                right.appendChild(draw);
-                var cost = document.createElement('div');
-                this.divCost = cost;
-                cost.innerHTML = "<font  style=\"color:" + this.cost1Color + "\">0<font/> <font  style=\"color:" + this.cost3Color + "\">0<font/>";
-                right.appendChild(cost);
-                canvas = document.createElement('canvas');
-                this.canvasCost = canvas;
-                this.containerFps.appendChild(canvas);
-                canvas.width = this.WIDTH;
-                canvas.height = this.HEIGHT;
-                context = canvas.getContext('2d');
-                this.contextCost = context;
-                context.fillStyle = this.bgCanvasColor;
-                context.fillRect(0, 0, this.WIDTH, this.HEIGHT);
-                context.fillStyle = "#000000";
-                context.fillRect(this.WIDTH_COST, 0, 1, this.HEIGHT);
-                this.fpsHeight = this.container.offsetHeight;
             };
             WebFps.prototype.addLog = function () {
-                var log = document.createElement('div');
-                log.style.maxWidth = document.body.clientWidth - 8 - this.panelX + 'px';
-                log.style.wordWrap = "break-word";
-                this.log = log;
-                this.container.appendChild(log);
             };
             WebFps.prototype.update = function (datas, showLastData) {
                 if (showLastData === void 0) { showLastData = false; }
@@ -187,57 +104,15 @@ r.prototype = e.prototype, t.prototype = new r();
                     else if (num > fpsMax)
                         fpsMax = num;
                 }
-                var WIDTH = this.WIDTH;
-                var HEIGHT = this.HEIGHT;
-                var context = this.contextFps;
-                context.drawImage(this.canvasFps, 1, 0, WIDTH - 1, HEIGHT, 0, 0, WIDTH - 1, HEIGHT);
-                context.fillStyle = this.bgCanvasColor;
-                context.fillRect(WIDTH - 1, 0, 1, HEIGHT);
-                var lastHeight = Math.floor(numFps / 60 * 20);
-                if (lastHeight < 1)
-                    lastHeight = 1;
-                context.fillStyle = this.fpsFrontColor;
-                context.fillRect(WIDTH - 1, 20 - lastHeight, 1, lastHeight);
-                var WIDTH_COST = this.WIDTH_COST;
-                context = this.contextCost;
-                context.drawImage(this.canvasCost, 1, 0, WIDTH_COST - 1, HEIGHT, 0, 0, WIDTH_COST - 1, HEIGHT);
-                context.drawImage(this.canvasCost, WIDTH_COST + 2, 0, WIDTH_COST - 1, HEIGHT, WIDTH_COST + 1, 0, WIDTH_COST - 1, HEIGHT);
-                var c1Height = Math.floor(numCostTicker / 2);
-                if (c1Height < 1)
-                    c1Height = 1;
-                else if (c1Height > 20)
-                    c1Height = 20;
-                //todo lcj
-                var c2Height = Math.floor(numCostRender / 2);
-                if (c2Height < 1)
-                    c2Height = 1;
-                else if (c2Height > 20)
-                    c2Height = 20;
-                context.fillStyle = this.bgCanvasColor;
-                context.fillRect(WIDTH_COST - 1, 0, 1, HEIGHT);
-                context.fillRect(WIDTH_COST * 2, 0, 1, HEIGHT);
-                context.fillRect(WIDTH_COST * 3 + 1, 0, 1, HEIGHT);
-                context.fillStyle = this.cost1Color;
-                context.fillRect(WIDTH_COST - 1, 20 - c1Height, 1, c1Height);
-                context.fillStyle = this.cost3Color;
-                context.fillRect(WIDTH_COST * 2, 20 - c2Height, 1, c2Height);
                 var fpsAvg = Math.floor(fpsTotal / lenFps);
-                var fpsOutput = numFps + " FPS " + this.renderMode;
-                if (this.showPanle) {
-                    fpsOutput += "<br/>min" + fpsMin + " max" + fpsMax + " avg" + fpsAvg;
-                    this.divDraw.innerHTML = this.lastNumDraw + "<br/>";
-                    this.divCost.innerHTML = "<font  style=\"color:#18fefe\">" + numCostTicker + "<font/> <font  style=\"color:#ff0000\">" + numCostRender + "<font/>";
-                }
-                this.fps.innerHTML = fpsOutput;
+                fpsText.text = numFps + " FPS \n"
+                    + ("min:" + fpsMin + " max:" + fpsMax + " avg:" + fpsAvg + "\n")
+                    + ("Draw " + this.lastNumDraw + "\n")
+                    + ("Cost " + numCostTicker + " " + numCostRender);
+                egret.sys.$TempStage.addChild(fpsText);
             };
             ;
             WebFps.prototype.updateInfo = function (info) {
-                this.arrLog.push(info);
-                this.log.innerHTML = this.arrLog.join('<br/>');
-                while (document.body.clientHeight < (this.log.offsetHeight + this.fpsHeight + this.panelY + this.fontSize * 2)) {
-                    this.arrLog.shift();
-                    this.log.innerHTML = this.arrLog.join('<br/>');
-                }
             };
             WebFps.prototype.updateWarn = function (info) {
             };
@@ -278,34 +153,293 @@ r.prototype = e.prototype, t.prototype = new r();
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
-if (window['HTMLDivElement'] == undefined) {
-    window['HTMLDivElement'] = HTMLElement;
-}
-// There is no HTMLDivElement in webkit for air
-if (window['HTMLVideoElement'] == undefined) {
-    window['HTMLVideoElement'] = HTMLDivElement;
-}
 
 (function (egret) {
     var wxgame;
     (function (wxgame) {
-        var className = "egret.BitmapData";
-        egret.registerClass(HTMLImageElement, className);
-        egret.registerClass(HTMLCanvasElement, className);
-        egret.registerClass(HTMLVideoElement, className);
+        /**
+         * A BitmapData object contains an array of pixel data. This data can represent either a fully opaque bitmap or a
+         * transparent bitmap that contains alpha channel data. Either type of BitmapData object is stored as a buffer of 32-bit
+         * integers. Each 32-bit integer determines the properties of a single pixel in the bitmap.<br/>
+         * Each 32-bit integer is a combination of four 8-bit channel values (from 0 to 255) that describe the alpha transparency
+         * and the red, green, and blue (ARGB) values of the pixel. (For ARGB values, the most significant byte represents the
+         * alpha channel value, followed by red, green, and blue.)
+         * @see egret.Bitmap
+         * @version Egret 2.4
+         * @platform Web,Native
+         * @language en_US
+         */
+        /**
+         * BitmapData 对象是一个包含像素数据的数组。此数据可以表示完全不透明的位图，或表示包含 Alpha 通道数据的透明位图。
+         * 以上任一类型的 BitmapData 对象都作为 32 位整数的缓冲区进行存储。每个 32 位整数确定位图中单个像素的属性。<br/>
+         * 每个 32 位整数都是四个 8 位通道值（从 0 到 255）的组合，这些值描述像素的 Alpha 透明度以及红色、绿色、蓝色 (ARGB) 值。
+         * （对于 ARGB 值，最高有效字节代表 Alpha 通道值，其后的有效字节分别代表红色、绿色和蓝色通道值。）
+         * @see egret.Bitmap
+         * @version Egret 2.4
+         * @platform Web,Native
+         * @language zh_CN
+         */
+        var BitmapData = (function (_super) {
+            __extends(BitmapData, _super);
+            /**
+             * Initializes a BitmapData object to refer to the specified source object.
+             * @param source The source object being referenced.
+             * @version Egret 2.4
+             * @platform Web,Native
+             * @language en_US
+             */
+            /**
+             * 创建一个引用指定 source 实例的 BitmapData 对象
+             * @param source 被引用的 source 实例
+             * @version Egret 2.4
+             * @platform Web,Native
+             * @language zh_CN
+             */
+            function BitmapData(source) {
+                var _this = _super.call(this) || this;
+                /**
+                 * Texture format.
+                 * @version Egret 2.4
+                 * @platform Web,Native
+                 * @language en_US
+                 */
+                /**
+                 * 纹理格式。
+                 * @version Egret 2.4
+                 * @platform Web,Native
+                 * @language zh_CN
+                 */
+                _this.format = "image";
+                /**
+                 * @private
+                 * webgl纹理生成后，是否删掉原始图像数据
+                 */
+                _this.$deleteSource = true;
+                _this.source = source;
+                _this.width = source.width;
+                _this.height = source.height;
+                return _this;
+            }
+            Object.defineProperty(BitmapData.prototype, "source", {
+                get: function () {
+                    return this.$source;
+                },
+                set: function (value) {
+                    this.$source = value;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            BitmapData.create = function (type, data, callback) {
+                var base64 = "";
+                if (type === "arraybuffer") {
+                    base64 = egret.Base64Util.encode(data);
+                }
+                else {
+                    base64 = data;
+                }
+                var imageType = "image/png"; //default value
+                if (base64.charAt(0) === '/') {
+                    imageType = "image/jpeg";
+                }
+                else if (base64.charAt(0) === 'R') {
+                    imageType = "image/gif";
+                }
+                else if (base64.charAt(0) === 'i') {
+                    imageType = "image/png";
+                }
+                var img = new Image();
+                img.src = "data:" + imageType + ";base64," + base64;
+                img.crossOrigin = '*';
+                var bitmapData = new BitmapData(img);
+                img.onload = function () {
+                    img.onload = undefined;
+                    bitmapData.source = img;
+                    bitmapData.height = img.height;
+                    bitmapData.width = img.width;
+                    if (callback) {
+                        callback(bitmapData);
+                    }
+                };
+                return bitmapData;
+            };
+            BitmapData.prototype.$dispose = function () {
+                if (egret.Capabilities.renderMode == "webgl" && this.webGLTexture) {
+                    egret.WebGLUtils.deleteWebGLTexture(this.webGLTexture);
+                    this.webGLTexture = null;
+                }
+                //native or WebGLRenderTarget
+                if (this.source && this.source.dispose) {
+                    this.source.dispose();
+                }
+                // clean buffer for wechat
+                if (this.source && this.source.src) {
+                    this.source.src = "";
+                }
+                this.source = null;
+                BitmapData.$dispose(this);
+            };
+            BitmapData.$addDisplayObject = function (displayObject, bitmapData) {
+                if (!bitmapData) {
+                    return;
+                }
+                var hashCode = bitmapData.hashCode;
+                if (!hashCode) {
+                    return;
+                }
+                if (!BitmapData._displayList[hashCode]) {
+                    BitmapData._displayList[hashCode] = [displayObject];
+                    return;
+                }
+                var tempList = BitmapData._displayList[hashCode];
+                if (tempList.indexOf(displayObject) < 0) {
+                    tempList.push(displayObject);
+                }
+            };
+            BitmapData.$removeDisplayObject = function (displayObject, bitmapData) {
+                if (!bitmapData) {
+                    return;
+                }
+                var hashCode = bitmapData.hashCode;
+                if (!hashCode) {
+                    return;
+                }
+                if (!BitmapData._displayList[hashCode]) {
+                    return;
+                }
+                var tempList = BitmapData._displayList[hashCode];
+                var index = tempList.indexOf(displayObject);
+                if (index >= 0) {
+                    tempList.splice(index, 1);
+                }
+            };
+            BitmapData.$invalidate = function (bitmapData) {
+                if (!bitmapData) {
+                    return;
+                }
+                var hashCode = bitmapData.hashCode;
+                if (!hashCode) {
+                    return;
+                }
+                if (!BitmapData._displayList[hashCode]) {
+                    return;
+                }
+                var tempList = BitmapData._displayList[hashCode];
+                for (var i = 0; i < tempList.length; i++) {
+                    if (tempList[i] instanceof egret.Bitmap) {
+                        tempList[i].$refreshImageData();
+                    }
+                    var bitmap = tempList[i];
+                    bitmap.$renderDirty = true;
+                    var p = bitmap.$parent;
+                    if (p && !p.$cacheDirty) {
+                        p.$cacheDirty = true;
+                        p.$cacheDirtyUp();
+                    }
+                    var maskedObject = bitmap.$maskedObject;
+                    if (maskedObject && !maskedObject.$cacheDirty) {
+                        maskedObject.$cacheDirty = true;
+                        maskedObject.$cacheDirtyUp();
+                    }
+                }
+            };
+            BitmapData.$dispose = function (bitmapData) {
+                if (!bitmapData) {
+                    return;
+                }
+                var hashCode = bitmapData.hashCode;
+                if (!hashCode) {
+                    return;
+                }
+                if (!BitmapData._displayList[hashCode]) {
+                    return;
+                }
+                var tempList = BitmapData._displayList[hashCode];
+                for (var _i = 0, tempList_1 = tempList; _i < tempList_1.length; _i++) {
+                    var node = tempList_1[_i];
+                    if (node instanceof egret.Bitmap) {
+                        node.$bitmapData = null;
+                    }
+                    node.$renderDirty = true;
+                    var p = node.$parent;
+                    if (p && !p.$cacheDirty) {
+                        p.$cacheDirty = true;
+                        p.$cacheDirtyUp();
+                    }
+                    var maskedObject = node.$maskedObject;
+                    if (maskedObject && !maskedObject.$cacheDirty) {
+                        maskedObject.$cacheDirty = true;
+                        maskedObject.$cacheDirtyUp();
+                    }
+                }
+                delete BitmapData._displayList[hashCode];
+            };
+            BitmapData._displayList = egret.createMap();
+            return BitmapData;
+        }(egret.HashObject));
+        wxgame.BitmapData = BitmapData;
+        __reflect(BitmapData.prototype, "egret.wxgame.BitmapData");
+        egret.BitmapData = BitmapData;
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
+//////////////////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2014-present, Egret Technology.
+//  All rights reserved.
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions are met:
+//
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//     * Neither the name of the Egret nor the
+//       names of its contributors may be used to endorse or promote products
+//       derived from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY EGRET AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+//  OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+//  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+//  IN NO EVENT SHALL EGRET AND CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+//  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;LOSS OF USE, DATA,
+//  OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+//  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+//  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+//  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////////////////
+
 (function (egret) {
-    /**
-     * 转换 Image，Canvas，Video 为 Egret 框架内使用的 BitmapData 对象。
-     * @param data 需要转换的对象，包括HTMLImageElement|HTMLCanvasElement|HTMLVideoElement
-     * @deprecated
-     */
-    function $toBitmapData(data) {
-        data["hashCode"] = data["$hashCode"] = egret.$hashCount++;
-        return data;
-    }
-    egret.$toBitmapData = $toBitmapData;
+    var wxgame;
+    (function (wxgame) {
+        /**
+         * @private
+         */
+        var WebExternalInterface = (function () {
+            function WebExternalInterface() {
+            }
+            /**
+             * @private
+             * @param functionName
+             * @param value
+             */
+            WebExternalInterface.call = function (functionName, value) {
+            };
+            /**
+             * @private
+             * @param functionName
+             * @param listener
+             */
+            WebExternalInterface.addCallback = function (functionName, listener) {
+            };
+            return WebExternalInterface;
+        }());
+        wxgame.WebExternalInterface = WebExternalInterface;
+        __reflect(WebExternalInterface.prototype, "egret.wxgame.WebExternalInterface", ["egret.ExternalInterface"]);
+        egret.ExternalInterface = WebExternalInterface;
+    })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
 //////////////////////////////////////////////////////////////////////////////////////
 //
@@ -462,11 +596,6 @@ if (window['HTMLVideoElement'] == undefined) {
                 var audio = new Audio(url);
                 audio.addEventListener("canplaythrough", onAudioLoaded);
                 audio.addEventListener("error", onAudioError);
-                var ua = navigator.userAgent.toLowerCase();
-                if (ua.indexOf("firefox") >= 0) {
-                    audio.autoplay = !0;
-                    audio.muted = true;
-                }
                 // audio.load();     wxgame没有此接口
                 this.originAudio = audio;
                 if (HtmlSound.clearAudios[this.url]) {
@@ -475,10 +604,6 @@ if (window['HTMLVideoElement'] == undefined) {
                 HtmlSound.$recycle(this.url, audio);
                 function onAudioLoaded() {
                     removeListeners();
-                    if (ua.indexOf("firefox") >= 0) {
-                        audio.pause();
-                        audio.muted = false;
-                    }
                     self.loaded = true;
                     self.dispatchEventWith(egret.Event.COMPLETE);
                 }
@@ -1525,7 +1650,7 @@ if (window['HTMLVideoElement'] == undefined) {
                     if (!this._bitmapData) {
                         this.video.width = this.video.videoWidth;
                         this.video.height = this.video.videoHeight;
-                        this._bitmapData = new egret.BitmapData(this.video);
+                        this._bitmapData = new wxgame.BitmapData(this.video);
                         this._bitmapData.$deleteSource = false;
                     }
                     return this._bitmapData;
@@ -2299,7 +2424,12 @@ if (window['HTMLVideoElement'] == undefined) {
             font += (fontSize || 12) + "px ";
             font += (fontFamily || "Arial");
             context.font = font;
-            return context.measureText(text).width;
+            var metrics = context.measureText(text);
+            if (!metrics) {
+                egret.warn("wxcontext.measureText result is null or undefined;text is " + text + "; font is " + font);
+                return 1;
+            }
+            return metrics.width;
         }
         /**
          * @private
@@ -2745,18 +2875,22 @@ if (window['HTMLVideoElement'] == undefined) {
          * @private
          */
         wxgame.WebLifeCycleHandler = function (context) {
-            wx.onShow(function () {
-                if (!isShow) {
-                    context.resume();
-                    isShow = true;
-                }
-            });
-            wx.onHide(function () {
-                if (isShow) {
-                    context.pause();
-                    isShow = false;
-                }
-            });
+            if (wx.onShow) {
+                wx.onShow(function () {
+                    if (!isShow) {
+                        context.resume();
+                        isShow = true;
+                    }
+                });
+            }
+            if (wx.onHide) {
+                wx.onHide(function () {
+                    if (isShow) {
+                        context.pause();
+                        isShow = false;
+                    }
+                });
+            }
         };
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
@@ -2827,8 +2961,8 @@ if (window['HTMLVideoElement'] == undefined) {
              *
              */
             Html5Capatibility.$init = function () {
-                var ua = navigator.userAgent.toLowerCase();
-                Html5Capatibility.ua = ua;
+                var systemInfo = wx.getSystemInfoSync();
+                Html5Capatibility.systemInfo = systemInfo;
                 Html5Capatibility._canUseBlob = false;
                 var canUseWebAudio = window["AudioContext"] || window["webkitAudioContext"] || window["mozAudioContext"];
                 if (canUseWebAudio) {
@@ -2850,12 +2984,13 @@ if (window['HTMLVideoElement'] == undefined) {
                     checkAudioType = true;
                     Html5Capatibility.setAudioType(AudioType.HTML5_AUDIO);
                 }
-                if (ua.indexOf("android") >= 0) {
+                var platformStr = systemInfo.platform;
+                if (platformStr.indexOf("android") >= 0) {
                     if (checkAudioType && canUseWebAudio) {
                         Html5Capatibility.setAudioType(AudioType.WEB_AUDIO);
                     }
                 }
-                else if (ua.indexOf("iphone") >= 0 || ua.indexOf("ipad") >= 0 || ua.indexOf("ipod") >= 0) {
+                else if (platformStr.indexOf("iphone") >= 0 || platformStr.indexOf("ipad") >= 0 || platformStr.indexOf("ipod") >= 0) {
                     if (Html5Capatibility.getIOSVersion() >= 7) {
                         Html5Capatibility._canUseBlob = true;
                         if (checkAudioType && canUseWebAudio) {
@@ -2866,10 +3001,6 @@ if (window['HTMLVideoElement'] == undefined) {
                 var winURL = window["URL"] || window["webkitURL"];
                 if (!winURL) {
                     Html5Capatibility._canUseBlob = false;
-                }
-                if (ua.indexOf("egretnative") >= 0) {
-                    Html5Capatibility.setAudioType(AudioType.HTML5_AUDIO);
-                    Html5Capatibility._canUseBlob = true;
                 }
                 egret.Sound = Html5Capatibility._AudioClass;
             };
@@ -2890,17 +3021,13 @@ if (window['HTMLVideoElement'] == undefined) {
              * @returns {string}
              */
             Html5Capatibility.getIOSVersion = function () {
-                var value = Html5Capatibility.ua.toLowerCase().match(/cpu [^\d]*\d.*like mac os x/)[0];
-                return parseInt(value.match(/\d+(_\d)*/)[0]) || 0;
+                var systemStr = Html5Capatibility.systemInfo.system;
+                return parseInt(systemStr.match(/\d+(_\d)*/)[0]) || 0;
             };
             //当前浏览器版本是否支持blob
             Html5Capatibility._canUseBlob = false;
             //当前浏览器版本是否支持webaudio
             Html5Capatibility._audioType = 0;
-            /**
-             * @private
-             */
-            Html5Capatibility.ua = "";
             return Html5Capatibility;
         }(egret.HashObject));
         wxgame.Html5Capatibility = Html5Capatibility;
@@ -2985,7 +3112,7 @@ if (window['HTMLVideoElement'] == undefined) {
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "1.1.5";
+        wxgame.version = "1.1.10";
         /**
          * 运行环境是否为子域
          */
@@ -3122,8 +3249,8 @@ if (window['HTMLVideoElement'] == undefined) {
             }
             requestAnimationFrame(onTick);
             function onTick() {
-                ticker.update();
                 requestAnimationFrame(onTick);
+                ticker.update(true);
             }
         }
         egret.runEgret = runEgret;
@@ -3136,10 +3263,17 @@ if (window['HTMLVideoElement'] == undefined) {
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
 if (true) {
-    var language = navigator.language || navigator["browserLanguage"] || "en_US";
-    language = language.replace("-", "_");
-    if (language in egret.$locale_strings)
+    var systemInfo = wx.getSystemInfoSync();
+    var language = systemInfo.language;
+    if (language == 'zh-cn') {
+        language = "zh_CN";
+    }
+    else {
+        language = "en_US";
+    }
+    if (language in egret.$locale_strings) {
         egret.$language = language;
+    }
 }
 egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
 //////////////////////////////////////////////////////////////////////////////////////
@@ -3186,69 +3320,21 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
              */
             WebCapability.detect = function () {
                 var capabilities = egret.Capabilities;
-                var ua = navigator.userAgent.toLowerCase();
-                capabilities["isMobile" + ""] = (ua.indexOf('mobile') != -1 || ua.indexOf('android') != -1);
-                if (capabilities.isMobile) {
-                    if (ua.indexOf("windows") < 0 && (ua.indexOf("iphone") != -1 || ua.indexOf("ipad") != -1 || ua.indexOf("ipod") != -1)) {
-                        capabilities["os" + ""] = "iOS";
-                    }
-                    else if (ua.indexOf("android") != -1 && ua.indexOf("linux") != -1) {
-                        capabilities["os" + ""] = "Android";
-                    }
-                    else if (ua.indexOf("windows") != -1) {
-                        capabilities["os" + ""] = "Windows Phone";
-                    }
+                capabilities["isMobile" + ""] = true;
+                var systemInfo = wx.getSystemInfoSync();
+                var systemStr = systemInfo.system.toLowerCase();
+                if ((systemStr.indexOf("iphone") != -1 || systemStr.indexOf("ipad") != -1 || systemStr.indexOf("ipod") != -1)) {
+                    capabilities["os" + ""] = "iOS";
                 }
-                else {
-                    if (ua.indexOf("windows nt") != -1) {
-                        capabilities["os" + ""] = "Windows PC";
-                    }
-                    else if (ua.indexOf("mac os") != -1) {
-                        capabilities["os" + ""] = "Mac OS";
-                    }
+                else if (systemStr.indexOf("android") != -1) {
+                    capabilities["os" + ""] = "Android";
                 }
-                var language = (navigator.language || navigator["browserLanguage"]).toLowerCase();
+                var language = systemInfo.language;
                 var strings = language.split("-");
                 if (strings.length > 1) {
                     strings[1] = strings[1].toUpperCase();
                 }
                 capabilities["language" + ""] = strings.join("-");
-                WebCapability.injectUIntFixOnIE9();
-            };
-            WebCapability.injectUIntFixOnIE9 = function () {
-                if (/msie 9.0/i.test(navigator.userAgent) && !/opera/i.test(navigator.userAgent)) {
-                    var IEBinaryToArray_ByteStr_Script = "<!-- IEBinaryToArray_ByteStr -->\r\n" +
-                        "<script type='text/vbscript' language='VBScript'>\r\n" +
-                        "Function IEBinaryToArray_ByteStr(Binary)\r\n" +
-                        "   IEBinaryToArray_ByteStr = CStr(Binary)\r\n" +
-                        "End Function\r\n" +
-                        "Function IEBinaryToArray_ByteStr_Last(Binary)\r\n" +
-                        "   Dim lastIndex\r\n" +
-                        "   lastIndex = LenB(Binary)\r\n" +
-                        "   if lastIndex mod 2 Then\r\n" +
-                        "       IEBinaryToArray_ByteStr_Last = Chr( AscB( MidB( Binary, lastIndex, 1 ) ) )\r\n" +
-                        "   Else\r\n" +
-                        "       IEBinaryToArray_ByteStr_Last = " + '""' + "\r\n" +
-                        "   End If\r\n" +
-                        "End Function\r\n" + "<\/script>\r\n" +
-                        "<!-- convertResponseBodyToText -->\r\n" +
-                        "<script>\r\n" +
-                        "let convertResponseBodyToText = function (binary) {\r\n" +
-                        "   let byteMapping = {};\r\n" +
-                        "   for ( let i = 0; i < 256; i++ ) {\r\n" +
-                        "       for ( let j = 0; j < 256; j++ ) {\r\n" +
-                        "           byteMapping[ String.fromCharCode( i + j * 256 ) ] =\r\n" +
-                        "           String.fromCharCode(i) + String.fromCharCode(j);\r\n" +
-                        "       }\r\n" +
-                        "   }\r\n" +
-                        "   let rawBytes = IEBinaryToArray_ByteStr(binary);\r\n" +
-                        "   let lastChr = IEBinaryToArray_ByteStr_Last(binary);\r\n" +
-                        "   return rawBytes.replace(/[\\s\\S]/g," +
-                        "                           function( match ) { return byteMapping[match]; }) + lastChr;\r\n" +
-                        "};\r\n" +
-                        "<\/script>\r\n";
-                    document.write(IEBinaryToArray_ByteStr_Script);
-                }
             };
             return WebCapability;
         }());
@@ -3285,85 +3371,34 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
 //  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////////////////
+if (window['HTMLDivElement'] == undefined) {
+    window['HTMLDivElement'] = HTMLElement;
+}
+// There is no HTMLDivElement in webkit for air
+if (window['HTMLVideoElement'] == undefined) {
+    window['HTMLVideoElement'] = HTMLDivElement;
+}
 
 (function (egret) {
     var wxgame;
     (function (wxgame) {
-        /**
-         * @private
-         */
-        var WebExternalInterface = (function () {
-            function WebExternalInterface() {
-            }
-            /**
-             * @private
-             * @param functionName
-             * @param value
-             */
-            WebExternalInterface.call = function (functionName, value) {
-            };
-            /**
-             * @private
-             * @param functionName
-             * @param listener
-             */
-            WebExternalInterface.addCallback = function (functionName, listener) {
-            };
-            return WebExternalInterface;
-        }());
-        wxgame.WebExternalInterface = WebExternalInterface;
-        __reflect(WebExternalInterface.prototype, "egret.wxgame.WebExternalInterface", ["egret.ExternalInterface"]);
-        var ua = navigator.userAgent.toLowerCase();
-        if (ua.indexOf("egretnative") < 0) {
-            egret.ExternalInterface = WebExternalInterface;
-        }
+        var className = "egret.BitmapData";
+        egret.registerClass(HTMLImageElement, className);
+        egret.registerClass(HTMLCanvasElement, className);
+        egret.registerClass(HTMLVideoElement, className);
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
 (function (egret) {
-    var wxgame;
-    (function (wxgame) {
-        var callBackDic = {};
-        /**
-         * @private
-         */
-        var NativeExternalInterface = (function () {
-            function NativeExternalInterface() {
-            }
-            NativeExternalInterface.call = function (functionName, value) {
-                var data = {};
-                data.functionName = functionName;
-                data.value = value;
-                egret_native.sendInfoToPlugin(JSON.stringify(data));
-            };
-            NativeExternalInterface.addCallback = function (functionName, listener) {
-                callBackDic[functionName] = listener;
-            };
-            return NativeExternalInterface;
-        }());
-        wxgame.NativeExternalInterface = NativeExternalInterface;
-        __reflect(NativeExternalInterface.prototype, "egret.wxgame.NativeExternalInterface", ["egret.ExternalInterface"]);
-        /**
-         * @private
-         * @param info
-         */
-        function onReceivedPluginInfo(info) {
-            var data = JSON.parse(info);
-            var functionName = data.functionName;
-            var listener = callBackDic[functionName];
-            if (listener) {
-                var value = data.value;
-                listener.call(null, value);
-            }
-            else {
-                egret.$warn(1050, functionName);
-            }
-        }
-        var ua = navigator.userAgent.toLowerCase();
-        if (ua.indexOf("egretnative") >= 0) {
-            egret.ExternalInterface = NativeExternalInterface;
-            egret_native.receivedPluginInfo = onReceivedPluginInfo;
-        }
-    })(wxgame = egret.wxgame || (egret.wxgame = {}));
+    /**
+     * 转换 Image，Canvas，Video 为 Egret 框架内使用的 BitmapData 对象。
+     * @param data 需要转换的对象，包括HTMLImageElement|HTMLCanvasElement|HTMLVideoElement
+     * @deprecated
+     */
+    function $toBitmapData(data) {
+        data["hashCode"] = data["$hashCode"] = egret.$hashCount++;
+        return data;
+    }
+    egret.$toBitmapData = $toBitmapData;
 })(egret || (egret = {}));
 //////////////////////////////////////////////////////////////////////////////////////
 //
@@ -3459,6 +3494,7 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
                 stage.$orientation = option.orientation;
                 stage.$maxTouches = option.maxTouches;
                 stage.frameRate = option.frameRate;
+                wx.setPreferredFramesPerSecond(stage.frameRate);
                 stage.textureScaleFactor = option.textureScaleFactor;
                 var buffer = new egret.sys.RenderBuffer(undefined, undefined, true);
                 var canvas = buffer.surface;
@@ -3495,17 +3531,19 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
                 var option = {};
                 option.entryClassName = options.entryClassName || "Main";
                 option.scaleMode = options.scaleMode || egret.StageScaleMode.FIXED_WIDTH;
-                if (option.scaleMode == egret.StageScaleMode.SHOW_ALL) {
-                    throw new Error("小游戏不支持 showAll 适配模式，推荐使用 fixedWidth 模式");
+                if (!option.scaleMode || option.scaleMode == egret.StageScaleMode.SHOW_ALL) {
+                    option.scaleMode = egret.StageScaleMode.FIXED_WIDE;
+                    var message = egret.sys.tr(4500, "showAll", "fixedWidth");
+                    console.warn(message);
                 }
                 option.frameRate = options.frameRate || 30;
                 option.contentWidth = options.contentWidth || 640;
                 option.contentHeight = options.contentHeight || 1136;
                 option.orientation = options.orientation || egret.OrientationMode.AUTO;
-                option.maxTouches = 2;
+                option.maxTouches = options.maxTouches;
                 option.textureScaleFactor = 1;
-                option.showFPS = false;
-                var styleStr = "x:0,y:0,size:12,textColor:0xffffff,bgAlpha:0.9";
+                option.showFPS = options.showFPS;
+                var styleStr = options.fpsStyles || "x:0,y:0,size:12,textColor:0xffffff,bgAlpha:0.9";
                 var stylesArr = styleStr.split(",");
                 var styles = {};
                 for (var i = 0; i < stylesArr.length; i++) {
@@ -3777,6 +3815,21 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
         function getPixels(x, y, width, height) {
             if (width === void 0) { width = 1; }
             if (height === void 0) { height = 1; }
+            //webgl环境下不需要转换成canvas获取像素信息
+            if (egret.Capabilities.renderMode == "webgl") {
+                var renderTexture = void 0;
+                //webgl下非RenderTexture纹理先画到RenderTexture
+                if (!this.$renderBuffer) {
+                    renderTexture = new egret.RenderTexture();
+                    renderTexture.drawToTexture(new egret.Bitmap(this));
+                }
+                else {
+                    renderTexture = this;
+                }
+                //从RenderTexture中读取像素数据
+                var pixels = renderTexture.$renderBuffer.getPixels(x, y, width, height);
+                return pixels;
+            }
             try {
                 var surface = convertImageToCanvas(this);
                 var result = sharedContext.getImageData(x, y, width, height).data;
@@ -5273,6 +5326,9 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+                if (bitmapData.source) {
+                    bitmapData.source.src = "";
+                }
                 return texture;
             };
             WebGLRenderContext.prototype.createTextureFromCompressedData = function (data, width, height, levels, internalFormat) {
@@ -5299,6 +5355,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                         bitmapData.webGLTexture = this.createTextureFromCompressedData(bitmapData.source.pvrtcData, bitmapData.width, bitmapData.height, bitmapData.source.mipmapsCount, bitmapData.source.format);
                     }
                     if (bitmapData.$deleteSource && bitmapData.webGLTexture) {
+                        bitmapData.source.src = "";
                         bitmapData.source = null;
                     }
                     //todo 默认值

@@ -113,12 +113,6 @@ namespace egret.wxgame {
             audio.addEventListener("canplaythrough", onAudioLoaded);
             audio.addEventListener("error", onAudioError);
 
-            let ua:string = navigator.userAgent.toLowerCase();
-            if (ua.indexOf("firefox") >= 0) {//火狐兼容
-                audio.autoplay = !0;
-                audio.muted = true;
-            }
-
            // audio.load();     wxgame没有此接口
             this.originAudio = audio;
             if(HtmlSound.clearAudios[this.url]) {
@@ -128,10 +122,6 @@ namespace egret.wxgame {
 
             function onAudioLoaded():void {
                 removeListeners();
-                if (ua.indexOf("firefox") >= 0) {//火狐兼容
-                    audio.pause();
-                    audio.muted = false;
-                }
 
                 self.loaded = true;
                 self.dispatchEventWith(egret.Event.COMPLETE);
