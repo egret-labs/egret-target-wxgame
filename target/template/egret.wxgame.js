@@ -3112,7 +3112,7 @@ r.prototype = e.prototype, t.prototype = new r();
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "1.1.11";
+        wxgame.version = "1.1.10";
         /**
          * 运行环境是否为子域
          */
@@ -3250,7 +3250,7 @@ r.prototype = e.prototype, t.prototype = new r();
             requestAnimationFrame(onTick);
             function onTick() {
                 requestAnimationFrame(onTick);
-                ticker.update();
+                ticker.update(true);
             }
         }
         egret.runEgret = runEgret;
@@ -3268,7 +3268,9 @@ if (true) {
     if (language == 'zh-cn') {
         language = "zh_CN";
     }
-    language = language.replace("-", "_");
+    else {
+        language = "en_US";
+    }
     if (language in egret.$locale_strings) {
         egret.$language = language;
     }
@@ -3492,6 +3494,7 @@ if (window['HTMLVideoElement'] == undefined) {
                 stage.$orientation = option.orientation;
                 stage.$maxTouches = option.maxTouches;
                 stage.frameRate = option.frameRate;
+                wx.setPreferredFramesPerSecond(stage.frameRate);
                 stage.textureScaleFactor = option.textureScaleFactor;
                 var buffer = new egret.sys.RenderBuffer(undefined, undefined, true);
                 var canvas = buffer.surface;

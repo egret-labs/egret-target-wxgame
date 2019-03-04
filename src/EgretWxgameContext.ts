@@ -186,7 +186,7 @@ namespace egret.wxgame {
         requestAnimationFrame(onTick);
         function onTick(): void {
             requestAnimationFrame(onTick);
-            ticker.update();
+            ticker.update(true);
         }
     }
 

@@ -9417,7 +9417,7 @@ declare namespace egret.sys {
          * @private
          * 执行一次刷新
          */
-        update(): void;
+        update(forceUpdate?: boolean): void;
         /**
          * @private
          * 执行一次屏幕渲染
