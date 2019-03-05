@@ -3112,7 +3112,7 @@ r.prototype = e.prototype, t.prototype = new r();
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "1.1.10";
+        wxgame.version = "1.1.11";
         /**
          * 运行环境是否为子域
          */
@@ -6284,7 +6284,14 @@ window["sharedCanvas"].isCanvas = true;
          */
         var WebGLRenderer = (function () {
             function WebGLRenderer() {
+                this.isiOS10 = false;
                 this.nestLevel = 0; //渲染的嵌套层次，0表示在调用堆栈的最外层。
+                //模拟器上不存在该方法
+                if (window['canvas'].getContext('webgl').wxBindCanvasTexture) {
+                    //ios10 系统上需要做特殊处理，不断创建 canvas,其他版本不需要
+                    var systemInfo = window['wx'].getSystemInfoSync();
+                    this.isiOS10 = systemInfo.system.indexOf('iOS 10') > -1 ? true : false;
+                }
             }
             /**
              * 渲染一个显示对象
@@ -7058,8 +7065,7 @@ window["sharedCanvas"].isCanvas = true;
                     node.$canvasScaleY = canvasScaleY;
                     node.dirtyRender = true;
                 }
-                var wxBindCanvasTexture = !!wxgame.WebGLRenderContext.getInstance(0, 0).context["wxBindCanvasTexture"];
-                if (wxBindCanvasTexture) {
+                if (this.isiOS10) {
                     if (!this.canvasRenderer) {
                         this.canvasRenderer = new egret.CanvasRenderer();
                     }
@@ -7094,7 +7100,7 @@ window["sharedCanvas"].isCanvas = true;
                 if (node.dirtyRender) {
                     var surface = this.canvasRenderBuffer.surface;
                     this.canvasRenderer.renderText(node, this.canvasRenderBuffer.context);
-                    if (wxBindCanvasTexture) {
+                    if (this.isiOS10) {
                         surface["isCanvas"] = true;
                         node.$texture = surface;
                     }
@@ -7153,8 +7159,7 @@ window["sharedCanvas"].isCanvas = true;
                 canvasScaleY *= height2 / height;
                 width = width2;
                 height = height2;
-                var wxBindCanvasTexture = !!wxgame.WebGLRenderContext.getInstance(0, 0).context["wxBindCanvasTexture"];
-                if (wxBindCanvasTexture) {
+                if (this.isiOS10) {
                     if (!this.canvasRenderer) {
                         this.canvasRenderer = new egret.CanvasRenderer();
                     }
@@ -7187,7 +7192,7 @@ window["sharedCanvas"].isCanvas = true;
                 if (forHitTest) {
                     this.canvasRenderer.renderGraphics(node, this.canvasRenderBuffer.context, true);
                     var texture = void 0;
-                    if (wxBindCanvasTexture) {
+                    if (this.isiOS10) {
                         console.log("forHitTest");
                         surface["isCanvas"] = true;
                         texture = surface;
@@ -7201,7 +7206,7 @@ window["sharedCanvas"].isCanvas = true;
                 else {
                     if (node.dirtyRender) {
                         this.canvasRenderer.renderGraphics(node, this.canvasRenderBuffer.context);
-                        if (wxBindCanvasTexture) {
+                        if (this.isiOS10) {
                             surface["isCanvas"] = true;
                             node.$texture = surface;
                         }

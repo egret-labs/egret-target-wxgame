@@ -39,10 +39,15 @@ namespace egret.wxgame {
      * WebGL渲染器
      */
     export class WebGLRenderer implements sys.SystemRenderer {
-
         public constructor() {
-
+            //模拟器上不存在该方法
+            if (window['canvas'].getContext('webgl').wxBindCanvasTexture) {
+                //ios10 系统上需要做特殊处理，不断创建 canvas,其他版本不需要
+                let systemInfo = window['wx'].getSystemInfoSync();
+                this.isiOS10 = systemInfo.system.indexOf('iOS 10') > -1 ? true : false;
+            }
         }
+        private isiOS10: boolean = false;
 
         private nestLevel: number = 0;//渲染的嵌套层次，0表示在调用堆栈的最外层。
         /**
@@ -864,8 +869,7 @@ namespace egret.wxgame {
                 node.$canvasScaleY = canvasScaleY;
                 node.dirtyRender = true;
             }
-            const wxBindCanvasTexture = !!WebGLRenderContext.getInstance(0, 0).context["wxBindCanvasTexture"];
-            if (wxBindCanvasTexture) {
+            if (this.isiOS10) {
                 if (!this.canvasRenderer) {
                     this.canvasRenderer = new CanvasRenderer();
                 }
@@ -905,7 +909,7 @@ namespace egret.wxgame {
                 let surface = this.canvasRenderBuffer.surface;
                 this.canvasRenderer.renderText(node, this.canvasRenderBuffer.context);
 
-                if (wxBindCanvasTexture) {
+                if (this.isiOS10) {
                     surface["isCanvas"] = true;
                     node.$texture = surface;
                 }
@@ -966,8 +970,7 @@ namespace egret.wxgame {
             canvasScaleY *= height2 / height;
             width = width2;
             height = height2;
-            const wxBindCanvasTexture = !!WebGLRenderContext.getInstance(0, 0).context["wxBindCanvasTexture"];
-            if (wxBindCanvasTexture) {
+            if (this.isiOS10) {
                 if (!this.canvasRenderer) {
                     this.canvasRenderer = new CanvasRenderer();
                 }
@@ -1000,7 +1003,7 @@ namespace egret.wxgame {
             if (forHitTest) {
                 this.canvasRenderer.renderGraphics(node, this.canvasRenderBuffer.context, true);
                 let texture;
-                if (wxBindCanvasTexture) {
+                if (this.isiOS10) {
                     console.log("forHitTest");
                     surface["isCanvas"] = true;
                     texture = surface;
@@ -1013,7 +1016,7 @@ namespace egret.wxgame {
             } else {
                 if (node.dirtyRender) {
                     this.canvasRenderer.renderGraphics(node, this.canvasRenderBuffer.context);
-                    if (wxBindCanvasTexture) {
+                    if (this.isiOS10) {
                         surface["isCanvas"] = true;
                         node.$texture = surface;
                     }
