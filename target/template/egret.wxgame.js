@@ -3264,8 +3264,8 @@ r.prototype = e.prototype, t.prototype = new r();
 })(egret || (egret = {}));
 if (true) {
     var systemInfo = wx.getSystemInfoSync();
-    var language = systemInfo.language;
-    if (language == 'zh-cn') {
+    var language = systemInfo.language.toLowerCase();
+    if (language.indexOf('zh') > -1) {
         language = "zh_CN";
     }
     else {
@@ -3323,18 +3323,20 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
                 capabilities["isMobile" + ""] = true;
                 var systemInfo = wx.getSystemInfoSync();
                 var systemStr = systemInfo.system.toLowerCase();
-                if ((systemStr.indexOf("iphone") != -1 || systemStr.indexOf("ipad") != -1 || systemStr.indexOf("ipod") != -1)) {
+                if (systemStr.indexOf("ios") > -1) {
                     capabilities["os" + ""] = "iOS";
                 }
-                else if (systemStr.indexOf("android") != -1) {
+                else if (systemStr.indexOf("android") > -1) {
                     capabilities["os" + ""] = "Android";
                 }
                 var language = systemInfo.language;
-                var strings = language.split("-");
-                if (strings.length > 1) {
-                    strings[1] = strings[1].toUpperCase();
+                if (language.indexOf('zh') > -1) {
+                    language = "zh-CN";
                 }
-                capabilities["language" + ""] = strings.join("-");
+                else {
+                    language = "en-US";
+                }
+                capabilities["language" + ""] = language;
             };
             return WebCapability;
         }());

@@ -204,8 +204,8 @@ namespace egret.wxgame {
 
 if (DEBUG) {
     let systemInfo = wx.getSystemInfoSync();
-    let language = systemInfo.language;
-    if (language == 'zh-cn') {
+    let language = systemInfo.language.toLowerCase();
+    if (language.indexOf('zh') > -1) {
         language = "zh_CN"
     } else {
         language = "en_US"
