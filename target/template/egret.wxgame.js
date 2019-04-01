@@ -1917,6 +1917,9 @@ r.prototype = e.prototype, t.prototype = new r();
                         encoding: 'utf8',
                         success: function (_a) {
                             var data = _a.data;
+                            if (self.responseType == "json") {
+                                data = JSON.parse(data);
+                            }
                             onSuccessFunc(data);
                         },
                         fail: function () {
@@ -3112,7 +3115,7 @@ r.prototype = e.prototype, t.prototype = new r();
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "1.1.11";
+        wxgame.version = "1.1.12";
         /**
          * 运行环境是否为子域
          */
