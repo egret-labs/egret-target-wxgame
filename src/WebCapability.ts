@@ -37,24 +37,24 @@ namespace egret.wxgame {
          * @private
          * 检测系统属性
          */
-        public static detect():void {
+        public static detect(): void {
             let capabilities = egret.Capabilities;
             capabilities["isMobile" + ""] = true;
 
             let systemInfo = wx.getSystemInfoSync();
             let systemStr = systemInfo.system.toLowerCase();
-            if ((systemStr.indexOf("iphone") != -1 || systemStr.indexOf("ipad") != -1 || systemStr.indexOf("ipod") != -1)) {
+            if (systemStr.indexOf("ios") > -1) {
                 capabilities["os" + ""] = "iOS";
-            } else if(systemStr.indexOf("android")!= -1) {
+            } else if (systemStr.indexOf("android") > -1) {
                 capabilities["os" + ""] = "Android";
             }
-
             let language = systemInfo.language;
-            let strings = language.split("-");
-            if (strings.length > 1) {
-                strings[1] = strings[1].toUpperCase();
+            if (language.indexOf('zh') > -1) {
+                language = "zh-CN"
+            } else {
+                language = "en-US"
             }
-            capabilities["language" + ""] = strings.join("-");
+            capabilities["language" + ""] = language;
         }
     }
     WebCapability.detect();

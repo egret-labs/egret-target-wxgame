@@ -137,6 +137,9 @@ namespace egret.wxgame {
                     filePath: self._url,
                     encoding: 'utf8',
                     success({ data }) {
+                        if(self.responseType == "json") {
+                            data = JSON.parse(data);
+                        }
                         onSuccessFunc(data);
                     },
                     fail() {
