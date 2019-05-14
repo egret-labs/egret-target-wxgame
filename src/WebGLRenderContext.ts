@@ -29,117 +29,6 @@
 
 namespace egret.wxgame {
 
-    /*
-    * 覆盖掉系统的
-    */
-    function createCanvas(width?: number, height?: number): HTMLCanvasElement {
-        return window['canvas'];
-    }
-
-    egret.sys.createCanvas = createCanvas;
-
-    /*
-    * 覆盖掉系统的
-    */
-    export function resizeContext(renderContext: egret.sys.RenderContext, width: number, height: number, useMaxSize?: boolean): void {
-        if (!renderContext) {
-            return;
-        }
-        const webglrendercontext = <WebGLRenderContext>renderContext;
-        let surface = webglrendercontext.surface;
-        if (useMaxSize) {
-            if (surface.width < width) {
-                surface.width = width;
-                if (!wxgame.isSubContext && window["sharedCanvas"]) {
-                    window["sharedCanvas"].width = width;
-                }
-            }
-            if (surface.height < height) {
-                surface.height = height;
-                if (!wxgame.isSubContext && window["sharedCanvas"]) {
-                    window["sharedCanvas"].height = height;
-                }
-            }
-        }
-        else {
-            if (surface.width != width) {
-                surface.width = width;
-                if (!wxgame.isSubContext && window["sharedCanvas"]) {
-                    window["sharedCanvas"].width = width;
-                }
-            }
-            if (surface.height != height) {
-                surface.height = height;
-                if (!wxgame.isSubContext && window["sharedCanvas"]) {
-                    window["sharedCanvas"].height = height;
-                }
-            }
-        }
-        webglrendercontext.onResize();
-    }
-    egret.sys.resizeContext = resizeContext;
-
-
-    /**
-     * sys.getSystemRenderingContext
-     */
-    function getSystemRenderingContext(surface: HTMLCanvasElement): CanvasRenderingContext2D | WebGLRenderingContext {
-        const gl = window['canvas'].getContext('webgl');
-        return gl;
-    }
-    egret.sys.getSystemRenderingContext = getSystemRenderingContext;
-
-
-    /**
-     * sys.createTexture
-     */
-    function createTexture(renderContext: egret.sys.RenderContext, bitmapData: BitmapData): WebGLTexture {
-        const webglrendercontext = <WebGLRenderContext>renderContext;
-        const gl: any = webglrendercontext.context;
-        if ((bitmapData as any).isCanvas && gl.wxBindCanvasTexture != null) {
-            return bitmapData;
-        }
-        const texture = gl.createTexture();
-        if (!texture) {
-            //先创建texture失败,然后lost事件才发出来..
-            webglrendercontext.contextLost = true;
-            return null;
-        }
-        texture.glContext = gl;
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, bitmapData);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        if (bitmapData.source) {
-            bitmapData.source.src = "";
-        }
-        return texture;
-    }
-    egret.sys.createTexture = createTexture;
-
-    /**
-    * 画texture
-    **/
-    function drawTextureElements(renderContext: egret.sys.RenderContext, data: any, offset: number): number {
-        const webglrendercontext = <WebGLRenderContext>renderContext;
-        const gl: any = webglrendercontext.context;
-        if (data.texture.isCanvas) {
-            gl.wxBindCanvasTexture(gl.TEXTURE_2D, data.texture);
-        } else {
-            gl.bindTexture(gl.TEXTURE_2D, data.texture);
-        }
-        const size = data.count * 3;
-        gl.drawElements(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, offset * 2);
-        return size;
-    }
-    egret.sys.drawTextureElements = drawTextureElements;
-
-
-
-
     /**
      * @private
      * WebGL上下文对象，提供简单的绘图接口
@@ -279,7 +168,7 @@ namespace egret.wxgame {
 
         public constructor(width?: number, height?: number) {
 
-            this.surface = createCanvas(width, height);//window['canvas'];
+            this.surface = egret.sys.createCanvas(width, height);//window['canvas'];
 
             this.initWebGL();
 
@@ -1213,6 +1102,4 @@ namespace egret.wxgame {
     WebGLRenderContext.initBlendMode();
 
 }
-
-window["sharedCanvas"].isCanvas = true;
 

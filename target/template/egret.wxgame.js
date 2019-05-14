@@ -43,86 +43,12 @@ r.prototype = e.prototype, t.prototype = new r();
         /**
          * @private
          */
-        var fpsText = new egret.TextField();
-        /**
-         * @private
-         */
-        var WebFps = (function (_super) {
-            __extends(WebFps, _super);
-            function WebFps(stage, showFPS, showLog, logFilter, styles) {
-                var _this = _super.call(this) || this;
-                _this.arrFps = [];
-                _this.arrCost = [];
-                if (!showFPS && !showLog) {
-                    return _this;
-                }
-                _this.arrFps = [];
-                _this.arrCost = [];
-                fpsText.x = styles["x"] == undefined ? 0 : parseInt(styles["x"]);
-                fpsText.y = styles["y"] == undefined ? 0 : parseInt(styles["y"]);
-                fpsText.textColor = styles["textColor"] == undefined ? '#ffffff' : styles['textColor'].replace("0x", "#");
-                var fontSize = styles["size"] == undefined ? 12 : parseInt(styles['size']);
-                fpsText.size = fontSize;
-                return _this;
-            }
-            WebFps.prototype.addFps = function () {
-            };
-            WebFps.prototype.addLog = function () {
-            };
-            WebFps.prototype.update = function (datas, showLastData) {
-                if (showLastData === void 0) { showLastData = false; }
-                var numFps;
-                var numCostTicker;
-                var numCostRender;
-                if (!showLastData) {
-                    numFps = datas.fps;
-                    numCostTicker = datas.costTicker;
-                    numCostRender = datas.costRender;
-                    this.lastNumDraw = datas.draw;
-                    this.arrFps.push(numFps);
-                    this.arrCost.push([numCostTicker, numCostRender]);
-                }
-                else {
-                    numFps = this.arrFps[this.arrFps.length - 1];
-                    numCostTicker = this.arrCost[this.arrCost.length - 1][0];
-                    numCostRender = this.arrCost[this.arrCost.length - 1][1];
-                }
-                var fpsTotal = 0;
-                var lenFps = this.arrFps.length;
-                if (lenFps > 101) {
-                    lenFps = 101;
-                    this.arrFps.shift();
-                    this.arrCost.shift();
-                }
-                var fpsMin = this.arrFps[0];
-                var fpsMax = this.arrFps[0];
-                for (var i = 0; i < lenFps; i++) {
-                    var num = this.arrFps[i];
-                    fpsTotal += num;
-                    if (num < fpsMin)
-                        fpsMin = num;
-                    else if (num > fpsMax)
-                        fpsMax = num;
-                }
-                var fpsAvg = Math.floor(fpsTotal / lenFps);
-                fpsText.text = numFps + " FPS \n"
-                    + ("min:" + fpsMin + " max:" + fpsMax + " avg:" + fpsAvg + "\n")
-                    + ("Draw " + this.lastNumDraw + "\n")
-                    + ("Cost " + numCostTicker + " " + numCostRender);
-                egret.sys.$TempStage.addChild(fpsText);
-            };
-            ;
-            WebFps.prototype.updateInfo = function (info) {
-            };
-            WebFps.prototype.updateWarn = function (info) {
-            };
-            WebFps.prototype.updateError = function (info) {
-            };
-            return WebFps;
-        }(egret.DisplayObject));
-        wxgame.WebFps = WebFps;
-        __reflect(WebFps.prototype, "egret.wxgame.WebFps", ["egret.FPSDisplay"]);
-        egret.FPSDisplay = WebFps;
+        function getOption(key) {
+            var launchOptions = wx.getLaunchOptionsSync();
+            return launchOptions.query[key] || launchOptions[key];
+        }
+        wxgame.getOption = getOption;
+        egret.getOption = getOption;
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
 //////////////////////////////////////////////////////////////////////////////////////
@@ -3125,28 +3051,86 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
         /**
          * @private
          */
-        var WebExternalInterface = (function () {
-            function WebExternalInterface() {
+        var fpsText = new egret.TextField();
+        /**
+         * @private
+         */
+        var WebFps = (function (_super) {
+            __extends(WebFps, _super);
+            function WebFps(stage, showFPS, showLog, logFilter, styles) {
+                var _this = _super.call(this) || this;
+                _this.arrFps = [];
+                _this.arrCost = [];
+                if (!showFPS && !showLog) {
+                    return _this;
+                }
+                _this.arrFps = [];
+                _this.arrCost = [];
+                fpsText.x = styles["x"] == undefined ? 0 : parseInt(styles["x"]);
+                fpsText.y = styles["y"] == undefined ? 0 : parseInt(styles["y"]);
+                fpsText.textColor = styles["textColor"] == undefined ? '#ffffff' : styles['textColor'].replace("0x", "#");
+                var fontSize = styles["size"] == undefined ? 12 : parseInt(styles['size']);
+                fpsText.size = fontSize;
+                return _this;
             }
-            /**
-             * @private
-             * @param functionName
-             * @param value
-             */
-            WebExternalInterface.call = function (functionName, value) {
+            WebFps.prototype.addFps = function () {
             };
-            /**
-             * @private
-             * @param functionName
-             * @param listener
-             */
-            WebExternalInterface.addCallback = function (functionName, listener) {
+            WebFps.prototype.addLog = function () {
             };
-            return WebExternalInterface;
-        }());
-        wxgame.WebExternalInterface = WebExternalInterface;
-        __reflect(WebExternalInterface.prototype, "egret.wxgame.WebExternalInterface", ["egret.ExternalInterface"]);
-        egret.ExternalInterface = WebExternalInterface;
+            WebFps.prototype.update = function (datas, showLastData) {
+                if (showLastData === void 0) { showLastData = false; }
+                var numFps;
+                var numCostTicker;
+                var numCostRender;
+                if (!showLastData) {
+                    numFps = datas.fps;
+                    numCostTicker = datas.costTicker;
+                    numCostRender = datas.costRender;
+                    this.lastNumDraw = datas.draw;
+                    this.arrFps.push(numFps);
+                    this.arrCost.push([numCostTicker, numCostRender]);
+                }
+                else {
+                    numFps = this.arrFps[this.arrFps.length - 1];
+                    numCostTicker = this.arrCost[this.arrCost.length - 1][0];
+                    numCostRender = this.arrCost[this.arrCost.length - 1][1];
+                }
+                var fpsTotal = 0;
+                var lenFps = this.arrFps.length;
+                if (lenFps > 101) {
+                    lenFps = 101;
+                    this.arrFps.shift();
+                    this.arrCost.shift();
+                }
+                var fpsMin = this.arrFps[0];
+                var fpsMax = this.arrFps[0];
+                for (var i = 0; i < lenFps; i++) {
+                    var num = this.arrFps[i];
+                    fpsTotal += num;
+                    if (num < fpsMin)
+                        fpsMin = num;
+                    else if (num > fpsMax)
+                        fpsMax = num;
+                }
+                var fpsAvg = Math.floor(fpsTotal / lenFps);
+                fpsText.text = numFps + " FPS \n"
+                    + ("min:" + fpsMin + " max:" + fpsMax + " avg:" + fpsAvg + "\n")
+                    + ("Draw " + this.lastNumDraw + "\n")
+                    + ("Cost " + numCostTicker + " " + numCostRender);
+                egret.sys.$TempStage.addChild(fpsText);
+            };
+            ;
+            WebFps.prototype.updateInfo = function (info) {
+            };
+            WebFps.prototype.updateWarn = function (info) {
+            };
+            WebFps.prototype.updateError = function (info) {
+            };
+            return WebFps;
+        }(egret.DisplayObject));
+        wxgame.WebFps = WebFps;
+        __reflect(WebFps.prototype, "egret.wxgame.WebFps", ["egret.FPSDisplay"]);
+        egret.FPSDisplay = WebFps;
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
 //////////////////////////////////////////////////////////////////////////////////////
@@ -3184,12 +3168,28 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
         /**
          * @private
          */
-        function getOption(key) {
-            var launchOptions = wx.getLaunchOptionsSync();
-            return launchOptions.query[key] || launchOptions[key];
-        }
-        wxgame.getOption = getOption;
-        egret.getOption = getOption;
+        var WebExternalInterface = (function () {
+            function WebExternalInterface() {
+            }
+            /**
+             * @private
+             * @param functionName
+             * @param value
+             */
+            WebExternalInterface.call = function (functionName, value) {
+            };
+            /**
+             * @private
+             * @param functionName
+             * @param listener
+             */
+            WebExternalInterface.addCallback = function (functionName, listener) {
+            };
+            return WebExternalInterface;
+        }());
+        wxgame.WebExternalInterface = WebExternalInterface;
+        __reflect(WebExternalInterface.prototype, "egret.wxgame.WebExternalInterface", ["egret.ExternalInterface"]);
+        egret.ExternalInterface = WebExternalInterface;
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
 //////////////////////////////////////////////////////////////////////////////////////
@@ -4867,6 +4867,41 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
             return size;
         }
         egret.sys.drawTextureElements = drawTextureElements;
+    })(wxgame = egret.wxgame || (egret.wxgame = {}));
+})(egret || (egret = {}));
+window["sharedCanvas"].isCanvas = true;
+//////////////////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2014-present, Egret Technology.
+//  All rights reserved.
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions are met:
+//
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//     * Neither the name of the Egret nor the
+//       names of its contributors may be used to endorse or promote products
+//       derived from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY EGRET AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+//  OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+//  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+//  IN NO EVENT SHALL EGRET AND CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+//  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;LOSS OF USE, DATA,
+//  OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+//  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+//  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+//  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////////////////
+
+(function (egret) {
+    var wxgame;
+    (function (wxgame) {
         /**
          * @private
          * WebGL上下文对象，提供简单的绘图接口
@@ -4880,7 +4915,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 this.contextLost = false;
                 this.$scissorState = false;
                 this.vertSize = 5;
-                this.surface = createCanvas(width, height); //window['canvas'];
+                this.surface = egret.sys.createCanvas(width, height); //window['canvas'];
                 this.initWebGL();
                 this.$bufferStack = [];
                 var gl = this.context;
@@ -5740,7 +5775,6 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
         WebGLRenderContext.initBlendMode();
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
-window["sharedCanvas"].isCanvas = true;
 //////////////////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2014-present, Egret Technology.
