@@ -39,6 +39,51 @@ namespace egret.wxgame {
     * 覆盖掉系统的
     */
     egret.sys.createCanvas = createCanvas;
+
+    export function resizeContext(renderContext: egret.sys.RenderContext, width: number, height: number, useMaxSize?: boolean): void {
+        if (!renderContext) {
+            return;
+        }
+        const webglrendercontext = <WebGLRenderContext>renderContext;
+        let surface = webglrendercontext.surface;
+        if (useMaxSize) {
+            if (surface.width < width) {
+                surface.width = width;
+                if (!wxgame.isSubContext && window["sharedCanvas"]) {
+                    window["sharedCanvas"].width = width;
+                }
+            }
+            if (surface.height < height) {
+                surface.height = height;
+                if (!wxgame.isSubContext && window["sharedCanvas"]) {
+                    window["sharedCanvas"].height = height;
+                }
+            }
+        }
+        else {
+            if (surface.width != width) {
+                surface.width = width;
+                if (!wxgame.isSubContext && window["sharedCanvas"]) {
+                    window["sharedCanvas"].width = width;
+                }
+            }
+            if (surface.height != height) {
+                surface.height = height;
+                if (!wxgame.isSubContext && window["sharedCanvas"]) {
+                    window["sharedCanvas"].height = height;
+                }
+            }
+        }
+        webglrendercontext.onResize();
+    }
+    /*
+    * 覆盖掉系统的
+    */
+    egret.sys.resizeContext = resizeContext;
+
+
+
+
     /**
      * @private
      * WebGL上下文对象，提供简单的绘图接口
@@ -204,7 +249,7 @@ namespace egret.wxgame {
             this.surface.width = this.surface.height = 0;
         }
 
-        private onResize(width?: number, height?: number): void {
+        public onResize(width?: number, height?: number): void {
             width = width || this.surface.width;
             height = height || this.surface.height;
             this.projectionX = width / 2;
@@ -220,7 +265,10 @@ namespace egret.wxgame {
          * @param height 改变后的高
          * @param useMaxSize 若传入true，则将改变后的尺寸与已有尺寸对比，保留较大的尺寸。
          */
+        
         public resize(width: number, height: number, useMaxSize?: boolean): void {
+            egret.sys.resizeContext(this, width, height, useMaxSize);
+            /*
             let surface = this.surface;
             if (useMaxSize) {
                 if (surface.width < width) {
@@ -252,7 +300,9 @@ namespace egret.wxgame {
             }
 
             this.onResize();
+            */
         }
+        
 
         public static glContextId: number = 0;
         public glID: number = null;

@@ -4775,6 +4775,47 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
         * 覆盖掉系统的
         */
         egret.sys.createCanvas = createCanvas;
+        function resizeContext(renderContext, width, height, useMaxSize) {
+            if (!renderContext) {
+                return;
+            }
+            var webglrendercontext = renderContext;
+            var surface = webglrendercontext.surface;
+            if (useMaxSize) {
+                if (surface.width < width) {
+                    surface.width = width;
+                    if (!wxgame.isSubContext && window["sharedCanvas"]) {
+                        window["sharedCanvas"].width = width;
+                    }
+                }
+                if (surface.height < height) {
+                    surface.height = height;
+                    if (!wxgame.isSubContext && window["sharedCanvas"]) {
+                        window["sharedCanvas"].height = height;
+                    }
+                }
+            }
+            else {
+                if (surface.width != width) {
+                    surface.width = width;
+                    if (!wxgame.isSubContext && window["sharedCanvas"]) {
+                        window["sharedCanvas"].width = width;
+                    }
+                }
+                if (surface.height != height) {
+                    surface.height = height;
+                    if (!wxgame.isSubContext && window["sharedCanvas"]) {
+                        window["sharedCanvas"].height = height;
+                    }
+                }
+            }
+            webglrendercontext.onResize();
+        }
+        wxgame.resizeContext = resizeContext;
+        /*
+        * 覆盖掉系统的
+        */
+        egret.sys.resizeContext = resizeContext;
         /**
          * @private
          * WebGL上下文对象，提供简单的绘图接口
@@ -4888,7 +4929,9 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
              * @param useMaxSize 若传入true，则将改变后的尺寸与已有尺寸对比，保留较大的尺寸。
              */
             WebGLRenderContext.prototype.resize = function (width, height, useMaxSize) {
-                var surface = this.surface;
+                egret.sys.resizeContext(this, width, height, useMaxSize);
+                /*
+                let surface = this.surface;
                 if (useMaxSize) {
                     if (surface.width < width) {
                         surface.width = width;
@@ -4917,7 +4960,9 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                         }
                     }
                 }
+    
                 this.onResize();
+                */
             };
             WebGLRenderContext.prototype.initWebGL = function () {
                 this.onResize();
