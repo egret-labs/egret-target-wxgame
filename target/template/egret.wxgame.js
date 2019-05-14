@@ -4765,16 +4765,16 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
-        /**
-         * 创建一个canvas。
-         */
-        function createCanvas(width, height) {
-            return window['canvas'];
-        }
         /*
         * 覆盖掉系统的
         */
+        function createCanvas(width, height) {
+            return window['canvas'];
+        }
         egret.sys.createCanvas = createCanvas;
+        /*
+        * 覆盖掉系统的
+        */
         function resizeContext(renderContext, width, height, useMaxSize) {
             if (!renderContext) {
                 return;
@@ -4812,10 +4812,15 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
             webglrendercontext.onResize();
         }
         wxgame.resizeContext = resizeContext;
-        /*
-        * 覆盖掉系统的
-        */
         egret.sys.resizeContext = resizeContext;
+        /**
+         * sys.getSystemRenderingContext
+         */
+        function getSystemRenderingContext(surface) {
+            var gl = window['canvas'].getContext('webgl');
+            return gl;
+        }
+        egret.sys.getSystemRenderingContext = getSystemRenderingContext;
         /**
          * @private
          * WebGL上下文对象，提供简单的绘图接口
@@ -5001,7 +5006,9 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 //     $error(1021);
                 // }
                 // this.setContext(gl);
-                this.setContext(window['canvas'].getContext('webgl'));
+                //this.setContext(window['canvas'].getContext('webgl'));
+                var gl = egret.sys.getSystemRenderingContext(this.surface);
+                this.setContext(gl);
             };
             WebGLRenderContext.prototype.setContext = function (gl) {
                 this.context = gl;

@@ -29,17 +29,18 @@
 
 namespace egret.wxgame {
 
-    /**
-     * 创建一个canvas。
-     */
-    function createCanvas(width?: number, height?: number): HTMLCanvasElement {
-        return window['canvas'];
-    }
     /*
     * 覆盖掉系统的
     */
+    function createCanvas(width?: number, height?: number): HTMLCanvasElement {
+        return window['canvas'];
+    }
+    
     egret.sys.createCanvas = createCanvas;
 
+    /*
+    * 覆盖掉系统的
+    */
     export function resizeContext(renderContext: egret.sys.RenderContext, width: number, height: number, useMaxSize?: boolean): void {
         if (!renderContext) {
             return;
@@ -76,10 +77,17 @@ namespace egret.wxgame {
         }
         webglrendercontext.onResize();
     }
-    /*
-    * 覆盖掉系统的
-    */
     egret.sys.resizeContext = resizeContext;
+
+
+    /**
+     * sys.getSystemRenderingContext
+     */
+    function getSystemRenderingContext(surface: HTMLCanvasElement): CanvasRenderingContext2D | WebGLRenderingContext {
+        const gl = window['canvas'].getContext('webgl');
+        return gl;
+    }
+    egret.sys.getSystemRenderingContext = getSystemRenderingContext;
 
 
 
@@ -355,7 +363,9 @@ namespace egret.wxgame {
             //     $error(1021);
             // }
             // this.setContext(gl);
-            this.setContext(window['canvas'].getContext('webgl'));
+            //this.setContext(window['canvas'].getContext('webgl'));
+            const gl = egret.sys.getSystemRenderingContext(this.surface);
+            this.setContext(gl);
         }
 
         public setContext(gl: any) {
