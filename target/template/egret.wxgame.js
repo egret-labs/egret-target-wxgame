@@ -4766,14 +4766,14 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
     var wxgame;
     (function (wxgame) {
         /*
-        * 覆盖掉系统的
+        * 覆盖掉系统的 createCanvas
         */
         function createCanvas(width, height) {
             return window['canvas'];
         }
         egret.sys.createCanvas = createCanvas;
         /*
-        * 覆盖掉系统的
+        * 覆盖掉系统的 resizeContext
         */
         function resizeContext(renderContext, width, height, useMaxSize) {
             if (!renderContext) {
@@ -4814,7 +4814,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
         wxgame.resizeContext = resizeContext;
         egret.sys.resizeContext = resizeContext;
         /**
-         * sys.getSystemRenderingContext
+         * 覆盖掉系统的 sys.getSystemRenderingContext
          */
         function getSystemRenderingContext(surface) {
             var gl = window['canvas'].getContext('webgl');
@@ -4822,7 +4822,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
         }
         egret.sys.getSystemRenderingContext = getSystemRenderingContext;
         /**
-         * sys.createTexture
+         * 覆盖掉系统的createTexture
          */
         function createTexture(renderContext, bitmapData) {
             var webglrendercontext = renderContext;
@@ -4851,7 +4851,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
         }
         egret.sys.createTexture = createTexture;
         /**
-        * 画texture
+        * 覆盖掉系统的drawTextureElements
         **/
         function drawTextureElements(renderContext, data, offset) {
             var webglrendercontext = renderContext;
@@ -4915,7 +4915,10 @@ window["sharedCanvas"].isCanvas = true;
                 this.contextLost = false;
                 this.$scissorState = false;
                 this.vertSize = 5;
-                this.surface = egret.sys.createCanvas(width, height); //window['canvas'];
+                this.surface = egret.sys.createCanvas(width, height);
+                if (egret.nativeRender) {
+                    return;
+                }
                 this.initWebGL();
                 this.$bufferStack = [];
                 var gl = this.context;
@@ -5021,29 +5024,17 @@ window["sharedCanvas"].isCanvas = true;
                 if (useMaxSize) {
                     if (surface.width < width) {
                         surface.width = width;
-                        if (!wxgame.isSubContext && window["sharedCanvas"]) {
-                            window["sharedCanvas"].width = width;
-                        }
                     }
                     if (surface.height < height) {
                         surface.height = height;
-                        if (!wxgame.isSubContext && window["sharedCanvas"]) {
-                            window["sharedCanvas"].height = height;
-                        }
                     }
                 }
                 else {
                     if (surface.width != width) {
                         surface.width = width;
-                        if (!wxgame.isSubContext && window["sharedCanvas"]) {
-                            window["sharedCanvas"].width = width;
-                        }
                     }
                     if (surface.height != height) {
                         surface.height = height;
-                        if (!wxgame.isSubContext && window["sharedCanvas"]) {
-                            window["sharedCanvas"].height = height;
-                        }
                     }
                 }
     
@@ -5066,28 +5057,28 @@ window["sharedCanvas"].isCanvas = true;
                 this.contextLost = false;
             };
             WebGLRenderContext.prototype.getWebGLContext = function () {
-                // let options = {
-                //     antialias: WebGLRenderContext.antialias,
-                //     stencil: true//设置可以使用模板（用于不规则遮罩）
-                // };
-                // let gl: any;
-                // //todo 是否使用chrome源码names
-                // //let contextNames = ["moz-webgl", "webkit-3d", "experimental-webgl", "webgl", "3d"];
-                // let names = ["webgl", "experimental-webgl"];
-                // for (let i = 0; i < names.length; i++) {
-                //     try {
-                //         gl = this.surface.getContext(names[i], options);
-                //     } catch (e) {
-                //     }
-                //     if (gl) {
-                //         break;
-                //     }
-                // }
-                // if (!gl) {
-                //     $error(1021);
-                // }
-                // this.setContext(gl);
-                //this.setContext(window['canvas'].getContext('webgl'));
+                /*
+                let options = {
+                    antialias: WebGLRenderContext.antialias,
+                    stencil: true//设置可以使用模板（用于不规则遮罩）
+                };
+                let gl: any;
+                //todo 是否使用chrome源码names
+                //let contextNames = ["moz-webgl", "webkit-3d", "experimental-webgl", "webgl", "3d"];
+                let names = ["webgl", "experimental-webgl"];
+                for (let i = 0; i < names.length; i++) {
+                    try {
+                        gl = this.surface.getContext(names[i], options);
+                    } catch (e) {
+                    }
+                    if (gl) {
+                        break;
+                    }
+                }
+                if (!gl) {
+                    $error(1021);
+                }
+                */
                 var gl = egret.sys.getSystemRenderingContext(this.surface);
                 this.setContext(gl);
             };
@@ -5145,9 +5136,7 @@ window["sharedCanvas"].isCanvas = true;
                 return egret.sys.createTexture(this, bitmapData);
                 /*
                 let gl: any = this.context;
-                if (bitmapData.isCanvas && gl.wxBindCanvasTexture != null) {
-                    return bitmapData;
-                }
+    
                 let texture = gl.createTexture();
     
                 if (!texture) {
@@ -5167,10 +5156,6 @@ window["sharedCanvas"].isCanvas = true;
     
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    
-                if (bitmapData.source) {
-                    bitmapData.source.src = "";
-                }
     
                 return texture;
                 */
@@ -5199,11 +5184,12 @@ window["sharedCanvas"].isCanvas = true;
                         bitmapData.webGLTexture = this.createTextureFromCompressedData(bitmapData.source.pvrtcData, bitmapData.width, bitmapData.height, bitmapData.source.mipmapsCount, bitmapData.source.format);
                     }
                     if (bitmapData.$deleteSource && bitmapData.webGLTexture) {
-                        bitmapData.source.src = "";
                         bitmapData.source = null;
                     }
-                    //todo 默认值
-                    bitmapData.webGLTexture["smoothing"] = true;
+                    if (bitmapData.webGLTexture) {
+                        //todo 默认值
+                        bitmapData.webGLTexture["smoothing"] = true;
+                    }
                 }
                 return bitmapData.webGLTexture;
             };
@@ -5344,7 +5330,7 @@ window["sharedCanvas"].isCanvas = true;
                 }
                 var count = meshIndices ? meshIndices.length / 3 : 2;
                 // 应用$filter，因为只可能是colorMatrixFilter，最后两个参数可不传
-                this.drawCmdManager.pushDrawTexture(texture, count, this.$filter);
+                this.drawCmdManager.pushDrawTexture(texture, count, this.$filter, textureWidth, textureHeight);
                 this.vao.cacheArrays(buffer, sourceX, sourceY, sourceWidth, sourceHeight, destX, destY, destWidth, destHeight, textureWidth, textureHeight, meshUVs, meshVertices, meshIndices, rotated);
             };
             /**
@@ -5600,11 +5586,7 @@ window["sharedCanvas"].isCanvas = true;
                 return egret.sys.drawTextureElements(this, data, offset);
                 /*
                 let gl: any = this.context;
-                if (data.texture.isCanvas) {
-                    gl.wxBindCanvasTexture(gl.TEXTURE_2D, data.texture);
-                } else {
-                    gl.bindTexture(gl.TEXTURE_2D, data.texture);
-                }
+                gl.bindTexture(gl.TEXTURE_2D, data.texture);
                 let size = data.count * 3;
                 gl.drawElements(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, offset * 2);
                 return size;
@@ -5771,7 +5753,7 @@ window["sharedCanvas"].isCanvas = true;
             return WebGLRenderContext;
         }());
         wxgame.WebGLRenderContext = WebGLRenderContext;
-        __reflect(WebGLRenderContext.prototype, "egret.wxgame.WebGLRenderContext");
+        __reflect(WebGLRenderContext.prototype, "egret.wxgame.WebGLRenderContext", ["egret.sys.RenderContext"]);
         WebGLRenderContext.initBlendMode();
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));

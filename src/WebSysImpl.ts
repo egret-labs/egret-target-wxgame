@@ -30,7 +30,7 @@
 namespace egret.wxgame {
 
     /*
-    * 覆盖掉系统的
+    * 覆盖掉系统的 createCanvas
     */
     function createCanvas(width?: number, height?: number): HTMLCanvasElement {
         return window['canvas'];
@@ -39,7 +39,7 @@ namespace egret.wxgame {
     egret.sys.createCanvas = createCanvas;
 
     /*
-    * 覆盖掉系统的
+    * 覆盖掉系统的 resizeContext
     */
     export function resizeContext(renderContext: egret.sys.RenderContext, width: number, height: number, useMaxSize?: boolean): void {
         if (!renderContext) {
@@ -81,7 +81,7 @@ namespace egret.wxgame {
 
 
     /**
-     * sys.getSystemRenderingContext
+     * 覆盖掉系统的 sys.getSystemRenderingContext
      */
     function getSystemRenderingContext(surface: HTMLCanvasElement): CanvasRenderingContext2D | WebGLRenderingContext {
         const gl = window['canvas'].getContext('webgl');
@@ -91,7 +91,7 @@ namespace egret.wxgame {
 
 
     /**
-     * sys.createTexture
+     * 覆盖掉系统的createTexture
      */
     function createTexture(renderContext: egret.sys.RenderContext, bitmapData: BitmapData): WebGLTexture {
         const webglrendercontext = <WebGLRenderContext>renderContext;
@@ -121,7 +121,7 @@ namespace egret.wxgame {
     egret.sys.createTexture = createTexture;
 
     /**
-    * 画texture
+    * 覆盖掉系统的drawTextureElements
     **/
     function drawTextureElements(renderContext: egret.sys.RenderContext, data: any, offset: number): number {
         const webglrendercontext = <WebGLRenderContext>renderContext;

@@ -34,7 +34,7 @@ namespace egret.wxgame {
      * WebGL上下文对象，提供简单的绘图接口
      * 抽象出此类，以实现共用一个context
      */
-    export class WebGLRenderContext {
+    export class WebGLRenderContext implements egret.sys.RenderContext {
 
         public static antialias: boolean;
 
@@ -64,7 +64,7 @@ namespace egret.wxgame {
         /**
          * 顶点数组管理器
          */
-        public vao: WebGLVertexArrayObject;
+        private vao: WebGLVertexArrayObject;
 
         /**
          * 绘制命令管理器
@@ -168,7 +168,11 @@ namespace egret.wxgame {
 
         public constructor(width?: number, height?: number) {
 
-            this.surface = egret.sys.createCanvas(width, height);//window['canvas'];
+            this.surface = egret.sys.createCanvas(width, height);
+
+            if (egret.nativeRender) {
+                return;
+            }
 
             this.initWebGL();
 
@@ -210,7 +214,6 @@ namespace egret.wxgame {
          * @param height 改变后的高
          * @param useMaxSize 若传入true，则将改变后的尺寸与已有尺寸对比，保留较大的尺寸。
          */
-
         public resize(width: number, height: number, useMaxSize?: boolean): void {
             egret.sys.resizeContext(this, width, height, useMaxSize);
             /*
@@ -218,36 +221,23 @@ namespace egret.wxgame {
             if (useMaxSize) {
                 if (surface.width < width) {
                     surface.width = width;
-                    if (!wxgame.isSubContext && window["sharedCanvas"]) {
-                        window["sharedCanvas"].width = width;
-                    }
                 }
                 if (surface.height < height) {
                     surface.height = height;
-                    if (!wxgame.isSubContext && window["sharedCanvas"]) {
-                        window["sharedCanvas"].height = height;
-                    }
                 }
             }
             else {
                 if (surface.width != width) {
                     surface.width = width;
-                    if (!wxgame.isSubContext && window["sharedCanvas"]) {
-                        window["sharedCanvas"].width = width;
-                    }
                 }
                 if (surface.height != height) {
                     surface.height = height;
-                    if (!wxgame.isSubContext && window["sharedCanvas"]) {
-                        window["sharedCanvas"].height = height;
-                    }
                 }
             }
 
             this.onResize();
             */
         }
-
 
         public static glContextId: number = 0;
         public glID: number = null;
@@ -279,33 +269,33 @@ namespace egret.wxgame {
         }
 
         private getWebGLContext() {
-            // let options = {
-            //     antialias: WebGLRenderContext.antialias,
-            //     stencil: true//设置可以使用模板（用于不规则遮罩）
-            // };
-            // let gl: any;
-            // //todo 是否使用chrome源码names
-            // //let contextNames = ["moz-webgl", "webkit-3d", "experimental-webgl", "webgl", "3d"];
-            // let names = ["webgl", "experimental-webgl"];
-            // for (let i = 0; i < names.length; i++) {
-            //     try {
-            //         gl = this.surface.getContext(names[i], options);
-            //     } catch (e) {
-            //     }
-            //     if (gl) {
-            //         break;
-            //     }
-            // }
-            // if (!gl) {
-            //     $error(1021);
-            // }
-            // this.setContext(gl);
-            //this.setContext(window['canvas'].getContext('webgl'));
+            /*
+            let options = {
+                antialias: WebGLRenderContext.antialias,
+                stencil: true//设置可以使用模板（用于不规则遮罩）
+            };
+            let gl: any;
+            //todo 是否使用chrome源码names
+            //let contextNames = ["moz-webgl", "webkit-3d", "experimental-webgl", "webgl", "3d"];
+            let names = ["webgl", "experimental-webgl"];
+            for (let i = 0; i < names.length; i++) {
+                try {
+                    gl = this.surface.getContext(names[i], options);
+                } catch (e) {
+                }
+                if (gl) {
+                    break;
+                }
+            }
+            if (!gl) {
+                $error(1021);
+            }
+            */
             const gl = egret.sys.getSystemRenderingContext(this.surface);
             this.setContext(gl);
         }
 
-        public setContext(gl: any) {
+        private setContext(gl: any) {
             this.context = gl;
             gl.id = WebGLRenderContext.glContextId++;
             this.glID = gl.id;
@@ -363,13 +353,11 @@ namespace egret.wxgame {
         /**
          * 创建一个WebGLTexture
          */
-        public createTexture(bitmapData: any): WebGLTexture {
+        public createTexture(bitmapData: BitmapData): WebGLTexture {
             return egret.sys.createTexture(this, bitmapData);
             /*
             let gl: any = this.context;
-            if (bitmapData.isCanvas && gl.wxBindCanvasTexture != null) {
-                return bitmapData;
-            }
+
             let texture = gl.createTexture();
 
             if (!texture) {
@@ -390,10 +378,6 @@ namespace egret.wxgame {
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
-            if (bitmapData.source) {
-                bitmapData.source.src = "";
-            }
-
             return texture;
             */
         }
@@ -405,7 +389,7 @@ namespace egret.wxgame {
         /**
          * 更新材质的bitmapData
          */
-        public updateTexture(texture: WebGLTexture, bitmapData: any): void {
+        public updateTexture(texture: WebGLTexture, bitmapData: BitmapData): void {
             let gl: any = this.context;
             gl.bindTexture(gl.TEXTURE_2D, texture);
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, bitmapData);
@@ -424,11 +408,12 @@ namespace egret.wxgame {
                     bitmapData.webGLTexture = this.createTextureFromCompressedData(bitmapData.source.pvrtcData, bitmapData.width, bitmapData.height, bitmapData.source.mipmapsCount, bitmapData.source.format);
                 }
                 if (bitmapData.$deleteSource && bitmapData.webGLTexture) {
-                    bitmapData.source.src = "";
                     bitmapData.source = null;
                 }
-                //todo 默认值
-                bitmapData.webGLTexture["smoothing"] = true;
+                if (bitmapData.webGLTexture) {
+                    //todo 默认值
+                    bitmapData.webGLTexture["smoothing"] = true;
+                }
             }
             return bitmapData.webGLTexture;
         }
@@ -596,7 +581,7 @@ namespace egret.wxgame {
 
             let count = meshIndices ? meshIndices.length / 3 : 2;
             // 应用$filter，因为只可能是colorMatrixFilter，最后两个参数可不传
-            this.drawCmdManager.pushDrawTexture(texture, count, this.$filter);
+            this.drawCmdManager.pushDrawTexture(texture, count, this.$filter, textureWidth, textureHeight);
 
             this.vao.cacheArrays(buffer, sourceX, sourceY, sourceWidth, sourceHeight,
                 destX, destY, destWidth, destHeight, textureWidth, textureHeight,
@@ -886,11 +871,7 @@ namespace egret.wxgame {
             return egret.sys.drawTextureElements(this, data, offset);
             /*
             let gl: any = this.context;
-            if (data.texture.isCanvas) {
-                gl.wxBindCanvasTexture(gl.TEXTURE_2D, data.texture);
-            } else {
-                gl.bindTexture(gl.TEXTURE_2D, data.texture);
-            }
+            gl.bindTexture(gl.TEXTURE_2D, data.texture);
             let size = data.count * 3;
             gl.drawElements(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, offset * 2);
             return size;
@@ -1102,4 +1083,3 @@ namespace egret.wxgame {
     WebGLRenderContext.initBlendMode();
 
 }
-
