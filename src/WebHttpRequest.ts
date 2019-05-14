@@ -36,6 +36,8 @@ namespace egret.wxgame {
 
         private _response: string;
 
+        public timeout: number = 0;
+
         /**
          * @private
          */

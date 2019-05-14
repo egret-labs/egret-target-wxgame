@@ -28,6 +28,17 @@
 //////////////////////////////////////////////////////////////////////////////////////
 
 namespace egret.wxgame {
+
+    /**
+     * 创建一个canvas。
+     */
+    function createCanvas(width?: number, height?: number): HTMLCanvasElement {
+        return window['canvas'];
+    }
+    /*
+    * 覆盖掉系统的
+    */
+    egret.sys.createCanvas = createCanvas;
     /**
      * @private
      * WebGL上下文对象，提供简单的绘图接口
@@ -167,7 +178,7 @@ namespace egret.wxgame {
 
         public constructor(width?: number, height?: number) {
 
-            this.surface = window['canvas'];
+            this.surface = createCanvas(width, height);//window['canvas'];
 
             this.initWebGL();
 
@@ -1086,7 +1097,8 @@ namespace egret.wxgame {
     }
 
     WebGLRenderContext.initBlendMode();
-
+    
 }
 
 window["sharedCanvas"].isCanvas = true;
+
