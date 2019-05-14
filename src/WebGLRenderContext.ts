@@ -90,6 +90,37 @@ namespace egret.wxgame {
     egret.sys.getSystemRenderingContext = getSystemRenderingContext;
 
 
+    /**
+     * sys.createTexture
+     */
+    function createTexture(renderContext: egret.sys.RenderContext, bitmapData: BitmapData): WebGLTexture {
+        const webglrendercontext = <WebGLRenderContext>renderContext;
+        const gl: any = webglrendercontext.context;
+        if ((bitmapData as any).isCanvas && gl.wxBindCanvasTexture != null) {
+            return bitmapData;
+        }
+        const texture = gl.createTexture();
+        if (!texture) {
+            //先创建texture失败,然后lost事件才发出来..
+            webglrendercontext.contextLost = true;
+            return null;
+        }
+        texture.glContext = gl;
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, bitmapData);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        if (bitmapData.source) {
+            bitmapData.source.src = "";
+        }
+        return texture;
+    }
+    egret.sys.createTexture = createTexture;
+
+
 
 
     /**
@@ -427,6 +458,8 @@ namespace egret.wxgame {
          * 创建一个WebGLTexture
          */
         public createTexture(bitmapData: any): WebGLTexture {
+            return egret.sys.createTexture(this, bitmapData);
+            /*
             let gl: any = this.context;
             if (bitmapData.isCanvas && gl.wxBindCanvasTexture != null) {
                 return bitmapData;
@@ -456,6 +489,7 @@ namespace egret.wxgame {
             }
 
             return texture;
+            */
         }
 
         private createTextureFromCompressedData(data, width, height, levels, internalFormat): WebGLTexture {
