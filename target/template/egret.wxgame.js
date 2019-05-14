@@ -4851,6 +4851,23 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
         }
         egret.sys.createTexture = createTexture;
         /**
+        * 画texture
+        **/
+        function drawTextureElements(renderContext, data, offset) {
+            var webglrendercontext = renderContext;
+            var gl = webglrendercontext.context;
+            if (data.texture.isCanvas) {
+                gl.wxBindCanvasTexture(gl.TEXTURE_2D, data.texture);
+            }
+            else {
+                gl.bindTexture(gl.TEXTURE_2D, data.texture);
+            }
+            var size = data.count * 3;
+            gl.drawElements(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, offset * 2);
+            return size;
+        }
+        egret.sys.drawTextureElements = drawTextureElements;
+        /**
          * @private
          * WebGL上下文对象，提供简单的绘图接口
          * 抽象出此类，以实现共用一个context
@@ -5545,16 +5562,18 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
              * 画texture
              **/
             WebGLRenderContext.prototype.drawTextureElements = function (data, offset) {
-                var gl = this.context;
+                return egret.sys.drawTextureElements(this, data, offset);
+                /*
+                let gl: any = this.context;
                 if (data.texture.isCanvas) {
                     gl.wxBindCanvasTexture(gl.TEXTURE_2D, data.texture);
-                }
-                else {
+                } else {
                     gl.bindTexture(gl.TEXTURE_2D, data.texture);
                 }
-                var size = data.count * 3;
+                let size = data.count * 3;
                 gl.drawElements(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, offset * 2);
                 return size;
+                */
             };
             /**
              * @private

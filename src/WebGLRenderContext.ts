@@ -35,7 +35,7 @@ namespace egret.wxgame {
     function createCanvas(width?: number, height?: number): HTMLCanvasElement {
         return window['canvas'];
     }
-    
+
     egret.sys.createCanvas = createCanvas;
 
     /*
@@ -119,6 +119,23 @@ namespace egret.wxgame {
         return texture;
     }
     egret.sys.createTexture = createTexture;
+
+    /**
+    * 画texture
+    **/
+    function drawTextureElements(renderContext: egret.sys.RenderContext, data: any, offset: number): number {
+        const webglrendercontext = <WebGLRenderContext>renderContext;
+        const gl: any = webglrendercontext.context;
+        if (data.texture.isCanvas) {
+            gl.wxBindCanvasTexture(gl.TEXTURE_2D, data.texture);
+        } else {
+            gl.bindTexture(gl.TEXTURE_2D, data.texture);
+        }
+        const size = data.count * 3;
+        gl.drawElements(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, offset * 2);
+        return size;
+    }
+    egret.sys.drawTextureElements = drawTextureElements;
 
 
 
@@ -304,7 +321,7 @@ namespace egret.wxgame {
          * @param height 改变后的高
          * @param useMaxSize 若传入true，则将改变后的尺寸与已有尺寸对比，保留较大的尺寸。
          */
-        
+
         public resize(width: number, height: number, useMaxSize?: boolean): void {
             egret.sys.resizeContext(this, width, height, useMaxSize);
             /*
@@ -341,7 +358,7 @@ namespace egret.wxgame {
             this.onResize();
             */
         }
-        
+
 
         public static glContextId: number = 0;
         public glID: number = null;
@@ -977,6 +994,8 @@ namespace egret.wxgame {
          * 画texture
          **/
         private drawTextureElements(data: any, offset: number): number {
+            return egret.sys.drawTextureElements(this, data, offset);
+            /*
             let gl: any = this.context;
             if (data.texture.isCanvas) {
                 gl.wxBindCanvasTexture(gl.TEXTURE_2D, data.texture);
@@ -986,6 +1005,7 @@ namespace egret.wxgame {
             let size = data.count * 3;
             gl.drawElements(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, offset * 2);
             return size;
+            */
         }
 
         /**
@@ -1191,7 +1211,7 @@ namespace egret.wxgame {
     }
 
     WebGLRenderContext.initBlendMode();
-    
+
 }
 
 window["sharedCanvas"].isCanvas = true;
