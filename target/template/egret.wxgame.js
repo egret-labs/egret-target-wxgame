@@ -4768,8 +4768,17 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
         /*
         * 覆盖掉系统的 createCanvas
         */
-        function createCanvas(width, height) {
+        function mainCanvas(width, height) {
             return window['canvas'];
+        }
+        egret.sys.mainCanvas = mainCanvas;
+        function createCanvas(width, height) {
+            var canvas = document.createElement("canvas");
+            if (!isNaN(width) && !isNaN(height)) {
+                canvas.width = width;
+                canvas.height = height;
+            }
+            return canvas;
         }
         egret.sys.createCanvas = createCanvas;
         /*
@@ -4814,13 +4823,20 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
         wxgame.resizeContext = resizeContext;
         egret.sys.resizeContext = resizeContext;
         /**
-         * 覆盖掉系统的 sys.getSystemRenderingContext
+         * sys.getContextWebGL
          */
-        function getSystemRenderingContext(surface) {
-            var gl = window['canvas'].getContext('webgl');
-            return gl;
+        function getContextWebGL(surface) {
+            return surface ? surface.getContext('webgl') : null;
         }
-        egret.sys.getSystemRenderingContext = getSystemRenderingContext;
+        egret.sys.getContextWebGL = getContextWebGL;
+        /**
+         * sys.getContext2d
+         */
+        function getContext2d(surface) {
+            return surface ? surface.getContext('2d') : null;
+        }
+        wxgame.getContext2d = getContext2d;
+        egret.sys.getContext2d = getContext2d;
         /**
          * 覆盖掉系统的createTexture
          */
@@ -4856,6 +4872,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
         function drawTextureElements(renderContext, data, offset) {
             var webglrendercontext = renderContext;
             var gl = webglrendercontext.context;
+            gl.activeTexture(gl.TEXTURE0);
             if (data.texture.isCanvas) {
                 gl.wxBindCanvasTexture(gl.TEXTURE_2D, data.texture);
             }
@@ -4921,7 +4938,7 @@ window["sharedCanvas"].isCanvas = true;
                 this.currentSupportedCompressedTextureTypes = [];
                 this.$scissorState = false;
                 this.vertSize = 5;
-                this.surface = egret.sys.createCanvas(width, height);
+                this.surface = egret.sys.mainCanvas(width, height);
                 if (egret.nativeRender) {
                     return;
                 }
@@ -5119,7 +5136,7 @@ window["sharedCanvas"].isCanvas = true;
                     $error(1021);
                 }
                 */
-                var gl = egret.sys.getSystemRenderingContext(this.surface);
+                var gl = egret.sys.getContextWebGL(this.surface);
                 this.setContext(gl);
             };
             WebGLRenderContext.prototype.setContext = function (gl) {
@@ -5266,7 +5283,7 @@ window["sharedCanvas"].isCanvas = true;
                     if (!this._defaultEmptyTexture) {
                         var size = 16;
                         var canvas = egret.sys.createCanvas(size, size);
-                        var context = canvas.getContext('2d');
+                        var context = egret.sys.getContext2d(canvas); //canvas.getContext('2d');
                         context.fillStyle = 'white';
                         context.fillRect(0, 0, size, size);
                         this._defaultEmptyTexture = this.createTexture(canvas);

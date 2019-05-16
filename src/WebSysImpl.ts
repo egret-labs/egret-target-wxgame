@@ -32,11 +32,21 @@ namespace egret.wxgame {
     /*
     * 覆盖掉系统的 createCanvas
     */
-    function createCanvas(width?: number, height?: number): HTMLCanvasElement {
+    function mainCanvas(width?: number, height?: number): HTMLCanvasElement {
         return window['canvas'];
     }
+    egret.sys.mainCanvas = mainCanvas;
 
+    function createCanvas(width?: number, height?: number): HTMLCanvasElement {
+        let canvas: HTMLCanvasElement = document.createElement("canvas");
+        if (!isNaN(width) && !isNaN(height)) {
+            canvas.width = width;
+            canvas.height = height;
+        }
+        return canvas;
+    }
     egret.sys.createCanvas = createCanvas;
+
 
     /*
     * 覆盖掉系统的 resizeContext
@@ -80,15 +90,21 @@ namespace egret.wxgame {
     egret.sys.resizeContext = resizeContext;
 
 
-    /**
-     * 覆盖掉系统的 sys.getSystemRenderingContext
-     */
-    function getSystemRenderingContext(surface: HTMLCanvasElement): CanvasRenderingContext2D | WebGLRenderingContext {
-        const gl = window['canvas'].getContext('webgl');
-        return gl;
-    }
-    egret.sys.getSystemRenderingContext = getSystemRenderingContext;
 
+    /**
+     * sys.getContextWebGL
+     */
+    function getContextWebGL(surface: HTMLCanvasElement): WebGLRenderingContext {
+        return surface ? surface.getContext('webgl') : null;
+    }
+    egret.sys.getContextWebGL = getContextWebGL;
+    /**
+     * sys.getContext2d
+     */
+    export function getContext2d(surface: HTMLCanvasElement): CanvasRenderingContext2D {
+        return surface ? surface.getContext('2d') : null;
+    }
+    egret.sys.getContext2d = getContext2d;
 
     /**
      * 覆盖掉系统的createTexture
@@ -126,6 +142,7 @@ namespace egret.wxgame {
     function drawTextureElements(renderContext: egret.sys.RenderContext, data: any, offset: number): number {
         const webglrendercontext = <WebGLRenderContext>renderContext;
         const gl: any = webglrendercontext.context;
+        gl.activeTexture(gl.TEXTURE0);
         if (data.texture.isCanvas) {
             gl.wxBindCanvasTexture(gl.TEXTURE_2D, data.texture);
         } else {
