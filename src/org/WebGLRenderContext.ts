@@ -29,6 +29,16 @@
 
 namespace egret.wxgame {
 
+    ///
+    export interface SupportedCompressedTextureType {
+        type: string,
+        formats: Uint32Array,
+        extension: any
+    }
+
+    //TO DO
+    let debugLogOnceCompressedTextureNotSupported = false;
+
     /**
      * @private
      * WebGL上下文对象，提供简单的绘图接口
@@ -37,6 +47,9 @@ namespace egret.wxgame {
     export class WebGLRenderContext implements egret.sys.RenderContext {
 
         public static antialias: boolean;
+
+        //
+        public _defaultEmptyTexture: WebGLTexture = null;
 
         /**
          * 渲染上下文
@@ -247,6 +260,42 @@ namespace egret.wxgame {
 
         public contextLost: boolean = false;
 
+        //refactor
+        public currentSupportedCompressedTextureTypes: SupportedCompressedTextureType[] = [];
+        private getSupportedCompressedTextureTypes(gl: WebGLRenderingContext, compressedTextureType: string[]): SupportedCompressedTextureType[] {
+            const result: SupportedCompressedTextureType[] = [];
+            for (let i = 0, length = compressedTextureType.length; i < length; ++i) {
+                const targetCompressedTextureType = compressedTextureType[i];
+                const rs = this.getSupportedCompressedTextureType(gl, targetCompressedTextureType);
+                if (rs) {
+                    result.push(rs);
+                }
+            }
+            return result;
+        }
+
+        private getSupportedCompressedTextureType(gl: WebGLRenderingContext, targetCompressedTextureType: string): SupportedCompressedTextureType {
+            const availableExtensions = gl.getSupportedExtensions();
+            for (let i = 0; i < availableExtensions.length; ++i) {
+                if (availableExtensions[i].indexOf(targetCompressedTextureType) !== -1) {
+                    const extension = gl.getExtension(availableExtensions[i]);
+                    const formats = gl.getParameter(gl.COMPRESSED_TEXTURE_FORMATS);
+                    if (DEBUG) {
+                        egret.log(formats);
+                        for (const key in extension) {
+                            egret.log(key, extension[key], '0x' + extension[key].toString(16));
+                        }
+                    }
+                    return {
+                        type: targetCompressedTextureType,
+                        extension: extension,
+                        formats: formats
+                    }
+                }
+            }
+            return null;
+        }
+
         private initWebGL(): void {
             this.onResize();
 
@@ -257,6 +306,9 @@ namespace egret.wxgame {
 
             let gl = this.context;
             this.$maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+
+            //refactor
+            this.currentSupportedCompressedTextureTypes = this.getSupportedCompressedTextureTypes(this.context, ['s3tc', 'etc1', 'pvrtc']);
         }
 
         private handleContextLost() {
@@ -353,7 +405,7 @@ namespace egret.wxgame {
         /**
          * 创建一个WebGLTexture
          */
-        public createTexture(bitmapData: BitmapData): WebGLTexture {
+        public createTexture(bitmapData: BitmapData | HTMLCanvasElement): WebGLTexture {
             return egret.sys.createTexture(this, bitmapData);
             /*
             let gl: any = this.context;
@@ -365,25 +417,77 @@ namespace egret.wxgame {
                 this.contextLost = true;
                 return;
             }
-
-            texture.glContext = gl;
-
+            texture[glContext] = gl;
             gl.bindTexture(gl.TEXTURE_2D, texture);
             gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
-
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, bitmapData);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, bitmapData as any);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-
             return texture;
             */
         }
 
-        private createTextureFromCompressedData(data, width, height, levels, internalFormat): WebGLTexture {
-            return null;
+        /*
+        * TO DO
+        */
+        private $debugCheckCompressedTextureInternalFormat(currentSupportedCompressedTextureTypes: SupportedCompressedTextureType[], internalFormat: number): boolean {
+            //width: number, height: number max ?
+            let checkCurrentSupportedCompressedTextureTypes = false;
+            for (let i = 0, length = currentSupportedCompressedTextureTypes.length; i < length; ++i) {
+                const ss = currentSupportedCompressedTextureTypes[i];
+                const formats = ss.formats;
+                for (let j = 0, length = formats.length; j < length; ++j) {
+                    if (formats[j] === internalFormat) {
+                        checkCurrentSupportedCompressedTextureTypes = true;
+                        break;
+                    }
+                }
+            }
+            return checkCurrentSupportedCompressedTextureTypes;
+        }
+
+        /*
+        * TO DO
+        */
+        private $debugLogOnceCompressedTextureNotSupported(currentSupportedCompressedTextureTypes: SupportedCompressedTextureType[], internalFormat: number): void {
+            if (!debugLogOnceCompressedTextureNotSupported) {
+                debugLogOnceCompressedTextureNotSupported = true;
+                egret.log('internalFormat = ' + internalFormat + ':' + ('0x' + internalFormat.toString(16)) + ', the current hardware does not support the corresponding compression format.');
+                for (let i = 0, length = currentSupportedCompressedTextureTypes.length; i < length; ++i) {
+                    const ss = currentSupportedCompressedTextureTypes[i];
+                    egret.log('type = ' + ss.type + ', formats = ' + ss.formats);
+                }
+            }
+        }
+
+        //
+        private createCompressedTexture(data: Uint8Array, width: number, height: number, levels: number, internalFormat: number): WebGLTexture {
+            if (DEBUG) {
+                const checkRes = this.$debugCheckCompressedTextureInternalFormat(this.currentSupportedCompressedTextureTypes, internalFormat);
+                if (!checkRes) {
+                    this.$debugLogOnceCompressedTextureNotSupported(this.currentSupportedCompressedTextureTypes, internalFormat);
+                    return this.defaultEmptyTexture;
+                }
+            }
+            const gl: any = this.context;
+            const texture = gl.createTexture() as WebGLTexture;
+            if (!texture) {
+                this.contextLost = true;
+                return;
+            }
+            texture[glContext] = gl;
+            texture[is_compressed_texture] = true;
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
+            gl.compressedTexImage2D(gl.TEXTURE_2D, levels, internalFormat, width, height, 0, data);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.bindTexture(gl.TEXTURE_2D, null);
+            return texture;
         }
 
         /**
@@ -395,20 +499,45 @@ namespace egret.wxgame {
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, bitmapData);
         }
 
-        /**
-         * 获取一个WebGLTexture
-         * 如果有缓存的texture返回缓存的texture，如果没有则创建并缓存texture
-         */
+        public get defaultEmptyTexture(): WebGLTexture {
+            if (!this._defaultEmptyTexture) {
+                const size = 16;
+                const canvas = egret.sys.createCanvas(size, size);
+                const context = canvas.getContext('2d');
+                context.fillStyle = 'white';
+                context.fillRect(0, 0, size, size);
+                this._defaultEmptyTexture = this.createTexture(canvas);
+                this._defaultEmptyTexture[engine_default_empty_texture] = true;
+            }
+            return this._defaultEmptyTexture;
+        }
+
         public getWebGLTexture(bitmapData: BitmapData): WebGLTexture {
             if (!bitmapData.webGLTexture) {
-                if (bitmapData.format == "image") {
+                if (bitmapData.format == "image" && !bitmapData.hasCompressed2d()) {
                     bitmapData.webGLTexture = this.createTexture(bitmapData.source);
                 }
-                else if (bitmapData.format == "pvr") {//todo 需要支持其他格式
-                    bitmapData.webGLTexture = this.createTextureFromCompressedData(bitmapData.source.pvrtcData, bitmapData.width, bitmapData.height, bitmapData.source.mipmapsCount, bitmapData.source.format);
+                else if (bitmapData.hasCompressed2d()) {
+                    const compressedData = bitmapData.getCompressed2dTextureData();
+                    bitmapData.webGLTexture = this.createCompressedTexture(
+                        compressedData!.byteArray,
+                        compressedData!.width,
+                        compressedData!.height,
+                        compressedData!.level,
+                        compressedData!.glInternalFormat
+                    );
+                    ///
+                    const etcAlphaMask = bitmapData.etcAlphaMask;
+                    if (etcAlphaMask) {
+                        const maskTexture = this.getWebGLTexture(etcAlphaMask);
+                        if (maskTexture) {
+                            bitmapData.webGLTexture[etc_alpha_mask] = maskTexture;
+                        }
+                    }
                 }
                 if (bitmapData.$deleteSource && bitmapData.webGLTexture) {
                     bitmapData.source = null;
+                    bitmapData.clearCompressedTextureData();
                 }
                 if (bitmapData.webGLTexture) {
                     //todo 默认值
@@ -722,6 +851,7 @@ namespace egret.wxgame {
 
             switch (data.type) {
                 case DRAWABLE_TYPE.TEXTURE:
+                    //这段的切换可以优化
                     if (filter) {
                         if (filter.type === "custom") {
                             program = EgretWebGLProgram.getProgram(gl, filter.$vertexSrc, filter.$fragmentSrc, filter.$shaderKey);
@@ -735,7 +865,15 @@ namespace egret.wxgame {
                             program = EgretWebGLProgram.getProgram(gl, EgretShaderLib.default_vert, EgretShaderLib.glow_frag, "glow");
                         }
                     } else {
-                        program = EgretWebGLProgram.getProgram(gl, EgretShaderLib.default_vert, EgretShaderLib.texture_frag, "texture");
+                        if (data.texture[etc_alpha_mask]) {
+                            program = EgretWebGLProgram.getProgram(gl, EgretShaderLib.default_vert, EgretShaderLib.texture_etc_alphamask_frag, etc_alpha_mask);
+                            ///need refactor
+                            gl.activeTexture(gl.TEXTURE1);
+                            gl.bindTexture(gl.TEXTURE_2D, data.texture[etc_alpha_mask]);
+                        }
+                        else {
+                            program = EgretWebGLProgram.getProgram(gl, EgretShaderLib.default_vert, EgretShaderLib.texture_frag, "texture");
+                        }
                     }
 
                     this.activeProgram(gl, program);
@@ -852,8 +990,12 @@ namespace egret.wxgame {
                 } else if (key === "uTextureSize") {
                     uniforms[key].setValue({ x: textureWidth, y: textureHeight });
                 } else if (key === "uSampler") {
-
-                } else {
+                    uniforms[key].setValue(0);
+                }
+                else if (key === "uSamplerAlphaMask") {
+                    uniforms[key].setValue(1);
+                }
+                else {
                     let value = filter.$uniforms[key];
                     if (value !== undefined) {
                         uniforms[key].setValue(value);
@@ -871,6 +1013,7 @@ namespace egret.wxgame {
             return egret.sys.drawTextureElements(this, data, offset);
             /*
             let gl: any = this.context;
+            gl.activeTexture(gl.TEXTURE0); ///refactor
             gl.bindTexture(gl.TEXTURE_2D, data.texture);
             let size = data.count * 3;
             gl.drawElements(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, offset * 2);

@@ -41,7 +41,7 @@
 		"src/EgretWebGLAttribute.ts",
 		"src/EgretWebGLProgram.ts",
 		"src/EgretWebGLUniform.ts",
-		"src/EgretShaderLib.ts",
+		"src/org/EgretShaderLib.ts",
 		"libs/egret.d.ts"
 	]
 }
