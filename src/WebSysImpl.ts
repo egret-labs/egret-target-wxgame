@@ -72,13 +72,13 @@ namespace egret.wxgame {
             }
         }
         else {
-            if (surface.width != width) {
+            if (surface.width !== width) {
                 surface.width = width;
                 if (!wxgame.isSubContext && window["sharedCanvas"]) {
                     window["sharedCanvas"].width = width;
                 }
             }
-            if (surface.height != height) {
+            if (surface.height !== height) {
                 surface.height = height;
                 if (!wxgame.isSubContext && window["sharedCanvas"]) {
                     window["sharedCanvas"].height = height;
@@ -112,7 +112,7 @@ namespace egret.wxgame {
     function createTexture(renderContext: egret.sys.RenderContext, bitmapData: BitmapData): WebGLTexture {
         const webglrendercontext = <WebGLRenderContext>renderContext;
         const gl: any = webglrendercontext.context;
-        if ((bitmapData as any).isCanvas && gl.wxBindCanvasTexture != null) {
+        if ((bitmapData as any).isCanvas && gl.wxBindCanvasTexture) {
             return bitmapData;
         }
         const texture = gl.createTexture();
