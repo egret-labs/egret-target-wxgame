@@ -5132,6 +5132,7 @@ window["sharedCanvas"].isCanvas = true;
                     this.etc1.name = 'WEBGL_compressed_texture_etc1';
                 }
                 //
+                egret.Capabilities.supportedCompressedTexture = egret.Capabilities.supportedCompressedTexture || {};
                 egret.Capabilities.supportedCompressedTexture.pvrtc = !!this.pvrtc;
                 egret.Capabilities.supportedCompressedTexture.etc1 = !!this.etc1;
                 //

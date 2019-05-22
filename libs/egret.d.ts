@@ -10844,7 +10844,7 @@ declare namespace egret {
          * @platform Web,Native
          * @language zh_CN
          */
-        static readonly supportedCompressedTexture: SupportedCompressedTexture;
+        static supportedCompressedTexture: SupportedCompressedTexture;
     }
 }
 declare namespace egret {
