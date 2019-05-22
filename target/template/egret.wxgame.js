@@ -2847,13 +2847,13 @@ if (window['HTMLVideoElement'] == undefined) {
             }
             else {
                 //based on : https://github.com/jondavidjohn/hidpi-canvas-polyfill
-                var context = egret.sys.canvasHitTestBuffer.context;
-                var backingStore = context.backingStorePixelRatio ||
-                    context.webkitBackingStorePixelRatio ||
-                    context.mozBackingStorePixelRatio ||
-                    context.msBackingStorePixelRatio ||
-                    context.oBackingStorePixelRatio ||
-                    context.backingStorePixelRatio || 1;
+                var context_1 = egret.sys.canvasHitTestBuffer.context;
+                var backingStore = context_1.backingStorePixelRatio ||
+                    context_1.webkitBackingStorePixelRatio ||
+                    context_1.mozBackingStorePixelRatio ||
+                    context_1.msBackingStorePixelRatio ||
+                    context_1.oBackingStorePixelRatio ||
+                    context_1.backingStorePixelRatio || 1;
                 canvasScaleFactor = (window.devicePixelRatio || 1) / backingStore;
             }
             egret.sys.DisplayList.$canvasScaleFactor = canvasScaleFactor;
@@ -4805,13 +4805,13 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 }
             }
             else {
-                if (surface.width != width) {
+                if (surface.width !== width) {
                     surface.width = width;
                     if (!wxgame.isSubContext && window["sharedCanvas"]) {
                         window["sharedCanvas"].width = width;
                     }
                 }
-                if (surface.height != height) {
+                if (surface.height !== height) {
                     surface.height = height;
                     if (!wxgame.isSubContext && window["sharedCanvas"]) {
                         window["sharedCanvas"].height = height;
@@ -4843,7 +4843,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
         function createTexture(renderContext, bitmapData) {
             var webglrendercontext = renderContext;
             var gl = webglrendercontext.context;
-            if (bitmapData.isCanvas && gl.wxBindCanvasTexture != null) {
+            if (bitmapData.isCanvas && gl.wxBindCanvasTexture) {
                 return bitmapData;
             }
             var texture = gl.createTexture();
@@ -5064,19 +5064,20 @@ window["sharedCanvas"].isCanvas = true;
                 this.onResize();
                 */
             };
-            WebGLRenderContext.prototype._buildSupportedCompressedTextureInfo = function (gl, compressedTextureExNames) {
-                if (compressedTextureExNames.length === 0) {
-                    return [];
-                }
+            WebGLRenderContext.prototype._buildSupportedCompressedTextureInfo = function (/*gl: WebGLRenderingContext, compressedTextureExNames: string[],*/ extensions) {
+                // if (compressedTextureExNames.length === 0) {
+                //     return [];
+                // }
                 var returnValue = [];
-                for (var _i = 0, compressedTextureExNames_1 = compressedTextureExNames; _i < compressedTextureExNames_1.length; _i++) {
-                    var exName = compressedTextureExNames_1[_i];
-                    var extension = gl.getExtension(exName);
+                // for (const exName of compressedTextureExNames) {
+                //     const extension = gl.getExtension(exName);
+                for (var _i = 0, extensions_1 = extensions; _i < extensions_1.length; _i++) {
+                    var extension = extensions_1[_i];
                     if (!extension) {
                         continue;
                     }
                     var info = {
-                        extensionName: exName,
+                        extensionName: extension.name,
                         supportedFormats: []
                     };
                     //
@@ -5086,10 +5087,10 @@ window["sharedCanvas"].isCanvas = true;
                     //
                     if (true) {
                         if (info.supportedFormats.length === 0) {
-                            console.error('buildSupportedCompressedTextureInfo failed = ' + exName);
+                            console.error('buildSupportedCompressedTextureInfo failed = ' + extension.name);
                         }
                         else {
-                            egret.log('support: ' + exName);
+                            egret.log('support: ' + extension.name);
                             for (var key in extension) {
                                 egret.log(key, extension[key], '0x' + extension[key].toString(16));
                             }
@@ -5113,15 +5114,28 @@ window["sharedCanvas"].isCanvas = true;
                 // this._caps.etc1 = this._gl.getExtension('WEBGL_compressed_texture_etc1') || this._gl.getExtension('WEBKIT_WEBGL_compressed_texture_etc1');
                 // this._caps.etc2 = this._gl.getExtension('WEBGL_compressed_texture_etc') || this._gl.getExtension('WEBKIT_WEBGL_compressed_texture_etc') ||
                 //     this._gl.getExtension('WEBGL_compressed_texture_es3_0'); // also a requirement of OpenGL ES 3
-                var compressedTextureExNames = [
-                    'WEBGL_compressed_texture_pvrtc', 'WEBKIT_WEBGL_compressed_texture_pvrtc',
-                    'WEBGL_compressed_texture_etc1', 'WEBKIT_WEBGL_compressed_texture_etc1',
-                    'WEBGL_compressed_texture_etc', 'WEBKIT_WEBGL_compressed_texture_etc',
-                    'WEBGL_compressed_texture_astc', 'WEBKIT_WEBGL_compressed_texture_astc',
-                    'WEBGL_compressed_texture_s3tc', 'WEBKIT_WEBGL_compressed_texture_s3tc',
-                    'WEBGL_compressed_texture_es3_0'
-                ];
-                this._supportedCompressedTextureInfo = this._buildSupportedCompressedTextureInfo(this.context, compressedTextureExNames);
+                // const compressedTextureExNames = [
+                //     'WEBGL_compressed_texture_pvrtc', 'WEBKIT_WEBGL_compressed_texture_pvrtc',
+                //     'WEBGL_compressed_texture_etc1', 'WEBKIT_WEBGL_compressed_texture_etc1',
+                //     'WEBGL_compressed_texture_etc', 'WEBKIT_WEBGL_compressed_texture_etc',
+                //     'WEBGL_compressed_texture_astc', 'WEBKIT_WEBGL_compressed_texture_astc',
+                //     'WEBGL_compressed_texture_s3tc', 'WEBKIT_WEBGL_compressed_texture_s3tc',
+                //     'WEBGL_compressed_texture_es3_0'];
+                //
+                this.pvrtc = gl.getExtension('WEBGL_compressed_texture_pvrtc') || gl.getExtension('WEBKIT_WEBGL_compressed_texture_pvrtc');
+                if (this.pvrtc) {
+                    this.pvrtc.name = 'WEBGL_compressed_texture_pvrtc';
+                }
+                //
+                this.etc1 = gl.getExtension('WEBGL_compressed_texture_etc1') || gl.getExtension('WEBKIT_WEBGL_compressed_texture_etc1');
+                if (this.etc1) {
+                    this.etc1.name = 'WEBGL_compressed_texture_etc1';
+                }
+                //
+                egret.Capabilities.supportedCompressedTexture.pvrtc = !!this.pvrtc;
+                egret.Capabilities.supportedCompressedTexture.etc1 = !!this.etc1;
+                //
+                this._supportedCompressedTextureInfo = this._buildSupportedCompressedTextureInfo(/*this.context, compressedTextureExNames,*/ [this.etc1, this.pvrtc]);
             };
             WebGLRenderContext.prototype.handleContextLost = function () {
                 this.contextLost = true;
@@ -5309,9 +5323,9 @@ window["sharedCanvas"].isCanvas = true;
                     if (!this._defaultEmptyTexture) {
                         var size = 16;
                         var canvas = egret.sys.createCanvas(size, size);
-                        var context = egret.sys.getContext2d(canvas); //canvas.getContext('2d');
-                        context.fillStyle = 'white';
-                        context.fillRect(0, 0, size, size);
+                        var context_2 = egret.sys.getContext2d(canvas); //canvas.getContext('2d');
+                        context_2.fillStyle = 'white';
+                        context_2.fillRect(0, 0, size, size);
                         this._defaultEmptyTexture = this.createTexture(canvas);
                         this._defaultEmptyTexture[egret.engine_default_empty_texture] = true;
                     }
@@ -7874,3 +7888,316 @@ window["sharedCanvas"].isCanvas = true;
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
 ;
+//////////////////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2014-present, Egret Technology.
+//  All rights reserved.
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions are met:
+//
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//     * Neither the name of the Egret nor the
+//       names of its contributors may be used to endorse or promote products
+//       derived from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY EGRET AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+//  OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+//  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+//  IN NO EVENT SHALL EGRET AND CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+//  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;LOSS OF USE, DATA,
+//  OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+//  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+//  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+//  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////////////////
+
+(function (egret) {
+    //refactor
+    var CompressedTextureData = (function () {
+        function CompressedTextureData() {
+        }
+        return CompressedTextureData;
+    }());
+    egret.CompressedTextureData = CompressedTextureData;
+    __reflect(CompressedTextureData.prototype, "egret.CompressedTextureData");
+    egret.etc_alpha_mask = 'etc_alpha_mask';
+    egret.engine_default_empty_texture = 'engine_default_empty_texture';
+    egret.is_compressed_texture = 'is_compressed_texture';
+    egret.glContext = 'glContext';
+    /**
+     * A BitmapData object contains an array of pixel data. This data can represent either a fully opaque bitmap or a
+     * transparent bitmap that contains alpha channel data. Either type of BitmapData object is stored as a buffer of 32-bit
+     * integers. Each 32-bit integer determines the properties of a single pixel in the bitmap.<br/>
+     * Each 32-bit integer is a combination of four 8-bit channel values (from 0 to 255) that describe the alpha transparency
+     * and the red, green, and blue (ARGB) values of the pixel. (For ARGB values, the most significant byte represents the
+     * alpha channel value, followed by red, green, and blue.)
+     * @see egret.Bitmap
+     * @version Egret 2.4
+     * @platform Web,Native
+     * @language en_US
+     */
+    /**
+     * BitmapData 对象是一个包含像素数据的数组。此数据可以表示完全不透明的位图，或表示包含 Alpha 通道数据的透明位图。
+     * 以上任一类型的 BitmapData 对象都作为 32 位整数的缓冲区进行存储。每个 32 位整数确定位图中单个像素的属性。<br/>
+     * 每个 32 位整数都是四个 8 位通道值（从 0 到 255）的组合，这些值描述像素的 Alpha 透明度以及红色、绿色、蓝色 (ARGB) 值。
+     * （对于 ARGB 值，最高有效字节代表 Alpha 通道值，其后的有效字节分别代表红色、绿色和蓝色通道值。）
+     * @see egret.Bitmap
+     * @version Egret 2.4
+     * @platform Web,Native
+     * @language zh_CN
+     */
+    var BitmapData = (function (_super) {
+        __extends(BitmapData, _super);
+        /**
+         * Initializes a BitmapData object to refer to the specified source object.
+         * @param source The source object being referenced.
+         * @version Egret 2.4
+         * @platform Web,Native
+         * @language en_US
+         */
+        /**
+         * 创建一个引用指定 source 实例的 BitmapData 对象
+         * @param source 被引用的 source 实例
+         * @version Egret 2.4
+         * @platform Web,Native
+         * @language zh_CN
+         */
+        function BitmapData(source) {
+            var _this = _super.call(this) || this;
+            /**
+             * Texture format.
+             * @version Egret 2.4
+             * @platform Web,Native
+             * @language en_US
+             */
+            /**
+             * 纹理格式。
+             * @version Egret 2.4
+             * @platform Web,Native
+             * @language zh_CN
+             */
+            _this.format = "image";
+            /**
+             * @private
+             * webgl纹理生成后，是否删掉原始图像数据
+             */
+            _this.$deleteSource = true;
+            /**
+             * @private
+             *
+             */
+            _this.compressedTextureData = [];
+            _this.debugCompressedTextureURL = '';
+            _this.etcAlphaMask = null;
+            if (egret.nativeRender) {
+                var nativeBitmapData = new egret_native.NativeBitmapData();
+                nativeBitmapData.$init();
+                _this.$nativeBitmapData = nativeBitmapData;
+            }
+            _this.source = source;
+            // this.width = source.width;
+            // this.height = source.height;
+            _this.source = source;
+            if (_this.source) {
+                _this.width = +source.width;
+                _this.height = +source.height;
+            }
+            else {
+                ///compressed texture?
+            }
+            return _this;
+        }
+        Object.defineProperty(BitmapData.prototype, "source", {
+            get: function () {
+                return this.$source;
+            },
+            set: function (value) {
+                this.$source = value;
+                if (egret.nativeRender) {
+                    egret_native.NativeDisplayObject.setSourceToNativeBitmapData(this.$nativeBitmapData, value);
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        BitmapData.create = function (type, data, callback) {
+            var base64 = "";
+            if (type === "arraybuffer") {
+                base64 = egret.Base64Util.encode(data);
+            }
+            else {
+                base64 = data;
+            }
+            var imageType = "image/png"; //default value
+            if (base64.charAt(0) === '/') {
+                imageType = "image/jpeg";
+            }
+            else if (base64.charAt(0) === 'R') {
+                imageType = "image/gif";
+            }
+            else if (base64.charAt(0) === 'i') {
+                imageType = "image/png";
+            }
+            var img = new Image();
+            img.src = "data:" + imageType + ";base64," + base64;
+            img.crossOrigin = '*';
+            var bitmapData = new BitmapData(img);
+            img.onload = function () {
+                img.onload = undefined;
+                bitmapData.source = img;
+                bitmapData.height = img.height;
+                bitmapData.width = img.width;
+                if (callback) {
+                    callback(bitmapData);
+                }
+            };
+            return bitmapData;
+        };
+        BitmapData.prototype.$dispose = function () {
+            if (egret.Capabilities.renderMode == "webgl" && this.webGLTexture) {
+                egret.WebGLUtils.deleteWebGLTexture(this.webGLTexture);
+                this.webGLTexture = null;
+            }
+            //native or WebGLRenderTarget
+            if (this.source && this.source.dispose) {
+                this.source.dispose();
+            }
+            // WeChat Memory leakage bug
+            if (this.source && this.source.src) {
+                this.source.src = "";
+            }
+            this.source = null;
+            ///dispose compressed texture info
+            //this.bitmapCompressedData.length = 0;
+            this.clearCompressedTextureData();
+            this.debugCompressedTextureURL = '';
+            this.etcAlphaMask = null;
+            ///
+            if (egret.nativeRender) {
+                egret_native.NativeDisplayObject.disposeNativeBitmapData(this.$nativeBitmapData);
+            }
+            BitmapData.$dispose(this);
+        };
+        BitmapData.$addDisplayObject = function (displayObject, bitmapData) {
+            if (!bitmapData) {
+                return;
+            }
+            var hashCode = bitmapData.hashCode;
+            if (!hashCode) {
+                return;
+            }
+            if (!BitmapData._displayList[hashCode]) {
+                BitmapData._displayList[hashCode] = [displayObject];
+                return;
+            }
+            var tempList = BitmapData._displayList[hashCode];
+            if (tempList.indexOf(displayObject) < 0) {
+                tempList.push(displayObject);
+            }
+        };
+        BitmapData.$removeDisplayObject = function (displayObject, bitmapData) {
+            if (!bitmapData) {
+                return;
+            }
+            var hashCode = bitmapData.hashCode;
+            if (!hashCode) {
+                return;
+            }
+            if (!BitmapData._displayList[hashCode]) {
+                return;
+            }
+            var tempList = BitmapData._displayList[hashCode];
+            var index = tempList.indexOf(displayObject);
+            if (index >= 0) {
+                tempList.splice(index, 1);
+            }
+        };
+        BitmapData.$invalidate = function (bitmapData) {
+            if (!bitmapData) {
+                return;
+            }
+            var hashCode = bitmapData.hashCode;
+            if (!hashCode) {
+                return;
+            }
+            if (!BitmapData._displayList[hashCode]) {
+                return;
+            }
+            var tempList = BitmapData._displayList[hashCode];
+            for (var i = 0; i < tempList.length; i++) {
+                if (tempList[i] instanceof egret.Bitmap) {
+                    tempList[i].$refreshImageData();
+                }
+                var bitmap = tempList[i];
+                bitmap.$renderDirty = true;
+                var p = bitmap.$parent;
+                if (p && !p.$cacheDirty) {
+                    p.$cacheDirty = true;
+                    p.$cacheDirtyUp();
+                }
+                var maskedObject = bitmap.$maskedObject;
+                if (maskedObject && !maskedObject.$cacheDirty) {
+                    maskedObject.$cacheDirty = true;
+                    maskedObject.$cacheDirtyUp();
+                }
+            }
+        };
+        BitmapData.$dispose = function (bitmapData) {
+            if (!bitmapData) {
+                return;
+            }
+            var hashCode = bitmapData.hashCode;
+            if (!hashCode) {
+                return;
+            }
+            if (!BitmapData._displayList[hashCode]) {
+                return;
+            }
+            var tempList = BitmapData._displayList[hashCode];
+            for (var _i = 0, tempList_1 = tempList; _i < tempList_1.length; _i++) {
+                var node = tempList_1[_i];
+                if (node instanceof egret.Bitmap) {
+                    node.$bitmapData = null;
+                }
+                node.$renderDirty = true;
+                var p = node.$parent;
+                if (p && !p.$cacheDirty) {
+                    p.$cacheDirty = true;
+                    p.$cacheDirtyUp();
+                }
+                var maskedObject = node.$maskedObject;
+                if (maskedObject && !maskedObject.$cacheDirty) {
+                    maskedObject.$cacheDirty = true;
+                    maskedObject.$cacheDirtyUp();
+                }
+            }
+            delete BitmapData._displayList[hashCode];
+        };
+        BitmapData.prototype._getCompressedTextureData = function (level, face) {
+            if (true) {
+                //level face is valid?
+            }
+            var levelData = this.compressedTextureData[level];
+            return levelData ? levelData[face] : null;
+        };
+        BitmapData.prototype.getCompressed2dTextureData = function () {
+            return this._getCompressedTextureData(0, 0);
+        };
+        BitmapData.prototype.hasCompressed2d = function () {
+            return !!this.getCompressed2dTextureData();
+        };
+        BitmapData.prototype.clearCompressedTextureData = function () {
+            this.compressedTextureData.length = 0;
+        };
+        BitmapData._displayList = egret.createMap();
+        return BitmapData;
+    }(egret.HashObject));
+    egret.BitmapData = BitmapData;
+    __reflect(BitmapData.prototype, "egret.BitmapData");
+})(egret || (egret = {}));

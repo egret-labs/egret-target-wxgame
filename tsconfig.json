@@ -42,6 +42,7 @@
 		"src/EgretWebGLProgram.ts",
 		"src/EgretWebGLUniform.ts",
 		"src/org/EgretShaderLib.ts",
+		"src/org/BitmapData.ts",
 		"libs/egret.d.ts"
 	]
 }
