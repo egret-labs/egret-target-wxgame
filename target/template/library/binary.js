@@ -48,8 +48,14 @@ class BinaryProcessor {
                     });
                 }
             } else {
-                const content = WXFS.readFileSync(xhrURL);
-                resolve(content);
+                //const content = WXFS.readFileSync(xhrURL);
+                //resolve(content);
+                try {
+                    const content = WXFS.readFileSync(xhrURL);
+                    resolve(content);
+                } catch (e) {
+                    resolve(null);
+                }
             }
         });
     }
