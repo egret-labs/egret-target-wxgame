@@ -578,7 +578,11 @@ namespace egret.wxgame {
                     }
                 }
                 if (bitmapData.$deleteSource && bitmapData.webGLTexture) {
-                    bitmapData.source = null;
+                    if (bitmapData.source) {
+                        // WeChat Memory leakage bug
+                        bitmapData.source.src = '';
+                        bitmapData.source = null;
+                    }
                     bitmapData.clearCompressedTextureData();
                 }
                 if (bitmapData.webGLTexture) {
