@@ -133,7 +133,7 @@ export const fs = {
         targetPath = WX_ROOT + targetPath;
         return new Promise((resolve, reject) => {
             //console.log(zipFilePath)
-            fs.unzip({
+            wxFs.unzip({
                 zipFilePath,
                 targetPath,
                 success: () => {
