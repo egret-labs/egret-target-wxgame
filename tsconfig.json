@@ -32,7 +32,7 @@
 		"src/WebMotion.ts",
 		"src/WebLogger.ts",
 		"src/WebGLDrawCmdManager.ts",
-		"src/WebGLVertexArrayObject.ts",
+		"src/org/WebGLVertexArrayObject.ts",
 		"src/WebGLRenderTarget.ts",
 		"src/WebSysImpl.ts",
 		"src/org/WebGLRenderContext.ts",
