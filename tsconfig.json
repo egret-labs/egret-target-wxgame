@@ -30,7 +30,7 @@
 		"src/WebDeviceOrientation.ts",
 		"src/WebGeolocation.ts",
 		"src/WebMotion.ts",
-		"src/WebLogger.ts",
+		"src/org/WebLogger.ts",
 		"src/WebGLDrawCmdManager.ts",
 		"src/org/WebGLVertexArrayObject.ts",
 		"src/WebGLRenderTarget.ts",
