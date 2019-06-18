@@ -28,7 +28,7 @@
 		"src/WebTexture.ts",
 		"src/WebXML.ts",
 		"src/WebDeviceOrientation.ts",
-		"src/WebGeolocation.ts",
+		"src/org/WebGeolocation.ts",
 		"src/WebMotion.ts",
 		"src/org/WebLogger.ts",
 		"src/WebGLDrawCmdManager.ts",

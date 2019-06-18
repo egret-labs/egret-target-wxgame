@@ -153,6 +153,8 @@ namespace egret.wxgame {
         return size;
     }
     egret.sys.drawTextureElements = drawTextureElements;
+
+    egret.Geolocation = egret.wxgame.WebGeolocation;
 }
 
 window["sharedCanvas"].isCanvas = true;

@@ -81,5 +81,4 @@ namespace egret.wxgame {
             this.dispatchEvent(event);
         };
     }
-    egret.Geolocation = egret.wxgame.WebGeolocation;
 }
