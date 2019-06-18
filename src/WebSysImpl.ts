@@ -161,14 +161,90 @@ namespace egret.wxgame {
      */
     function measureTextWith(context: CanvasRenderingContext2D, text: string): number {
         const metrics = context.measureText(text);
-        if(!metrics){
+        if (!metrics) {
             egret.warn(`wxcontext.measureText result is null or undefined;text is ${text}; font is ${context.font}`)
             return 1;
         }
         return metrics.width;
     }
     egret.sys.measureTextWith = measureTextWith;
-    
+
+    /**
+     * 为CanvasRenderBuffer创建一个HTMLCanvasElement
+     * @param defaultFunc 
+     * @param width 
+     * @param height 
+     * @param root 
+     */
+    function createCanvasRenderBufferSurface(defaultFunc: (width?: number, height?: number) => HTMLCanvasElement, width?: number, height?: number, root?: boolean): HTMLCanvasElement {
+        if (root) {
+            if (wxgame.isSubContext) {
+                return window["sharedCanvas"];
+            }
+            else {
+                return window["canvas"];
+            }
+        }
+        else {
+            return defaultFunc(width, height);
+        }
+    }
+    egret.sys.createCanvasRenderBufferSurface = createCanvasRenderBufferSurface;
+
+    /**
+     * 改变渲染缓冲的大小并清空缓冲区
+     * @param renderContext 
+     * @param width 
+     * @param height 
+     * @param useMaxSize 
+     */
+    function resizeCanvasRenderBuffer(renderContext: egret.sys.RenderContext, width: number, height: number, useMaxSize?: boolean): void {
+        let canvasRenderBuffer = <CanvasRenderBuffer>renderContext;
+        let surface = canvasRenderBuffer.surface;
+        if (wxgame.isSubContext) {
+            return;
+        }
+        if (useMaxSize) {
+            let change = false;
+            if (surface.width < width) {
+                surface.width = width;
+                if (Capabilities.renderMode === 'canvas') {
+                    window["sharedCanvas"].width = width;
+                }
+                change = true;
+            }
+            if (surface.height < height) {
+                surface.height = height;
+                if (Capabilities.renderMode === 'canvas') {
+                    window["sharedCanvas"].height = height;
+                }
+                change = true;
+            }
+            //尺寸没有变化时,将绘制属性重置
+            if (!change) {
+                canvasRenderBuffer.context.globalCompositeOperation = "source-over";
+                canvasRenderBuffer.context.setTransform(1, 0, 0, 1, 0, 0);
+                canvasRenderBuffer.context.globalAlpha = 1;
+            }
+        }
+        else {
+            if (surface.width != width) {
+                surface.width = width;
+                if (Capabilities.renderMode === 'canvas') {
+                    window["sharedCanvas"].width = width;
+                }
+            }
+            if (surface.height != height) {
+                surface.height = height;
+                if (Capabilities.renderMode === 'canvas') {
+                    window["sharedCanvas"].height = height;
+                }
+            }
+        }
+        canvasRenderBuffer.clear();
+    }
+    egret.sys.resizeCanvasRenderBuffer = resizeCanvasRenderBuffer;
+
     egret.Geolocation = egret.wxgame.WebGeolocation;
     egret.Motion = egret.wxgame.WebMotion;
 }

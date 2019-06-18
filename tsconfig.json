@@ -16,7 +16,7 @@
 		"src/WebImageLoader.ts",
 		"src/HTML5StageText.ts",
 		"src/org/WebTextMeasurer.ts",
-		"src/CanvasRenderBuffer.ts",
+		"src/org/CanvasRenderBuffer.ts",
 		"src/WebTouchHandler.ts",
 		"src/WebHideHandler.ts",
 		"src/Html5Capatibility.ts",

@@ -32,10 +32,8 @@ namespace egret.wxgame {
     /**
      * 创建一个canvas。
      */
-    function createCanvas(width?: number, height?: number): HTMLCanvasElement {
-
+    function __createCanvas__(width?: number, height?: number): HTMLCanvasElement {
         let canvas: HTMLCanvasElement = document.createElement("canvas");
-
         if (!isNaN(width) && !isNaN(height)) {
             canvas.width = width;
             canvas.height = height;
@@ -76,17 +74,7 @@ namespace egret.wxgame {
     export class CanvasRenderBuffer implements sys.RenderBuffer {
 
         public constructor(width?: number, height?: number, root?: boolean) {
-            if (root) {
-                if (wxgame.isSubContext) {
-                    this.surface = window["sharedCanvas"];
-                }
-                else {
-                    this.surface = window["canvas"];
-                }
-            }
-            else {
-                this.surface = createCanvas(width, height);
-            }
+            this.surface = egret.sys.createCanvasRenderBufferSurface(__createCanvas__, width, height);
             this.context = this.surface.getContext("2d");
             if (this.context) {
                 this.context.$offsetX = 0;
@@ -126,48 +114,7 @@ namespace egret.wxgame {
          * @param useMaxSize 若传入true，则将改变后的尺寸与已有尺寸对比，保留较大的尺寸。
          */
         public resize(width: number, height: number, useMaxSize?: boolean): void {
-            let surface = this.surface;
-            if (wxgame.isSubContext) {
-                return;
-            }
-            if (useMaxSize) {
-                let change = false;
-                if (surface.width < width) {
-                    surface.width = width;
-                    if (Capabilities.renderMode === 'canvas') {
-                        window["sharedCanvas"].width = width;
-                    }
-                    change = true;
-                }
-                if (surface.height < height) {
-                    surface.height = height;
-                    if (Capabilities.renderMode === 'canvas') {
-                        window["sharedCanvas"].height = height;
-                    }
-                    change = true;
-                }
-                //尺寸没有变化时,将绘制属性重置
-                if (!change) {
-                    this.context.globalCompositeOperation = "source-over";
-                    this.context.setTransform(1, 0, 0, 1, 0, 0);
-                    this.context.globalAlpha = 1;
-                }
-            }
-            else {
-                if (surface.width != width) {
-                    surface.width = width;
-                    if (Capabilities.renderMode === 'canvas') {
-                        window["sharedCanvas"].width = width;
-                    }
-                }
-                if (surface.height != height) {
-                    surface.height = height;
-                    if (Capabilities.renderMode === 'canvas') {
-                        window["sharedCanvas"].height = height;
-                    }
-                }
-            }
-            this.clear();
+            egret.sys.resizeCanvasRenderBuffer(this, width, height, useMaxSize);
         }
 
         /**
