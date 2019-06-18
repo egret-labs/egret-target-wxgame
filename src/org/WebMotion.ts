@@ -49,5 +49,4 @@ namespace egret.wxgame {
             this.dispatchEvent(event);
         }
     }
-    egret.Motion = egret.wxgame.WebMotion;
 }

@@ -155,6 +155,7 @@ namespace egret.wxgame {
     egret.sys.drawTextureElements = drawTextureElements;
 
     egret.Geolocation = egret.wxgame.WebGeolocation;
+    egret.Motion = egret.wxgame.WebMotion;
 }
 
 window["sharedCanvas"].isCanvas = true;

@@ -29,7 +29,7 @@
 		"src/WebXML.ts",
 		"src/WebDeviceOrientation.ts",
 		"src/org/WebGeolocation.ts",
-		"src/WebMotion.ts",
+		"src/org/WebMotion.ts",
 		"src/org/WebLogger.ts",
 		"src/WebGLDrawCmdManager.ts",
 		"src/org/WebGLVertexArrayObject.ts",
