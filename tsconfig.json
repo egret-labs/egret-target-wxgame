@@ -15,7 +15,7 @@
 		"src/WebHttpRequest.ts",
 		"src/WebImageLoader.ts",
 		"src/HTML5StageText.ts",
-		"src/WebTextMeasurer.ts",
+		"src/org/WebTextMeasurer.ts",
 		"src/CanvasRenderBuffer.ts",
 		"src/WebTouchHandler.ts",
 		"src/WebHideHandler.ts",

@@ -154,6 +154,21 @@ namespace egret.wxgame {
     }
     egret.sys.drawTextureElements = drawTextureElements;
 
+    /**
+     * 测量文本的宽度
+     * @param context 
+     * @param text 
+     */
+    function measureTextWith(context: CanvasRenderingContext2D, text: string): number {
+        const metrics = context.measureText(text);
+        if(!metrics){
+            egret.warn(`wxcontext.measureText result is null or undefined;text is ${text}; font is ${context.font}`)
+            return 1;
+        }
+        return metrics.width;
+    }
+    egret.sys.measureTextWith = measureTextWith;
+    
     egret.Geolocation = egret.wxgame.WebGeolocation;
     egret.Motion = egret.wxgame.WebMotion;
 }
