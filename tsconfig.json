@@ -9,7 +9,7 @@
 		"src/WebLocalStorage.ts",
 		"src/HtmlSound.ts",
 		"src/HtmlSoundChannel.ts",
-		"src/WebAudioSound.ts",
+		"src/org/WebAudioSound.ts",
 		"src/org/WebAudioSoundChannel.ts",
 		"src/WebVideo.ts",
 		"src/WebHttpRequest.ts",

@@ -245,6 +245,48 @@ namespace egret.wxgame {
     }
     egret.sys.resizeCanvasRenderBuffer = resizeCanvasRenderBuffer;
 
+    /**
+     * sys.printWebAudioDecodeError
+     * @param url 
+     */
+    function printWebAudioDecodeError(url: string): void {
+        alert("sound decode error: " + url + "！\nsee http://edn.egret.com/cn/docs/page/156");
+    }
+    egret.sys.printWebAudioDecodeError = printWebAudioDecodeError;
+
+    /**
+     * sys.loadWebAudioSound
+     * @param context 
+     * @param url 
+     * @param onAudioLoaded 
+     * @param onAudioError 
+     */
+    function loadWebAudioSound(context: egret.sys.RenderContext, url: string, onAudioLoaded: () => void, onAudioError: () => void): void {
+        let self = <WebAudioSound>context;
+        let request = new XMLHttpRequest();
+        request.open("GET", url, true);
+        request.responseType = "arraybuffer";
+        request.onreadystatechange = function () {
+            if (request.readyState == 4) {// 4 = "loaded"
+                let ioError = (request.status >= 400 || request.status == 0);
+                if (ioError) {//请求错误
+                    self.dispatchEventWith(egret.IOErrorEvent.IO_ERROR);
+                } else {
+                    WebAudioDecode.decodeArr.push({
+                        "buffer": request.response,
+                        "success": onAudioLoaded,
+                        "fail": onAudioError,
+                        "self": self,
+                        "url": url
+                    });
+                    WebAudioDecode.decodeAudios();
+                }
+            }
+        }
+        request.send();
+    }
+    egret.sys.loadWebAudioSound = loadWebAudioSound;
+
     egret.Geolocation = egret.wxgame.WebGeolocation;
     egret.Motion = egret.wxgame.WebMotion;
 }
