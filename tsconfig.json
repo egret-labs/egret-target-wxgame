@@ -26,7 +26,7 @@
 		"src/WebGetOption.ts",
 		"src/WebPlayer.ts",
 		"src/WebTexture.ts",
-		"src/WebXML.ts",
+		"src/org/WebXML.ts",
 		"src/WebDeviceOrientation.ts",
 		"src/org/WebGeolocation.ts",
 		"src/org/WebMotion.ts",

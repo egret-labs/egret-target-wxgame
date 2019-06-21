@@ -3636,12 +3636,7 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
          */
         function parse(text) {
             if (!parser) {
-                if (!window["DOMParser"]) {
-                    console.error("没有 XML 支持库，请访问 http://developer.egret.com/cn/github/egret-docs/Engine2D/minigame/minigameFAQ/index.html#xml 了解详情");
-                }
-                else {
-                    parser = new DOMParser();
-                }
+                parser = egret.sys.getDOMParser();
             }
             var xmlDoc = parser.parseFromString(text, "text/xml");
             var length = xmlDoc.childNodes.length;
@@ -4914,6 +4909,16 @@ if (window['HTMLVideoElement'] == undefined) {
             canvasRenderBuffer.clear();
         }
         egret.sys.resizeCanvasRenderBuffer = resizeCanvasRenderBuffer;
+        function getDOMParser() {
+            if (!window["DOMParser"]) {
+                console.error("没有 XML 支持库，请访问 http://developer.egret.com/cn/github/egret-docs/Engine2D/minigame/minigameFAQ/index.html#xml 了解详情");
+            }
+            else {
+                return new DOMParser();
+            }
+            return null;
+        }
+        egret.sys.getDOMParser = getDOMParser;
         egret.Geolocation = egret.wxgame.WebGeolocation;
         egret.Motion = egret.wxgame.WebMotion;
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
