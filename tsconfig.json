@@ -33,7 +33,7 @@
 		"src/org/WebLogger.ts",
 		"src/WebGLDrawCmdManager.ts",
 		"src/org/WebGLVertexArrayObject.ts",
-		"src/WebGLRenderTarget.ts",
+		"src/org/WebGLRenderTarget.ts",
 		"src/WebSysImpl.ts",
 		"src/org/WebGLRenderContext.ts",
 		"src/org/WebGLRenderBuffer.ts",
