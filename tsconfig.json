@@ -36,7 +36,7 @@
 		"src/WebGLRenderTarget.ts",
 		"src/WebSysImpl.ts",
 		"src/org/WebGLRenderContext.ts",
-		"src/WebGLRenderBuffer.ts",
+		"src/org/WebGLRenderBuffer.ts",
 		"src/WebGLRenderer.ts",
 		"src/EgretWebGLAttribute.ts",
 		"src/org/EgretWebGLProgram.ts",
