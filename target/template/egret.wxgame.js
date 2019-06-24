@@ -2783,7 +2783,7 @@ if (window['HTMLVideoElement'] == undefined) {
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "1.1.16";
+        wxgame.version = "0.1.17";
         /**
          * 运行环境是否为子域
          */

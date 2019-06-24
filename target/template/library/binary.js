@@ -78,18 +78,19 @@ function needReadFile() {
 
 function loadBinary(xhrURL) {
     return new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.responseType = "arraybuffer"
-        xhr.onload = () => {
-            resolve(xhr.response);
-        }
-        xhr.onerror = (e) => {
-            const error = new RES.ResourceManagerError(1001, xhrURL);
-            console.error(e);
-            reject(error);
-        }
-        xhr.open("get", xhrURL);
-        xhr.send();
+        wx.request({
+            url: xhrURL,
+            method: 'get',
+            responseType: 'arraybuffer',
+            success: function success(_ref) {
+                resolve(_ref.data)
+            },
+            fail: function fail(_ref2) {
+                const error = new RES.ResourceManagerError(1001, xhrURL);
+                console.error('load binary error',xhrURL);
+                reject(error)
+            }
+        });
     });
 
 }
