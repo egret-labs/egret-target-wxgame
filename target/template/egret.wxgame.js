@@ -2180,7 +2180,6 @@ if (window['HTMLVideoElement'] == undefined) {
             }
             return canvas;
         }
-        var sharedCanvas;
         /**
          * @private
          * Canvas2D渲染缓冲
@@ -2189,7 +2188,7 @@ if (window['HTMLVideoElement'] == undefined) {
             function CanvasRenderBuffer(width, height, root) {
                 if (root) {
                     if (wxgame.isSubContext) {
-                        this.surface = window["sharedCanvas"];
+                        console.error('wxgame.isSubContext');
                     }
                     else {
                         this.surface = window["canvas"];
@@ -2241,16 +2240,10 @@ if (window['HTMLVideoElement'] == undefined) {
                     var change = false;
                     if (surface.width < width) {
                         surface.width = width;
-                        if (egret.Capabilities.renderMode === 'canvas') {
-                            window["sharedCanvas"].width = width;
-                        }
                         change = true;
                     }
                     if (surface.height < height) {
                         surface.height = height;
-                        if (egret.Capabilities.renderMode === 'canvas') {
-                            window["sharedCanvas"].height = height;
-                        }
                         change = true;
                     }
                     //尺寸没有变化时,将绘制属性重置
@@ -2263,15 +2256,9 @@ if (window['HTMLVideoElement'] == undefined) {
                 else {
                     if (surface.width != width) {
                         surface.width = width;
-                        if (egret.Capabilities.renderMode === 'canvas') {
-                            window["sharedCanvas"].width = width;
-                        }
                     }
                     if (surface.height != height) {
                         surface.height = height;
-                        if (egret.Capabilities.renderMode === 'canvas') {
-                            window["sharedCanvas"].height = height;
-                        }
                     }
                 }
                 this.clear();
@@ -3359,17 +3346,11 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
                 canvas.style[wxgame.getPrefixStyleName("transformOrigin")] = "0% 0% 0px";
                 if (canvas.width != stageWidth) {
                     if (!wxgame.isSubContext) {
-                        if (window["sharedCanvas"]) {
-                            window["sharedCanvas"].width = stageWidth;
-                        }
                         canvas.width = stageWidth;
                     }
                 }
                 if (canvas.height != stageHeight) {
                     if (!wxgame.isSubContext) {
-                        if (window["sharedCanvas"]) {
-                            window["sharedCanvas"].height = stageHeight;
-                        }
                         canvas.height = stageHeight;
                     }
                 }
@@ -3457,77 +3438,13 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
 (function (egret) {
     var wxgame;
     (function (wxgame) {
-        var sharedCanvas;
         var sharedContext;
         /**
          * @private
          */
         function convertImageToCanvas(texture, rect) {
-            if (!sharedCanvas) {
-                sharedCanvas = wx.createCanvas();
-                sharedContext = sharedCanvas.getContext("2d");
-            }
-            var w = texture.$getTextureWidth();
-            var h = texture.$getTextureHeight();
-            if (rect == null) {
-                rect = egret.$TempRectangle;
-                rect.x = 0;
-                rect.y = 0;
-                rect.width = w;
-                rect.height = h;
-            }
-            rect.x = Math.min(rect.x, w - 1);
-            rect.y = Math.min(rect.y, h - 1);
-            rect.width = Math.min(rect.width, w - rect.x);
-            rect.height = Math.min(rect.height, h - rect.y);
-            var iWidth = Math.floor(rect.width);
-            var iHeight = Math.floor(rect.height);
-            var surface = sharedCanvas;
-            surface["style"]["width"] = iWidth + "px";
-            surface["style"]["height"] = iHeight + "px";
-            sharedCanvas.width = iWidth;
-            sharedCanvas.height = iHeight;
-            if (egret.Capabilities.renderMode == "webgl") {
-                var renderTexture = void 0;
-                //webgl下非RenderTexture纹理先画到RenderTexture
-                if (!texture.$renderBuffer) {
-                    renderTexture = new egret.RenderTexture();
-                    renderTexture.drawToTexture(new egret.Bitmap(texture));
-                }
-                else {
-                    renderTexture = texture;
-                }
-                //从RenderTexture中读取像素数据，填入canvas
-                var pixels = renderTexture.$renderBuffer.getPixels(rect.x, rect.y, iWidth, iHeight);
-                var x = 0;
-                var y = 0;
-                for (var i = 0; i < pixels.length; i += 4) {
-                    sharedContext.fillStyle =
-                        'rgba(' + pixels[i]
-                            + ',' + pixels[i + 1]
-                            + ',' + pixels[i + 2]
-                            + ',' + (pixels[i + 3] / 255) + ')';
-                    sharedContext.fillRect(x, y, 1, 1);
-                    x++;
-                    if (x == iWidth) {
-                        x = 0;
-                        y++;
-                    }
-                }
-                if (!texture.$renderBuffer) {
-                    renderTexture.dispose();
-                }
-                return surface;
-            }
-            else {
-                var bitmapData = texture;
-                var offsetX = Math.round(bitmapData.$offsetX);
-                var offsetY = Math.round(bitmapData.$offsetY);
-                var bitmapWidth = bitmapData.$bitmapWidth;
-                var bitmapHeight = bitmapData.$bitmapHeight;
-                sharedContext.drawImage(bitmapData.$bitmapData.source, bitmapData.$bitmapX + rect.x / egret.$TextureScaleFactor, bitmapData.$bitmapY + rect.y / egret.$TextureScaleFactor, bitmapWidth * rect.width / w, bitmapHeight * rect.height / h, offsetX, offsetY, rect.width, rect.height);
-                return surface;
-            }
+            console.error('convertImageToCanvas');
+            return null;
         }
         /**
          * @private
@@ -4796,29 +4713,17 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
             if (useMaxSize) {
                 if (surface.width < width) {
                     surface.width = width;
-                    if (!wxgame.isSubContext && window["sharedCanvas"]) {
-                        window["sharedCanvas"].width = width;
-                    }
                 }
                 if (surface.height < height) {
                     surface.height = height;
-                    if (!wxgame.isSubContext && window["sharedCanvas"]) {
-                        window["sharedCanvas"].height = height;
-                    }
                 }
             }
             else {
                 if (surface.width !== width) {
                     surface.width = width;
-                    if (!wxgame.isSubContext && window["sharedCanvas"]) {
-                        window["sharedCanvas"].width = width;
-                    }
                 }
                 if (surface.height !== height) {
                     surface.height = height;
-                    if (!wxgame.isSubContext && window["sharedCanvas"]) {
-                        window["sharedCanvas"].height = height;
-                    }
                 }
             }
             webglrendercontext.onResize();
@@ -4889,7 +4794,6 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
         egret.sys.drawTextureElements = drawTextureElements;
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
-window["sharedCanvas"].isCanvas = true;
 //////////////////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2014-present, Egret Technology.

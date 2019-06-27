@@ -200,17 +200,11 @@ namespace egret.wxgame {
             canvas.style[getPrefixStyleName("transformOrigin")] = "0% 0% 0px";
             if (canvas.width != stageWidth) {
                 if (!wxgame.isSubContext) {
-                    if (window["sharedCanvas"]) {
-                        window["sharedCanvas"].width = stageWidth;
-                    }
                     canvas.width = stageWidth;
                 }
             }
             if (canvas.height != stageHeight) {
                 if (!wxgame.isSubContext) {
-                    if (window["sharedCanvas"]) {
-                        window["sharedCanvas"].height = stageHeight;
-                    }
                     canvas.height = stageHeight;
                 }
             }

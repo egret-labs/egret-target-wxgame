@@ -67,8 +67,6 @@ namespace egret.wxgame {
         return canvas;
     }
 
-    let sharedCanvas: HTMLCanvasElement;
-
     /**
      * @private
      * Canvas2D渲染缓冲
@@ -78,7 +76,7 @@ namespace egret.wxgame {
         public constructor(width?: number, height?: number, root?: boolean) {
             if (root) {
                 if (wxgame.isSubContext) {
-                    this.surface = window["sharedCanvas"];
+                    console.error('wxgame.isSubContext');
                 }
                 else {
                     this.surface = window["canvas"];
@@ -134,16 +132,10 @@ namespace egret.wxgame {
                 let change = false;
                 if (surface.width < width) {
                     surface.width = width;
-                    if (Capabilities.renderMode === 'canvas') {
-                        window["sharedCanvas"].width = width;
-                    }
                     change = true;
                 }
                 if (surface.height < height) {
                     surface.height = height;
-                    if (Capabilities.renderMode === 'canvas') {
-                        window["sharedCanvas"].height = height;
-                    }
                     change = true;
                 }
                 //尺寸没有变化时,将绘制属性重置
@@ -156,15 +148,9 @@ namespace egret.wxgame {
             else {
                 if (surface.width != width) {
                     surface.width = width;
-                    if (Capabilities.renderMode === 'canvas') {
-                        window["sharedCanvas"].width = width;
-                    }
                 }
                 if (surface.height != height) {
                     surface.height = height;
-                    if (Capabilities.renderMode === 'canvas') {
-                        window["sharedCanvas"].height = height;
-                    }
                 }
             }
             this.clear();

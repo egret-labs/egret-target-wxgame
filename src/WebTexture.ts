@@ -30,85 +30,14 @@
 
 namespace egret.wxgame {
 
-    let sharedCanvas: HTMLCanvasElement;
     let sharedContext: CanvasRenderingContext2D;
 
     /**
      * @private
      */
     function convertImageToCanvas(texture: egret.Texture, rect?: egret.Rectangle): HTMLCanvasElement {
-        if (!sharedCanvas) {
-            sharedCanvas = wx.createCanvas();
-            sharedContext = sharedCanvas.getContext("2d");
-        }
-
-        let w = texture.$getTextureWidth();
-        let h = texture.$getTextureHeight();
-        if (rect == null) {
-            rect = egret.$TempRectangle;
-            rect.x = 0;
-            rect.y = 0;
-            rect.width = w;
-            rect.height = h;
-        }
-
-        rect.x = Math.min(rect.x, w - 1);
-        rect.y = Math.min(rect.y, h - 1);
-        rect.width = Math.min(rect.width, w - rect.x);
-        rect.height = Math.min(rect.height, h - rect.y);
-
-        let iWidth = Math.floor(rect.width);
-        let iHeight = Math.floor(rect.height);
-        let surface = sharedCanvas;
-        surface["style"]["width"] = iWidth + "px";
-        surface["style"]["height"] = iHeight + "px";
-        sharedCanvas.width = iWidth;
-        sharedCanvas.height = iHeight;
-
-        if (Capabilities.renderMode == "webgl") {
-            let renderTexture: RenderTexture;
-            //webgl下非RenderTexture纹理先画到RenderTexture
-            if (!(<RenderTexture>texture).$renderBuffer) {
-                renderTexture = new egret.RenderTexture();
-                renderTexture.drawToTexture(new egret.Bitmap(texture));
-            }
-            else {
-                renderTexture = <RenderTexture>texture;
-            }
-            //从RenderTexture中读取像素数据，填入canvas
-            let pixels = renderTexture.$renderBuffer.getPixels(rect.x, rect.y, iWidth, iHeight);
-            var x = 0;
-            var y = 0;
-            for (var i = 0; i < pixels.length; i += 4) {
-                sharedContext.fillStyle =
-                    'rgba(' + pixels[i]
-                    + ',' + pixels[i + 1]
-                    + ',' + pixels[i + 2]
-                    + ',' + (pixels[i + 3] / 255) + ')';
-                sharedContext.fillRect(x, y, 1, 1);
-                x++;
-                if (x == iWidth) {
-                    x = 0;
-                    y++;
-                }
-            }
-
-            if (!(<RenderTexture>texture).$renderBuffer) {
-                renderTexture.dispose();
-            }
-
-            return surface;
-        }
-        else {
-            let bitmapData = texture;
-            let offsetX: number = Math.round(bitmapData.$offsetX);
-            let offsetY: number = Math.round(bitmapData.$offsetY);
-            let bitmapWidth: number = bitmapData.$bitmapWidth;
-            let bitmapHeight: number = bitmapData.$bitmapHeight;
-            sharedContext.drawImage(bitmapData.$bitmapData.source, bitmapData.$bitmapX + rect.x / $TextureScaleFactor, bitmapData.$bitmapY + rect.y / $TextureScaleFactor,
-                bitmapWidth * rect.width / w, bitmapHeight * rect.height / h, offsetX, offsetY, rect.width, rect.height);
-            return surface;
-        }
+        console.error('convertImageToCanvas');
+        return null;
     }
 
     /**

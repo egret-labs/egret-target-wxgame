@@ -60,29 +60,17 @@ namespace egret.wxgame {
         if (useMaxSize) {
             if (surface.width < width) {
                 surface.width = width;
-                if (!wxgame.isSubContext && window["sharedCanvas"]) {
-                    window["sharedCanvas"].width = width;
-                }
             }
             if (surface.height < height) {
                 surface.height = height;
-                if (!wxgame.isSubContext && window["sharedCanvas"]) {
-                    window["sharedCanvas"].height = height;
-                }
             }
         }
         else {
             if (surface.width !== width) {
                 surface.width = width;
-                if (!wxgame.isSubContext && window["sharedCanvas"]) {
-                    window["sharedCanvas"].width = width;
-                }
             }
             if (surface.height !== height) {
                 surface.height = height;
-                if (!wxgame.isSubContext && window["sharedCanvas"]) {
-                    window["sharedCanvas"].height = height;
-                }
             }
         }
         webglrendercontext.onResize();
@@ -154,6 +142,3 @@ namespace egret.wxgame {
     }
     egret.sys.drawTextureElements = drawTextureElements;
 }
-
-window["sharedCanvas"].isCanvas = true;
-
