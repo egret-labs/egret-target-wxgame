@@ -7057,7 +7057,8 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 else {
                     if (!this.canvasRenderBuffer || !this.canvasRenderBuffer.context) {
                         this.canvasRenderer = new egret.CanvasRenderer();
-                        this.canvasRenderBuffer = new wxgame.CanvasRenderBuffer(width, height);
+                        this.canvasRenderBuffer = new wxgame.CanvasRenderBuffer(2000, 2000);
+                        this.canvasRenderBuffer.resize(width, height);
                     }
                     else if (node.dirtyRender) {
                         this.canvasRenderBuffer.resize(width, height);
@@ -7151,7 +7152,8 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 else {
                     if (!this.canvasRenderBuffer || !this.canvasRenderBuffer.context) {
                         this.canvasRenderer = new egret.CanvasRenderer();
-                        this.canvasRenderBuffer = new wxgame.CanvasRenderBuffer(width, height);
+                        this.canvasRenderBuffer = new wxgame.CanvasRenderBuffer(2000, 2000);
+                        this.canvasRenderBuffer.resize(width, height);
                     }
                     else if (node.dirtyRender) {
                         this.canvasRenderBuffer.resize(width, height);

@@ -880,7 +880,8 @@ namespace egret.wxgame {
             else {
                 if (!this.canvasRenderBuffer || !this.canvasRenderBuffer.context) {
                     this.canvasRenderer = new CanvasRenderer();
-                    this.canvasRenderBuffer = new CanvasRenderBuffer(width, height);
+                    this.canvasRenderBuffer = new CanvasRenderBuffer(2000, 2000);
+                    this.canvasRenderBuffer.resize(width, height);
                 }
                 else if (node.dirtyRender) {
                     this.canvasRenderBuffer.resize(width, height);
@@ -981,7 +982,8 @@ namespace egret.wxgame {
             else {
                 if (!this.canvasRenderBuffer || !this.canvasRenderBuffer.context) {
                     this.canvasRenderer = new CanvasRenderer();
-                    this.canvasRenderBuffer = new CanvasRenderBuffer(width, height);
+                    this.canvasRenderBuffer = new CanvasRenderBuffer(2000, 2000);
+                    this.canvasRenderBuffer.resize(width, height);
                 }
                 else if (node.dirtyRender) {
                     this.canvasRenderBuffer.resize(width, height);
