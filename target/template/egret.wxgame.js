@@ -2373,6 +2373,19 @@ if (window['HTMLVideoElement'] == undefined) {
                  */
                 _this.rotation = 0;
                 _this.canvas = canvas;
+                egret.sys.TouchHandler.prototype.onTouchBegin = function (x, y, touchPointID) {
+                    if (this.useTouchesCount >= this.maxTouches) {
+                        return;
+                    }
+                    this.lastTouchX = x;
+                    this.lastTouchY = y;
+                    var target = this.findTarget(x, y);
+                    if (this.touchDownTarget[touchPointID] == null) {
+                        this.touchDownTarget[touchPointID] = target;
+                        this.useTouchesCount++;
+                        egret.TouchEvent.dispatchTouchEvent(target, egret.TouchEvent.TOUCH_BEGIN, true, true, x, y, touchPointID, true);
+                    }
+                };
                 _this.touch = new egret.sys.TouchHandler(stage);
                 _this.addTouchListener();
                 return _this;

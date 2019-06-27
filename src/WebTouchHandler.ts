@@ -40,6 +40,19 @@ namespace egret.wxgame {
         public constructor(stage: egret.Stage, canvas: HTMLCanvasElement) {
             super();
             this.canvas = canvas;
+            egret.sys.TouchHandler.prototype.onTouchBegin = function (x, y, touchPointID) {
+                if (this.useTouchesCount >= this.maxTouches) {
+                    return;
+                }
+                this.lastTouchX = x;
+                this.lastTouchY = y;
+                var target = this.findTarget(x, y);
+                if (this.touchDownTarget[touchPointID] == null) {
+                    this.touchDownTarget[touchPointID] = target;
+                    this.useTouchesCount++;
+                    egret.TouchEvent.dispatchTouchEvent(target, egret.TouchEvent.TOUCH_BEGIN, true, true, x, y, touchPointID, true);
+                }
+            };
             this.touch = new egret.sys.TouchHandler(stage);
             this.addTouchListener();
         }
