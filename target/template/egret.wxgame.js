@@ -1613,9 +1613,9 @@ if (window['HTMLVideoElement'] == undefined) {
                         url: this._url,
                         method: this._method,
                         header: this.headerObj,
-                        responseType: this.responseType,
+                        dataType: this.responseType,
                         success: function success(_ref) {
-                            var data = _ref.data, statusCode = _ref.statusCode, header = _ref.header;
+                            var data = _ref.data, statusCode = _ref.status, header = _ref.header;
                             if (statusCode != 200) {
                                 self_1.dispatchEventWith(egret.IOErrorEvent.IO_ERROR);
                                 return;

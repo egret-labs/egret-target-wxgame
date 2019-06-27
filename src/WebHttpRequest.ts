@@ -167,10 +167,10 @@ namespace egret.wxgame {
                     url: this._url,
                     method: this._method,
                     header: this.headerObj,
-                    responseType: this.responseType,
+                    dataType: this.responseType,
                     success: function success(_ref) {
                         var data = _ref.data,
-                            statusCode = _ref.statusCode,
+                            statusCode = _ref.status,
                             header = _ref.header;
                         if (statusCode != 200) {
                             self.dispatchEventWith(egret.IOErrorEvent.IO_ERROR);
