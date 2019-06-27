@@ -231,7 +231,7 @@ namespace egret {
             } else if (base64.charAt(0) === 'i') {
                 imageType = "image/png";
             }
-            let img: HTMLImageElement = new Image();
+            let img: HTMLImageElement = wx.createImage();
             img.src = "data:" + imageType + ";base64," + base64;
             img.crossOrigin = '*';
             let bitmapData = new BitmapData(img);

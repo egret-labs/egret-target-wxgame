@@ -100,7 +100,7 @@ namespace egret.wxgame {
          * @private
          */
         private loadImage(src: string): void {
-            let image = new Image();
+            let image = wx.createImage();
             this.data = null;
             this.currentImage = image;
             if (this._hasCrossOriginSet) {

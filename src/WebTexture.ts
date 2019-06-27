@@ -38,7 +38,7 @@ namespace egret.wxgame {
      */
     function convertImageToCanvas(texture: egret.Texture, rect?: egret.Rectangle): HTMLCanvasElement {
         if (!sharedCanvas) {
-            sharedCanvas = document.createElement("canvas");
+            sharedCanvas = wx.createCanvas();
             sharedContext = sharedCanvas.getContext("2d");
         }
 

@@ -1795,7 +1795,7 @@ if (window['HTMLVideoElement'] == undefined) {
              * @private
              */
             WebImageLoader.prototype.loadImage = function (src) {
-                var image = new Image();
+                var image = wx.createImage();
                 this.data = null;
                 this.currentImage = image;
                 if (this._hasCrossOriginSet) {
@@ -2149,7 +2149,7 @@ if (window['HTMLVideoElement'] == undefined) {
          * 创建一个canvas。
          */
         function createCanvas(width, height) {
-            var canvas = document.createElement("canvas");
+            var canvas = wx.createCanvas();
             if (!isNaN(width) && !isNaN(height)) {
                 canvas.width = width;
                 canvas.height = height;
@@ -2783,7 +2783,7 @@ if (window['HTMLVideoElement'] == undefined) {
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "1.1.16";
+        wxgame.version = "1.2.0";
         /**
          * 运行环境是否为子域
          */
@@ -3461,7 +3461,7 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
          */
         function convertImageToCanvas(texture, rect) {
             if (!sharedCanvas) {
-                sharedCanvas = document.createElement("canvas");
+                sharedCanvas = wx.createCanvas();
                 sharedContext = sharedCanvas.getContext("2d");
             }
             var w = texture.$getTextureWidth();
@@ -4773,7 +4773,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
         }
         egret.sys.mainCanvas = mainCanvas;
         function createCanvas(width, height) {
-            var canvas = document.createElement("canvas");
+            var canvas = wx.createCanvas();
             if (!isNaN(width) && !isNaN(height)) {
                 canvas.width = width;
                 canvas.height = height;
@@ -8080,7 +8080,7 @@ window["sharedCanvas"].isCanvas = true;
             else if (base64.charAt(0) === 'i') {
                 imageType = "image/png";
             }
-            var img = new Image();
+            var img = wx.createImage();
             img.src = "data:" + imageType + ";base64," + base64;
             img.crossOrigin = '*';
             var bitmapData = new BitmapData(img);

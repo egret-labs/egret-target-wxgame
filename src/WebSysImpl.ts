@@ -38,7 +38,7 @@ namespace egret.wxgame {
     egret.sys.mainCanvas = mainCanvas;
 
     function createCanvas(width?: number, height?: number): HTMLCanvasElement {
-        let canvas: HTMLCanvasElement = document.createElement("canvas");
+        let canvas: HTMLCanvasElement = wx.createCanvas();
         if (!isNaN(width) && !isNaN(height)) {
             canvas.width = width;
             canvas.height = height;
