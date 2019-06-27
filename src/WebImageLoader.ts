@@ -166,7 +166,7 @@ namespace egret.wxgame {
          * @private
          */
         private getImage(event: any): HTMLImageElement {
-            let image: HTMLImageElement = event.target;
+            let image: HTMLImageElement = this.currentImage;
             let url = image.src;
             image.onerror = null;
             image.onload = null;

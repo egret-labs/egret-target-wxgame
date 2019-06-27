@@ -1857,7 +1857,7 @@ if (window['HTMLVideoElement'] == undefined) {
              * @private
              */
             WebImageLoader.prototype.getImage = function (event) {
-                var image = event.target;
+                var image = this.currentImage;
                 var url = image.src;
                 image.onerror = null;
                 image.onload = null;
