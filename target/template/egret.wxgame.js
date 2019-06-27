@@ -2468,7 +2468,9 @@ if (window['HTMLVideoElement'] == undefined) {
             WebTouchHandler.prototype.getLocation = function (event) {
                 //   event.identifier = +event.identifier || 0;        wxgame 内核该属性只读
                 var doc = document.documentElement;
-                var box = this.canvas.getBoundingClientRect();
+                var box = { top: 0, left: 0,
+                    width: wxgame.Html5Capatibility.systemInfo.windowWidth,
+                    height: wxgame.Html5Capatibility.systemInfo.windowHeight };
                 var left = box.left;
                 var top = box.top;
                 var x = event.pageX - left, newx = x;
@@ -3330,7 +3332,7 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
                 if (canvas['userTyping'])
                     return;
                 var option = this.playerOption;
-                var screenRect = canvas.getBoundingClientRect();
+                var screenRect = { top: 0, width: canvas.width, height: canvas.height };
                 var top = 0;
                 var boundingClientWidth = screenRect.width;
                 var boundingClientHeight = screenRect.height;

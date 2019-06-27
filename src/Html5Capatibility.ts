@@ -65,10 +65,7 @@ namespace egret.wxgame {
             super();
         }
 
-        /**
-         * @private
-         */
-        private static systemInfo: any;
+        public static systemInfo: any;
 
         /**
          * @private

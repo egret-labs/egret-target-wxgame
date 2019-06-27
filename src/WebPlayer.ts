@@ -172,7 +172,7 @@ namespace egret.wxgame {
             if (canvas['userTyping'])
                 return;
             let option = this.playerOption;
-            let screenRect = canvas.getBoundingClientRect();
+            let screenRect = {top: 0, width: canvas.width, height: canvas.height};
             let top = 0;
             let boundingClientWidth = screenRect.width;
             let boundingClientHeight = screenRect.height;

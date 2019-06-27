@@ -161,7 +161,9 @@ namespace egret.wxgame {
         private getLocation(event: any): Point {
             //   event.identifier = +event.identifier || 0;        wxgame 内核该属性只读
             let doc = document.documentElement;
-            let box = this.canvas.getBoundingClientRect();
+            let box = {top: 0, left: 0,
+                width: Html5Capatibility.systemInfo.windowWidth,
+                height: Html5Capatibility.systemInfo.windowHeight};
             let left = box.left
                 //+ window.pageXOffset - doc.clientLeft              wxgame 不存在
                 ;
