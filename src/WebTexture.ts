@@ -50,6 +50,7 @@ namespace egret.wxgame {
             return result;
         }
         catch (e) {
+            console.error('toDataURL error: ' + e);
             egret.$error(1033);
         }
         return null;
@@ -102,6 +103,7 @@ namespace egret.wxgame {
             return <number[]><any>result;
         }
         catch (e) {
+            console.error('getPixels error: ' + e);
             egret.$error(1039);
         }
     }

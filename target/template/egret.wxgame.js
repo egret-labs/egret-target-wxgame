@@ -164,6 +164,7 @@ if (window['HTMLVideoElement'] == undefined) {
                     return true;
                 }
                 catch (e) {
+                    console.error('window.localStorage.setItem error ' + e);
                     egret.$warn(1047, key, value);
                     return false;
                 }
@@ -3469,6 +3470,7 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
                 return result;
             }
             catch (e) {
+                console.error('toDataURL error: ' + e);
                 egret.$error(1033);
             }
             return null;
@@ -3518,6 +3520,7 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
                 return result;
             }
             catch (e) {
+                console.error('getPixels error: ' + e);
                 egret.$error(1039);
             }
         }
@@ -5066,28 +5069,6 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 this.contextLost = false;
             };
             WebGLRenderContext.prototype.getWebGLContext = function () {
-                /*
-                let options = {
-                    antialias: WebGLRenderContext.antialias,
-                    stencil: true//设置可以使用模板（用于不规则遮罩）
-                };
-                let gl: any;
-                //todo 是否使用chrome源码names
-                //let contextNames = ["moz-webgl", "webkit-3d", "experimental-webgl", "webgl", "3d"];
-                let names = ["webgl", "experimental-webgl"];
-                for (let i = 0; i < names.length; i++) {
-                    try {
-                        gl = this.surface.getContext(names[i], options);
-                    } catch (e) {
-                    }
-                    if (gl) {
-                        break;
-                    }
-                }
-                if (!gl) {
-                    $error(1021);
-                }
-                */
                 var gl = egret.sys.getContextWebGL(this.surface);
                 this.setContext(gl);
             };

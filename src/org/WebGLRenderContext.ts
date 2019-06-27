@@ -354,28 +354,6 @@ namespace egret.wxgame {
         }
 
         private getWebGLContext() {
-            /*
-            let options = {
-                antialias: WebGLRenderContext.antialias,
-                stencil: true//设置可以使用模板（用于不规则遮罩）
-            };
-            let gl: any;
-            //todo 是否使用chrome源码names
-            //let contextNames = ["moz-webgl", "webkit-3d", "experimental-webgl", "webgl", "3d"];
-            let names = ["webgl", "experimental-webgl"];
-            for (let i = 0; i < names.length; i++) {
-                try {
-                    gl = this.surface.getContext(names[i], options);
-                } catch (e) {
-                }
-                if (gl) {
-                    break;
-                }
-            }
-            if (!gl) {
-                $error(1021);
-            }
-            */
             const gl = egret.sys.getContextWebGL(this.surface);
             this.setContext(gl);
         }

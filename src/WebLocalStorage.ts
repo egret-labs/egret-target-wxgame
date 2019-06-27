@@ -50,6 +50,7 @@ namespace egret.localStorage.wxgame {
             return true;
         }
         catch(e){
+            console.error('window.localStorage.setItem error ' + e);
             egret.$warn(1047, key, value);
             return false;
         }
