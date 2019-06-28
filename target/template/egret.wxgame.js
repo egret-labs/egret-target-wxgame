@@ -478,15 +478,11 @@ if (window['HTMLVideoElement'] == undefined) {
                 this.isStopped = true;
                 var audio = this.audio;
                 audio.removeEventListener("ended", this.onPlayEnd);
+                audio.pause();
                 audio.volume = 0;
+                wxgame.HtmlSound.$recycle(this.$url, audio);
                 this._volume = 0;
                 this.audio = null;
-                var url = this.$url;
-                //延迟一定时间再停止，规避chrome报错
-                window.setTimeout(function () {
-                    audio.pause();
-                    wxgame.HtmlSound.$recycle(url, audio);
-                }, 200);
             };
             Object.defineProperty(HtmlSoundChannel.prototype, "volume", {
                 /**
@@ -2783,7 +2779,7 @@ if (window['HTMLVideoElement'] == undefined) {
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "0.1.17";
+        wxgame.version = "1.1.18";
         /**
          * 运行环境是否为子域
          */
