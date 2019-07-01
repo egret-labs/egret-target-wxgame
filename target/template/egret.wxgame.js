@@ -1825,10 +1825,7 @@ if (window['HTMLVideoElement'] == undefined) {
                 if (wxgame.preUploadTexture && egret.Capabilities.renderMode == "webgl") {
                     wxgame.WebGLRenderContext.getInstance(null, null).getWebGLTexture(this.data);
                 }
-                var self = this;
-                window.setTimeout(function () {
-                    self.dispatchEventWith(egret.Event.COMPLETE);
-                }, 0);
+                this.dispatchEventWith(egret.Event.COMPLETE);
             };
             /**
              * @private
