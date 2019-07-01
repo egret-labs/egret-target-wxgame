@@ -31,7 +31,7 @@
 		"src/org/WebGeolocation.ts",
 		"src/org/WebMotion.ts",
 		"src/org/WebLogger.ts",
-		"src/WebGLDrawCmdManager.ts",
+		"src/org/WebGLDrawCmdManager.ts",
 		"src/org/WebGLVertexArrayObject.ts",
 		"src/org/WebGLRenderTarget.ts",
 		"src/WebSysImpl.ts",
