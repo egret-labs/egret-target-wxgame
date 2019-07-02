@@ -39,6 +39,7 @@ namespace egret.wxgame {
      * WebGL渲染器
      */
     export class WebGLRenderer implements sys.SystemRenderer {
+
         public constructor() {
             //模拟器上不存在该方法
             if (window['canvas'].getContext('webgl').wxBindCanvasTexture) {
@@ -397,6 +398,9 @@ namespace egret.wxgame {
                 const displayBoundsY = displayBounds.y;
                 const displayBoundsWidth = displayBounds.width;
                 const displayBoundsHeight = displayBounds.height;
+                if (displayBoundsWidth <= 0 || displayBoundsHeight <= 0) {
+                    return drawCalls;
+                }
                 //绘制显示对象自身，若有scrollRect，应用clip
                 let displayBuffer = this.createRenderBuffer(displayBoundsWidth, displayBoundsHeight);
                 displayBuffer.context.pushBuffer(displayBuffer);
@@ -886,7 +890,6 @@ namespace egret.wxgame {
                     this.canvasRenderBuffer.resize(width, height);
                 }
             }
-
             if (!this.canvasRenderBuffer.context) {
                 return;
             }
@@ -970,6 +973,7 @@ namespace egret.wxgame {
             canvasScaleY *= height2 / height;
             width = width2;
             height = height2;
+
             if (this.isiOS10) {
                 if (!this.canvasRenderer) {
                     this.canvasRenderer = new CanvasRenderer();
@@ -987,6 +991,7 @@ namespace egret.wxgame {
                     this.canvasRenderBuffer.resize(width, height);
                 }
             }
+
             if (!this.canvasRenderBuffer.context) {
                 return;
             }
@@ -1004,7 +1009,6 @@ namespace egret.wxgame {
                 this.canvasRenderer.renderGraphics(node, this.canvasRenderBuffer.context, true);
                 let texture;
                 if (this.isiOS10) {
-                    console.log("forHitTest");
                     surface["isCanvas"] = true;
                     texture = surface;
                 }
@@ -1016,6 +1020,7 @@ namespace egret.wxgame {
             } else {
                 if (node.dirtyRender) {
                     this.canvasRenderer.renderGraphics(node, this.canvasRenderBuffer.context);
+
                     if (this.isiOS10) {
                         surface["isCanvas"] = true;
                         node.$texture = surface;
