@@ -471,15 +471,11 @@ r.prototype = e.prototype, t.prototype = new r();
                 this.isStopped = true;
                 var audio = this.audio;
                 audio.removeEventListener("ended", this.onPlayEnd);
+                audio.pause();
                 audio.volume = 0;
+                wxgame.HtmlSound.$recycle(this.$url, audio);
                 this._volume = 0;
                 this.audio = null;
-                var url = this.$url;
-                //延迟一定时间再停止，规避chrome报错
-                window.setTimeout(function () {
-                    audio.pause();
-                    wxgame.HtmlSound.$recycle(url, audio);
-                }, 200);
             };
             Object.defineProperty(HtmlSoundChannel.prototype, "volume", {
                 /**
@@ -1822,10 +1818,7 @@ r.prototype = e.prototype, t.prototype = new r();
                 if (wxgame.preUploadTexture && egret.Capabilities.renderMode == "webgl") {
                     wxgame.WebGLRenderContext.getInstance(null, null).getWebGLTexture(this.data);
                 }
-                var self = this;
-                window.setTimeout(function () {
-                    self.dispatchEventWith(egret.Event.COMPLETE);
-                }, 0);
+                this.dispatchEventWith(egret.Event.COMPLETE);
             };
             /**
              * @private
@@ -2720,7 +2713,7 @@ r.prototype = e.prototype, t.prototype = new r();
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "1.1.16";
+        wxgame.version = "1.1.18";
         /**
          * 运行环境是否为子域
          */

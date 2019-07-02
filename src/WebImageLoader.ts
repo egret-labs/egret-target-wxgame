@@ -135,10 +135,7 @@ namespace egret.wxgame {
             if(wxgame.preUploadTexture && Capabilities.renderMode == "webgl") {
                 WebGLRenderContext.getInstance(null, null).getWebGLTexture(this.data);
             }
-            let self = this;
-            window.setTimeout(function (): void {
-                self.dispatchEventWith(Event.COMPLETE);
-            }, 0);
+            this.dispatchEventWith(Event.COMPLETE);
         }
 
         /**

@@ -110,17 +110,12 @@ namespace egret.wxgame {
 
             let audio = this.audio;
             audio.removeEventListener("ended", this.onPlayEnd);
+            audio.pause();
             audio.volume = 0;
+            HtmlSound.$recycle(this.$url, audio);
+            
             this._volume = 0;
             this.audio = null;
-
-            let url = this.$url;
-
-            //延迟一定时间再停止，规避chrome报错
-            window.setTimeout(function () {
-                audio.pause();
-                HtmlSound.$recycle(url, audio);
-            }, 200);
         }
 
         /**
