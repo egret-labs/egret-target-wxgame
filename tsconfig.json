@@ -38,9 +38,9 @@
 		"src/org/WebGLRenderContext.ts",
 		"src/org/WebGLRenderBuffer.ts",
 		"src/WebGLRenderer.ts",
-		"src/EgretWebGLAttribute.ts",
+		"src/org/EgretWebGLAttribute.ts",
 		"src/org/EgretWebGLProgram.ts",
-		"src/EgretWebGLUniform.ts",
+		"src/org/EgretWebGLUniform.ts",
 		"src/org/EgretShaderLib.ts",
 		"src/org/BitmapData.ts",
 		"libs/egret.d.ts"
