@@ -42,7 +42,9 @@
 		"src/org/EgretWebGLProgram.ts",
 		"src/org/EgretWebGLUniform.ts",
 		"src/org/EgretShaderLib.ts",
-		"src/org/BitmapData.ts",
+		"src/org/EgretShaderLib.ts",
+		"src/org/TextAtlasStrategy.ts",
+		"src/org/TextAtlasRender.ts",
 		"libs/egret.d.ts"
 	]
 }
