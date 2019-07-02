@@ -147,9 +147,17 @@ namespace egret.wxgame {
      */
     function setRenderMode(renderMode: string): void {
         if (renderMode === "webgl") {
+            //模拟器上不存在该方法
+            let wxiOS10 = false;
+            if (window['canvas'].getContext('webgl').wxBindCanvasTexture) {
+                //ios10 系统上需要做特殊处理，不断创建 canvas,其他版本不需要
+                let systemInfo = window['wx'].getSystemInfoSync();
+                wxiOS10 = systemInfo.system.indexOf('iOS 10') > -1 ? true : false;
+            }
             Capabilities["renderMode" + ""] = "webgl";
             sys.RenderBuffer = WebGLRenderBuffer;
             sys.systemRenderer = new WebGLRenderer();
+            (sys.systemRenderer as WebGLRenderer).wxiOS10 = wxiOS10;
             sys.canvasRenderer = new CanvasRenderer();
             sys.customHitTestBuffer = new WebGLRenderBuffer(3, 3);
             sys.canvasHitTestBuffer = new CanvasRenderBuffer(3, 3);
