@@ -125,6 +125,7 @@ namespace egret.wxgame {
 
                 self.loaded = true;
                 self.dispatchEventWith(egret.Event.COMPLETE);
+                
             }
 
             function onAudioError():void {
@@ -157,7 +158,7 @@ namespace egret.wxgame {
             else {
                 //audio.load();
             }
-            audio.autoplay = true;
+            // audio.autoplay = true;
 
             let channel = new HtmlSoundChannel(audio);
             channel.$url = this.url;

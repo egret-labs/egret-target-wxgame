@@ -299,7 +299,7 @@ if (window['HTMLVideoElement'] == undefined) {
                 else {
                     //audio.load();
                 }
-                audio.autoplay = true;
+                // audio.autoplay = true;
                 var channel = new wxgame.HtmlSoundChannel(audio);
                 channel.$url = this.url;
                 channel.$loops = loops;
