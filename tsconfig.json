@@ -34,7 +34,6 @@
 		"src/org/WebGLDrawCmdManager.ts",
 		"src/org/WebGLVertexArrayObject.ts",
 		"src/org/WebGLRenderTarget.ts",
-		"src/WebSysImpl.ts",
 		"src/org/WebGLRenderContext.ts",
 		"src/org/WebGLRenderBuffer.ts",
 		"src/org/WebGLRenderer.ts",
@@ -45,6 +44,7 @@
 		"src/org/EgretShaderLib.ts",
 		"src/org/TextAtlasStrategy.ts",
 		"src/org/TextAtlasRender.ts",
+		"src/WebSysImpl.ts",
 		"libs/egret.d.ts"
 	]
 }
