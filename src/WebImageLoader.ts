@@ -132,10 +132,12 @@ namespace egret.wxgame {
                 return;
             }
             this.data = new egret.BitmapData(image);
-            if(wxgame.preUploadTexture && Capabilities.renderMode == "webgl") {
+            if (wxgame.preUploadTexture && Capabilities.renderMode == "webgl") {
                 WebGLRenderContext.getInstance(null, null).getWebGLTexture(this.data);
             }
-            this.dispatchEventWith(Event.COMPLETE);
+            window.setTimeout(() => {
+                this.dispatchEventWith(Event.COMPLETE);
+            }, 0)
         }
 
         /**
@@ -150,12 +152,11 @@ namespace egret.wxgame {
         }
 
         private dispatchIOError(url: string): void {
-            let self = this;
-            window.setTimeout(function (): void {
-                if (DEBUG && !self.hasEventListener(IOErrorEvent.IO_ERROR)) {
-                    $error(1011, url);
+            window.setTimeout(() => {
+                if (!this.hasEventListener(IOErrorEvent.IO_ERROR)) {
+                    $warn(1011, url);
                 }
-                self.dispatchEventWith(IOErrorEvent.IO_ERROR);
+                this.dispatchEventWith(IOErrorEvent.IO_ERROR);
             }, 0);
         }
 
