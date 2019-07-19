@@ -152,8 +152,8 @@ namespace egret.wxgame {
         private dispatchIOError(url: string): void {
             let self = this;
             window.setTimeout(function (): void {
-                if (DEBUG && !self.hasEventListener(IOErrorEvent.IO_ERROR)) {
-                    $error(1011, url);
+                if (!self.hasEventListener(IOErrorEvent.IO_ERROR)) {
+                    $warn(1011, url);
                 }
                 self.dispatchEventWith(IOErrorEvent.IO_ERROR);
             }, 0);
