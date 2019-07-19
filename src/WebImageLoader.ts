@@ -153,7 +153,7 @@ namespace egret.wxgame {
             let self = this;
             window.setTimeout(function (): void {
                 if (!self.hasEventListener(IOErrorEvent.IO_ERROR)) {
-                    $warn(1011, url);
+                    egret.warn(1011, url);
                 }
                 self.dispatchEventWith(IOErrorEvent.IO_ERROR);
             }, 0);
