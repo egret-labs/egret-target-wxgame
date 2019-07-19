@@ -1291,6 +1291,27 @@ declare namespace egret {
          * @platform Web,Native
          */
         willTrigger(type: string): boolean;
+        /**
+         * inspired by pixi.js
+         */
+        private _tint;
+        /**
+         * @private
+         */
+        $tintRGB: number;
+        /**
+         * Staining the current object
+         * @version Egret 5.2.24
+         * @platform Web,Native
+         * @language en_US
+         */
+        /**
+         * 给当前对象染色
+         * @version Egret 5.2.24
+         * @platform Web,Native
+         * @language zh_CN
+         */
+        tint: number;
     }
 }
 declare namespace egret {
@@ -4401,6 +4422,10 @@ declare namespace egret {
         private static canUseWebGL;
         static checkCanUseWebGL(): boolean;
         static deleteWebGLTexture(webglTexture: WebGLTexture): void;
+        /**
+         * inspired by pixi.js
+         */
+        static premultiplyTint(tint: number, alpha: number): number;
     }
 }
 declare namespace egret {
@@ -5643,6 +5668,7 @@ declare namespace egret {
     const engine_default_empty_texture = "engine_default_empty_texture";
     const is_compressed_texture = "is_compressed_texture";
     const glContext = "glContext";
+    const UNPACK_PREMULTIPLY_ALPHA_WEBGL = "UNPACK_PREMULTIPLY_ALPHA_WEBGL";
     /**
      * A BitmapData object contains an array of pixel data. This data can represent either a fully opaque bitmap or a
      * transparent bitmap that contains alpha channel data. Either type of BitmapData object is stored as a buffer of 32-bit
@@ -10890,6 +10916,19 @@ declare namespace egret {
          * @language zh_CN
          */
         const RUNTIME2 = "runtime2";
+        /**
+         * Running on Alipay
+         * @version Egret 5.2.23
+         * @platform All
+         * @language en_US
+         */
+        /**
+         * 运行在支付宝小游戏上
+         * @version Egret 5.2.23
+         * @platform All
+         * @language zh_CN
+         */
+        const MYGAME = "mygame";
         /**
          * Running on WeChat mini game
          * @version Egret 5.1.5
