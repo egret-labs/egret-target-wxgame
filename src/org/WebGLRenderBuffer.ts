@@ -59,6 +59,9 @@ namespace egret.wxgame {
          */
         private root: boolean;
 
+        //
+        public currentTexture: WebGLTexture = null;
+
 
         public constructor(width?: number, height?: number, root?: boolean) {
             super();
@@ -103,6 +106,7 @@ namespace egret.wxgame {
         }
 
         public globalAlpha: number = 1;
+        public globalTintColor: number = 0xFFFFFF;
         /**
          * stencil state
          * 模版开关状态

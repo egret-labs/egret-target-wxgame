@@ -1300,18 +1300,58 @@ declare namespace egret {
          */
         $tintRGB: number;
         /**
-         * Staining the current object
+         * Set a tint color for the current object
          * @version Egret 5.2.24
          * @platform Web,Native
          * @language en_US
          */
         /**
-         * 给当前对象染色
+         * 给当前对象设置填充色
          * @version Egret 5.2.24
          * @platform Web,Native
          * @language zh_CN
          */
         tint: number;
+        /**
+         * @private
+         * inspired by pixi.js
+         */
+        $sortDirty: boolean;
+        sortChildren(): void;
+        /**
+         * @private
+         */
+        private _zIndex;
+        /**
+         * the z-order (front-to-back order) of the object
+         * @version Egret 5.2.24
+         * @platform Web,Native
+         * @language en_US
+         */
+        /**
+         * 设置对象的 Z 轴顺序（前后顺序）
+         * @version Egret 5.2.24
+         * @platform Web,Native
+         * @language zh_CN
+         */
+        zIndex: number;
+        /**
+         * @private
+         */
+        $lastSortedIndex: number;
+        /**
+         * Allow objects to use zIndex sorting
+         * @version Egret 5.2.24
+         * @platform Web,Native
+         * @language en_US
+         */
+        /**
+         * 允许对象使用 zIndex 排序
+         * @version Egret 5.2.24
+         * @platform Web,Native
+         * @language zh_CN
+         */
+        sortableChildren: boolean;
     }
 }
 declare namespace egret {
@@ -3009,6 +3049,8 @@ declare namespace egret {
          * @private
          */
         $hitTest(stageX: number, stageY: number): DisplayObject;
+        private _sortChildrenFunc(a, b);
+        sortChildren(): void;
     }
 }
 declare namespace egret {
