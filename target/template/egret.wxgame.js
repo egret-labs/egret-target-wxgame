@@ -2900,7 +2900,7 @@ r.prototype = e.prototype, t.prototype = new r();
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "1.2.0";
+        wxgame.version = "1.2.1";
         /**
          * 运行环境是否为子域
          */
@@ -4391,7 +4391,7 @@ if (window['HTMLVideoElement'] == undefined) {
                 * 混入tintcolor => alpha
                 */
                 alpha = Math.min(alpha, 1.0);
-                var globalTintColor = buffer.globalTintColor;
+                var globalTintColor = buffer.globalTintColor || 0xFFFFFF;
                 var currentTexture = buffer.currentTexture;
                 alpha = ((alpha < 1.0 && currentTexture && currentTexture[egret.UNPACK_PREMULTIPLY_ALPHA_WEBGL]) ?
                     egret.WebGLUtils.premultiplyTint(globalTintColor, alpha)
