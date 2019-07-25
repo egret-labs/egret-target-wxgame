@@ -4452,24 +4452,7 @@ declare namespace egret {
         SQUARE: string;
     };
 }
-declare namespace egret {
-    /**
-     * @private
-     */
-    class WebGLUtils {
-        static compileProgram(gl: WebGLRenderingContext, vertexSrc: string, fragmentSrc: string): WebGLProgram;
-        static compileFragmentShader(gl: WebGLRenderingContext, shaderSrc: string): WebGLShader;
-        static compileVertexShader(gl: WebGLRenderingContext, shaderSrc: string): WebGLShader;
-        private static _compileShader(gl, shaderSrc, shaderType);
-        private static canUseWebGL;
-        static checkCanUseWebGL(): boolean;
-        static deleteWebGLTexture(webglTexture: WebGLTexture): void;
-        /**
-         * inspired by pixi.js
-         */
-        static premultiplyTint(tint: number, alpha: number): number;
-    }
-}
+
 declare namespace egret {
     /**
      * The EventPhase class provides values for the eventPhase property of the Event class.
