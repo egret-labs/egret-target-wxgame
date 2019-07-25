@@ -2900,7 +2900,7 @@ r.prototype = e.prototype, t.prototype = new r();
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "1.2.1";
+        wxgame.version = "1.2.2";
         /**
          * 运行环境是否为子域
          */
@@ -8755,6 +8755,7 @@ if (window['HTMLVideoElement'] == undefined) {
             texture.glContext = gl;
             gl.bindTexture(gl.TEXTURE_2D, texture);
             gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
+            texture[egret.UNPACK_PREMULTIPLY_ALPHA_WEBGL] = true;
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, bitmapData);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
