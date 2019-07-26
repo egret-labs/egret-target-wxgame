@@ -2684,7 +2684,7 @@ r.prototype = e.prototype, t.prototype = new r();
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "0.0.3";
+        wxgame.version = "0.0.5";
         /**
          * 运行环境是否为子域
          */
@@ -3667,7 +3667,7 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 }
                 else {
                     new Response(res.data).arrayBuffer().then(function (buffer) {
-                        this.onSocketData.call(this.thisObject, buffer);
+                        _this.onSocketData.call(_this.thisObject, buffer);
                     });
                 }
             });

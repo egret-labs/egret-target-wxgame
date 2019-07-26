@@ -77,7 +77,7 @@ namespace egret {
                 if (typeof res.data === "string") {
                     this.onSocketData.call(this.thisObject, res.data);
                 } else {
-                    new Response(res.data).arrayBuffer().then(function (buffer) {
+                    new Response(res.data).arrayBuffer().then((buffer) => {
                         this.onSocketData.call(this.thisObject, buffer);
                     });
                 }
