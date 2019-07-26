@@ -20,7 +20,7 @@
 		"src/WebTouchHandler.ts",
 		"src/WebHideHandler.ts",
 		"src/Html5Capatibility.ts",
-		"src/EgretWxgameContext.ts",
+		"src/EgretQQgameContext.ts",
 		"src/WebCapability.ts",
 		"src/WebFps.ts",
 		"src/WebGetOption.ts",
