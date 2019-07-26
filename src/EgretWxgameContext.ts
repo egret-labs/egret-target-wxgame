@@ -146,6 +146,17 @@ namespace egret.wxgame {
      * @param renderMode
      */
     function setRenderMode(renderMode: string): void {
+        if (window["sharedCanvas"]) {
+            window["sharedCanvas"].getBoundingClientRect = function () {
+                var ret = {
+                    top: 0,
+                    left: 0,
+                    width: window.innerWidth,
+                    height: window.innerHeight
+                }
+                return ret;
+            }
+        }
         if (renderMode === "webgl") {
             //模拟器上不存在该方法
             let wxiOS10 = false;
