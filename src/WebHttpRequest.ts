@@ -269,4 +269,3 @@ namespace egret.wxgame {
 
 }
 
-declare var wx: any;

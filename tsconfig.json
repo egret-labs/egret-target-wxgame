@@ -28,6 +28,8 @@
 		"src/WebTexture.ts",
 		"src/WebXML.ts",
 		"src/WebDeviceOrientation.ts",
+		"src/WXSocket.ts",
+		"src/org/ISocket.ts",
 		"src/org/WebGLUtils.ts",
 		"src/org/WebGeolocation.ts",
 		"src/org/WebMotion.ts",
@@ -46,6 +48,7 @@
 		"src/org/TextAtlasStrategy.ts",
 		"src/org/TextAtlasRender.ts",
 		"src/WebSysImpl.ts",
+		"libs/wx.d.ts",
 		"libs/egret.d.ts"
 	]
 }
