@@ -234,4 +234,4 @@ if (DEBUG) {
     }
 }
 
-egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
+egret.Capabilities["runtimeType" + ""] = "qqgame";
