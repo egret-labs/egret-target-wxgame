@@ -82,13 +82,6 @@ namespace egret {
         }
         public close(): void {
             wx.closeSocket()
-            this.onClose.call(this.thisObject)
-            egret.callLater(() => {
-                wx.offSocketOpen();
-                wx.offSocketClose();
-                wx.offSocketError();
-                wx.offSocketMessage();
-            }, this)
         }
         public disconnect(): void {
             this.close()

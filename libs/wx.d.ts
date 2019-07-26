@@ -45,7 +45,7 @@ declare namespace wx {
     function offSocketMessage();
 
     /** 设备方向 */
-    function startDeviceMotionListening();
+    function startDeviceMotionListening(data: { interval: "normal" | "game" | "ui" });
     function stopDeviceMotionListening();
     function onDeviceMotionChange(callback: Function);
 

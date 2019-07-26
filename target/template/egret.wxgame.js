@@ -3558,7 +3558,7 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
                  * @private
                  */
                 _this.onChange = function (e) {
-                    if (_this.isStart) {
+                    if (!_this.isStart) {
                         return;
                     }
                     var event = new egret.OrientationEvent(egret.Event.CHANGE);
@@ -3575,7 +3575,7 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
              */
             WebDeviceOrientation.prototype.start = function () {
                 this.isStart = true;
-                wx.startDeviceMotionListening();
+                wx.startDeviceMotionListening({ interval: "normal" });
                 wx.onDeviceMotionChange(this.onChange);
             };
             /**
@@ -3670,13 +3670,6 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
         };
         WXSocket.prototype.close = function () {
             wx.closeSocket();
-            this.onClose.call(this.thisObject);
-            egret.callLater(function () {
-                wx.offSocketOpen();
-                wx.offSocketClose();
-                wx.offSocketError();
-                wx.offSocketMessage();
-            }, this);
         };
         WXSocket.prototype.disconnect = function () {
             this.close();
