@@ -9,7 +9,7 @@
     },
     "compileType": "game",
     "libVersion": "game",
-    "appid": "{appid}",
+    "qqappid": "{appid}",
     "projectname": "{projectname}",
     "condition": {
         "search": {

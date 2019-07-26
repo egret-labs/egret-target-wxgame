@@ -1,10 +1,9 @@
 {
-	"projectType": "wxgame",
-	"version": "0.0.3",
+	"projectType": "qqgame",
+	"version": "0.0.4",
 	"args": [
 		{
 			"name": "appid",
-			"default": "wx6ac3f5090a6b99c5",
 			"files": [
 				"project.config.json"
 			]
