@@ -2684,7 +2684,7 @@ r.prototype = e.prototype, t.prototype = new r();
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "1.2.4";
+        wxgame.version = "0.0.3";
         /**
          * 运行环境是否为子域
          */
@@ -3662,7 +3662,14 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 _this.onError.call(_this.thisObject);
             });
             wx.onSocketMessage(function (res) {
-                _this.onSocketData.call(_this.thisObject, res.data);
+                if (typeof res.data === "string") {
+                    _this.onSocketData.call(_this.thisObject, res.data);
+                }
+                else {
+                    new Response(res.data).arrayBuffer().then(function (buffer) {
+                        this.onSocketData.call(this.thisObject, buffer);
+                    });
+                }
             });
         };
         WXSocket.prototype.send = function (message) {

@@ -74,7 +74,13 @@ namespace egret {
                 this.onError.call(this.thisObject)
             })
             wx.onSocketMessage((res) => {
-                this.onSocketData.call(this.thisObject, res.data);
+                if (typeof res.data === "string") {
+                    this.onSocketData.call(this.thisObject, res.data);
+                } else {
+                    new Response(res.data).arrayBuffer().then(function (buffer) {
+                        this.onSocketData.call(this.thisObject, buffer);
+                    });
+                }
             })
         }
         public send(message: any): void {
