@@ -74,37 +74,11 @@ namespace egret {
                 this.onError.call(this.thisObject)
             })
             wx.onSocketMessage((res) => {
-                let result = res.data.data
-                if (res.data.isBuffer) {
-                    const padding = '='.repeat((4 - result.length % 4) % 4);
-                    const base64 = (result + padding)
-                        .replace(/\-/g, '+')
-                        .replace(/_/g, '/');
-
-                    const rawData = window.atob(base64);
-                    const outputArray = new Uint8Array(rawData.length);
-
-                    for (let i = 0; i < rawData.length; ++i) {
-                        outputArray[i] = rawData.charCodeAt(i);
-                    }
-                    result = outputArray
-                }
-                this.onSocketData.call(this.thisObject, result);
+                this.onSocketData.call(this.thisObject, res.data);
             })
         }
         public send(message: any): void {
-            if (typeof message == "string") {
-                wx.sendSocketMessage({ data: message })
-            } else {
-                var binary = '';
-                var bytes = new Uint8Array(message);
-                var len = bytes.byteLength;
-                for (var i = 0; i < len; i++) {
-                    binary += String.fromCharCode(bytes[i]);
-                }
-                let bString = window.btoa(binary);
-                wx.sendSocketMessage({ data: bString, isBuffer: true })
-            }
+            wx.sendSocketMessage({ data: message })
         }
         public close(): void {
             wx.closeSocket()
@@ -118,7 +92,6 @@ namespace egret {
         }
         public disconnect(): void {
             this.close()
-            console.log('支付宝小游戏不支持 disconnect 方法')
         }
 
     }

@@ -1,8 +1,8 @@
 declare namespace wx {
     /** 系统环境变量 */
     const env: IENV
-     /** 同步获取系统信息 */
-    function getSystemInfoSync():ISysInfo;
+    /** 同步获取系统信息 */
+    function getSystemInfoSync(): ISysInfo;
 
     /** 键盘事件 */
     function showKeyboard(info: any): void;
@@ -23,7 +23,7 @@ declare namespace wx {
     /** 获取启动参数 */
     function getLaunchOptionsSync(): any;
     /** 网络请求 */
-    function request(obj: IRequestObject):void;
+    function request(obj: IRequestObject): void;
     /** 触摸方法 */
     function onTouchStart(event: Function): void;
     function onTouchMove(event: Function): void;
@@ -43,6 +43,12 @@ declare namespace wx {
     function offSocketClose();
     function offSocketError();
     function offSocketMessage();
+
+    /** 设备方向 */
+    function startDeviceMotionListening();
+    function stopDeviceMotionListening();
+    function onDeviceMotionChange(callback: Function);
+
 
     interface IENV {
         USER_DATA_PATH: string;
