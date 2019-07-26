@@ -3553,10 +3553,14 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
             __extends(WebDeviceOrientation, _super);
             function WebDeviceOrientation() {
                 var _this = _super !== null && _super.apply(this, arguments) || this;
+                _this.isStart = false;
                 /**
                  * @private
                  */
                 _this.onChange = function (e) {
+                    if (_this.isStart) {
+                        return;
+                    }
                     var event = new egret.OrientationEvent(egret.Event.CHANGE);
                     event.beta = e.beta;
                     event.gamma = e.gamma;
@@ -3570,14 +3574,17 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
              *
              */
             WebDeviceOrientation.prototype.start = function () {
-                window.addEventListener("deviceorientation", this.onChange);
+                this.isStart = true;
+                wx.startDeviceMotionListening();
+                wx.onDeviceMotionChange(this.onChange);
             };
             /**
              * @private
              *
              */
             WebDeviceOrientation.prototype.stop = function () {
-                window.removeEventListener("deviceorientation", this.onChange);
+                this.isStart = false;
+                wx.stopDeviceMotionListening();
             };
             return WebDeviceOrientation;
         }(egret.EventDispatcher));
@@ -3655,36 +3662,11 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
                 _this.onError.call(_this.thisObject);
             });
             wx.onSocketMessage(function (res) {
-                var result = res.data.data;
-                if (res.data.isBuffer) {
-                    var padding = '='.repeat((4 - result.length % 4) % 4);
-                    var base64 = (result + padding)
-                        .replace(/\-/g, '+')
-                        .replace(/_/g, '/');
-                    var rawData = window.atob(base64);
-                    var outputArray = new Uint8Array(rawData.length);
-                    for (var i = 0; i < rawData.length; ++i) {
-                        outputArray[i] = rawData.charCodeAt(i);
-                    }
-                    result = outputArray;
-                }
-                _this.onSocketData.call(_this.thisObject, result);
+                _this.onSocketData.call(_this.thisObject, res.data);
             });
         };
         WXSocket.prototype.send = function (message) {
-            if (typeof message == "string") {
-                wx.sendSocketMessage({ data: message });
-            }
-            else {
-                var binary = '';
-                var bytes = new Uint8Array(message);
-                var len = bytes.byteLength;
-                for (var i = 0; i < len; i++) {
-                    binary += String.fromCharCode(bytes[i]);
-                }
-                var bString = window.btoa(binary);
-                wx.sendSocketMessage({ data: bString, isBuffer: true });
-            }
+            wx.sendSocketMessage({ data: message });
         };
         WXSocket.prototype.close = function () {
             wx.closeSocket();
@@ -3698,7 +3680,6 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
         };
         WXSocket.prototype.disconnect = function () {
             this.close();
-            console.log('支付宝小游戏不支持 disconnect 方法');
         };
         return WXSocket;
     }());

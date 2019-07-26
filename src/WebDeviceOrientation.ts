@@ -4,13 +4,15 @@ namespace egret.wxgame {
      * @private
      */
     export class WebDeviceOrientation extends EventDispatcher implements DeviceOrientation {
-
+        private isStart:boolean = false;
         /**
          * @private
          * 
          */
         start() {
-            window.addEventListener("deviceorientation", this.onChange);
+            this.isStart = true;
+            wx.startDeviceMotionListening()
+            wx.onDeviceMotionChange(this.onChange)
         }
 
         /**
@@ -18,13 +20,17 @@ namespace egret.wxgame {
          * 
          */
         stop() {
-            window.removeEventListener("deviceorientation", this.onChange);
+            this.isStart = false;
+            wx.stopDeviceMotionListening()
         }
 
         /**
          * @private
          */
         protected onChange = (e: DeviceOrientationEvent) => {
+            if(!this.isStart){
+                return
+            }
             let event = new OrientationEvent(Event.CHANGE);
             event.beta = e.beta;
             event.gamma = e.gamma;
