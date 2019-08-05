@@ -6569,17 +6569,7 @@ if (window['HTMLVideoElement'] == undefined) {
                             this.renderBitmap(node, buffer);
                             break;
                         case 2 /* TextNode */:
-                            switch (node.renderStrategy) {
-                                case egret.TextRenderStrategyType.TEXTATLAS:
-                                    this.renderTextAtlas(node, buffer);
-                                    break;
-                                case egret.TextRenderStrategyType.LABEL:
-                                    this.renderText(node, buffer);
-                                    break;
-                                default:
-                                    this.renderText(node, buffer);
-                                    break;
-                            }
+                            this.renderText(node, buffer);
                             break;
                         case 3 /* GraphicsNode */:
                             this.renderGraphics(node, buffer);
@@ -7269,7 +7259,7 @@ if (window['HTMLVideoElement'] == undefined) {
             /**
              * @private
              */
-            WebGLRenderer.prototype.renderTextAtlas = function (node, buffer) {
+            WebGLRenderer.prototype.___renderText____ = function (node, buffer) {
                 var width = node.width - node.x;
                 var height = node.height - node.y;
                 if (width <= 0 || height <= 0 || !width || !height || node.drawData.length === 0) {
@@ -7341,6 +7331,11 @@ if (window['HTMLVideoElement'] == undefined) {
              * @private
              */
             WebGLRenderer.prototype.renderText = function (node, buffer) {
+                if (wxgame.textAtlasRenderEnable) {
+                    //新的文字渲染机制
+                    this.___renderText____(node, buffer);
+                    return;
+                }
                 var width = node.width - node.x;
                 var height = node.height - node.y;
                 if (width <= 0 || height <= 0 || !width || !height || node.drawData.length == 0) {
@@ -8516,6 +8511,8 @@ if (window['HTMLVideoElement'] == undefined) {
 (function (egret) {
     var wxgame;
     (function (wxgame) {
+        //测试开关,打开会截住老的字体渲染
+        wxgame.textAtlasRenderEnable = false;
         //测试对象, 先不用singleton的，后续整理代码，就new一个，放在全局的context上做成员变量
         wxgame.__textAtlasRender__ = null;
         //不想改TextNode的代码了，先用这种方式实现，以后稳了再改
@@ -8810,7 +8807,7 @@ if (window['HTMLVideoElement'] == undefined) {
                     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
                     page.webGLTexture[egret.UNPACK_PREMULTIPLY_ALPHA_WEBGL] = true;
                     gl.texSubImage2D(gl.TEXTURE_2D, 0, txtBlock.subImageOffsetX, txtBlock.subImageOffsetY, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
-                    //gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+                    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
                 }
             };
             //给一个page创建一个纹理

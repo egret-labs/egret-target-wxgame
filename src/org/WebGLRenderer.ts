@@ -126,17 +126,7 @@ namespace egret.wxgame {
                         this.renderBitmap(<sys.BitmapNode>node, buffer);
                         break;
                     case sys.RenderNodeType.TextNode:
-                        switch ((node as sys.TextNode).renderStrategy) {
-                            case TextRenderStrategyType.TEXTATLAS:
-                                this.renderTextAtlas(<sys.TextNode>node, buffer)
-                                break;
-                            case TextRenderStrategyType.LABEL:
-                                this.renderText(<sys.TextNode>node, buffer);
-                                break;
-                            default:
-                                this.renderText(<sys.TextNode>node, buffer);
-                                break;
-                        }
+                        this.renderText(<sys.TextNode>node, buffer);
                         break;
                     case sys.RenderNodeType.GraphicsNode:
                         this.renderGraphics(<sys.GraphicsNode>node, buffer);
@@ -867,7 +857,7 @@ namespace egret.wxgame {
         /**
          * @private
          */
-        private renderTextAtlas(node: sys.TextNode, buffer: WebGLRenderBuffer): void {
+        private ___renderText____(node: sys.TextNode, buffer: WebGLRenderBuffer): void {
             let width = node.width - node.x;
             let height = node.height - node.y;
             if (width <= 0 || height <= 0 || !width || !height || node.drawData.length === 0) {
@@ -923,9 +913,9 @@ namespace egret.wxgame {
                         buffer.$offsetY = saveOffsetY + anchorY - (tb.measureHeight + (tb.stroke2 ? tb.canvasHeightOffset : 0)) / 2;
                         page = tb.line.page;
                         buffer.context.drawTexture(page.webGLTexture,
-                            tb.u, tb.v, tb.contentWidth, tb.contentHeight,
+                            tb.u, tb.v, tb.contentWidth, tb.contentHeight, 
                             0, 0, tb.contentWidth, tb.contentHeight,
-                            page.pageWidth, page.pageHeight);
+                             page.pageWidth, page.pageHeight);
 
                         buffer.$offsetX += (tb.contentWidth - tb.canvasWidthOffset);
                     }
@@ -943,6 +933,11 @@ namespace egret.wxgame {
          * @private
          */
         private renderText(node: sys.TextNode, buffer: WebGLRenderBuffer): void {
+            if (textAtlasRenderEnable) {
+                //新的文字渲染机制
+                this.___renderText____(node, buffer);
+                return;
+            }
             let width = node.width - node.x;
             let height = node.height - node.y;
             if (width <= 0 || height <= 0 || !width || !height || node.drawData.length == 0) {
