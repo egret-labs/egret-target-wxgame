@@ -29,9 +29,6 @@
 
 namespace egret.wxgame {
 
-    //测试开关,打开会截住老的字体渲染
-    export const textAtlasRenderEnable: boolean = false;
-
     //测试对象, 先不用singleton的，后续整理代码，就new一个，放在全局的context上做成员变量
     export let __textAtlasRender__: TextAtlasRender = null;
 
@@ -331,8 +328,7 @@ namespace egret.wxgame {
                 gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
                 page.webGLTexture[UNPACK_PREMULTIPLY_ALPHA_WEBGL] = true;
                 gl.texSubImage2D(gl.TEXTURE_2D, 0, txtBlock.subImageOffsetX, txtBlock.subImageOffsetY, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
-                gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
-                
+                //gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
             }
         }
 
