@@ -1,15 +1,19 @@
-var commands = process.argv.slice(2);
-if (commands.length != 1) {
-    console.log("没有输入版本号");
-    return;
-}
-var version = commands[0];
 
 var cp = require('child_process');
 var fs = require('fs');
 
 var targetJsonPath = "./target/target.json";
 var targetJson = JSON.parse(fs.readFileSync(targetJsonPath, { encoding }));
+
+var commands = process.argv.slice(2);
+var version
+if (commands.length != 1) {
+    version = targetJson.version;
+    console.log("没有输入版本号，使用默认版本号:",version);
+}else{
+    version = commands[0];
+}
+
 targetJson.version = version;
 fs.writeFileSync(targetJsonPath, JSON.stringify(targetJson, undefined, "\t"));
 
