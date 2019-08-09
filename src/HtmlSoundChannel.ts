@@ -70,9 +70,10 @@ namespace egret.wxgame {
                 egret.$error(1036);
                 return;
             }
-            this.audio.play();
+            
             this.audio.volume = this._volume;
             this.audio.currentTime = this.$startTime;
+            this.audio.play();
         }
 
         /**
