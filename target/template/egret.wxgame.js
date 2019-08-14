@@ -425,9 +425,9 @@ r.prototype = e.prototype, t.prototype = new r();
                     egret.$error(1036);
                     return;
                 }
-                this.audio.play();
                 this.audio.volume = this._volume;
                 this.audio.currentTime = this.$startTime;
+                this.audio.play();
             };
             /**
              * @private
