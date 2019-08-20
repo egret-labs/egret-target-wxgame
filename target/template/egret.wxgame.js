@@ -2684,7 +2684,7 @@ r.prototype = e.prototype, t.prototype = new r();
         /**
          * 微信小游戏支持库版本号
          */
-        wxgame.version = "1.2.4";
+        wxgame.version = "1.2.6";
         /**
          * 运行环境是否为子域
          */
