@@ -68,7 +68,9 @@ namespace egret {
                 this.onConnect.call(this.thisObject)
             });
             wx.onSocketClose(() => {
-                this.onClose.call(this.thisObject)
+                egret.callLater(()=>{
+                    this.onClose.call(this.thisObject)
+                },this)
             })
             wx.onSocketError(() => {
                 this.onError.call(this.thisObject)
