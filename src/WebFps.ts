@@ -37,20 +37,35 @@ namespace egret.wxgame {
      * @private
      */
     export class WebFps extends egret.DisplayObject implements egret.FPSDisplay {
-
+        private bg: egret.Shape
+        private showFPS: boolean
+        private showLog: boolean
         constructor(stage: Stage, showFPS: boolean, showLog: boolean, logFilter: string, styles: Object) {
             super();
             if (!showFPS && !showLog) {
                 return;
             }
+            this.showFPS = showFPS;
+            this.showLog = showLog
             this.arrFps = [];
             this.arrCost = [];
-            fpsText.x = styles["x"] == undefined ? 0 : parseInt(styles["x"]);
-            fpsText.y = styles["y"] == undefined ? 0 : parseInt(styles["y"]);
-            fpsText.textColor = styles["textColor"] == undefined ? '#ffffff' : styles['textColor'].replace("0x", "#");
-            let fontSize = styles["size"] == undefined ? 12 : parseInt(styles['size']);
-            fpsText.size = fontSize;
 
+            let tx = styles["x"] == undefined ? 0 : parseInt(styles["x"]);
+            let ty = styles["y"] == undefined ? 0 : parseInt(styles["y"]);
+            let bgAlpha = styles["bgAlpha"] == undefined ? 1 : Number(styles["bgAlpha"]);
+            let fontSize = styles["size"] == undefined ? 12 : parseInt(styles['size']);
+            let bg = new egret.Shape();
+            this.bg = bg;
+            bg.graphics.beginFill(0x000000, bgAlpha)
+            bg.graphics.drawRect(0, 0, 10, 10)
+            bg.graphics.endFill();
+            bg.x = tx;
+            bg.y = ty;
+            if (showFPS) {
+                fpsText.x = tx + 4;
+                fpsText.y = ty + 4;
+                fpsText.size = fontSize;
+            }
         }
 
         private addFps() {
@@ -102,8 +117,21 @@ namespace egret.wxgame {
                 + `min:${fpsMin} max:${fpsMax} avg:${fpsAvg}\n`
                 + `Draw ${this.lastNumDraw}\n`
                 + `Cost ${numCostTicker} ${numCostRender}`;
+            egret.sys.$TempStage.addChild(this.bg);
             egret.sys.$TempStage.addChild(fpsText);
+            this.resizeBG()
         };
+        private resizeBG() {
+            if (this.showFPS && this.showLog) {
+
+            } else if (this.showFPS) {
+
+            } else {
+
+            }
+            this.bg.scaleX = Math.ceil((fpsText.width + 8) / 10);
+            this.bg.scaleY = Math.ceil((fpsText.height + 8) / 10)
+        }
 
         public updateInfo(info: string) {
         }

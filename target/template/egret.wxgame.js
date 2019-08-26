@@ -2973,13 +2973,26 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
                 if (!showFPS && !showLog) {
                     return _this;
                 }
+                _this.showFPS = showFPS;
+                _this.showLog = showLog;
                 _this.arrFps = [];
                 _this.arrCost = [];
-                fpsText.x = styles["x"] == undefined ? 0 : parseInt(styles["x"]);
-                fpsText.y = styles["y"] == undefined ? 0 : parseInt(styles["y"]);
-                fpsText.textColor = styles["textColor"] == undefined ? '#ffffff' : styles['textColor'].replace("0x", "#");
+                var tx = styles["x"] == undefined ? 0 : parseInt(styles["x"]);
+                var ty = styles["y"] == undefined ? 0 : parseInt(styles["y"]);
+                var bgAlpha = styles["bgAlpha"] == undefined ? 1 : Number(styles["bgAlpha"]);
                 var fontSize = styles["size"] == undefined ? 12 : parseInt(styles['size']);
-                fpsText.size = fontSize;
+                var bg = new egret.Shape();
+                _this.bg = bg;
+                bg.graphics.beginFill(0x000000, bgAlpha);
+                bg.graphics.drawRect(0, 0, 10, 10);
+                bg.graphics.endFill();
+                bg.x = tx;
+                bg.y = ty;
+                if (showFPS) {
+                    fpsText.x = tx + 4;
+                    fpsText.y = ty + 4;
+                    fpsText.size = fontSize;
+                }
                 return _this;
             }
             WebFps.prototype.addFps = function () {
@@ -3026,9 +3039,21 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
                     + ("min:" + fpsMin + " max:" + fpsMax + " avg:" + fpsAvg + "\n")
                     + ("Draw " + this.lastNumDraw + "\n")
                     + ("Cost " + numCostTicker + " " + numCostRender);
+                egret.sys.$TempStage.addChild(this.bg);
                 egret.sys.$TempStage.addChild(fpsText);
+                this.resizeBG();
             };
             ;
+            WebFps.prototype.resizeBG = function () {
+                if (this.showFPS && this.showLog) {
+                }
+                else if (this.showFPS) {
+                }
+                else {
+                }
+                this.bg.scaleX = Math.ceil((fpsText.width + 8) / 10);
+                this.bg.scaleY = Math.ceil((fpsText.height + 8) / 10);
+            };
             WebFps.prototype.updateInfo = function (info) {
             };
             WebFps.prototype.updateWarn = function (info) {
