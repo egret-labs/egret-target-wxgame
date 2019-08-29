@@ -40,6 +40,7 @@ namespace egret.wxgame {
         }
 
         private init(container: any, options: runEgretOptions): void {
+            console.log("Egret Engine Version:", egret.Capabilities.engineVersion)
             let option = this.readOption(container, options);
             let stage = new egret.Stage();
             stage.$screen = this;
