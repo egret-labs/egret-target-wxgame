@@ -3640,39 +3640,41 @@ egret.DeviceOrientation = egret.wxgame.WebDeviceOrientation;
             this.host = host;
             this.port = port;
             var socketServerUrl = "ws://" + this.host + ":" + this.port;
-            wx.connectSocket({
+            this.socketTask = wx.connectSocket({
                 url: socketServerUrl
             });
             this._bindEvent();
         };
         WXSocket.prototype.connectByUrl = function (url) {
-            wx.connectSocket({
+            this.socketTask = wx.connectSocket({
                 url: url
             });
             this._bindEvent();
         };
         WXSocket.prototype._bindEvent = function () {
             var _this = this;
-            wx.onSocketOpen(function () {
+            this.socketTask.onOpen(function () {
                 _this.onConnect.call(_this.thisObject);
             });
-            wx.onSocketClose(function () {
+            this.socketTask.onClose(function () {
                 egret.callLater(function () {
                     _this.onClose.call(_this.thisObject);
                 }, _this);
             });
-            wx.onSocketError(function () {
+            this.socketTask.onError(function () {
                 _this.onError.call(_this.thisObject);
             });
-            wx.onSocketMessage(function (res) {
+            this.socketTask.onMessage(function (res) {
                 _this.onSocketData.call(_this.thisObject, res.data);
             });
         };
         WXSocket.prototype.send = function (message) {
-            wx.sendSocketMessage({ data: message });
+            this.socketTask.send({
+                data: message
+            });
         };
         WXSocket.prototype.close = function () {
-            wx.closeSocket();
+            this.socketTask.close();
         };
         WXSocket.prototype.disconnect = function () {
             this.close();

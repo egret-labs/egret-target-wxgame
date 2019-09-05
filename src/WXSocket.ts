@@ -32,6 +32,7 @@ namespace egret {
         constructor() {
 
         }
+        private socketTask: wx.socketTask;
         private onConnect: Function;
         private onClose: Function;
         private onSocketData: Function;
@@ -51,39 +52,41 @@ namespace egret {
             this.port = port;
 
             let socketServerUrl = "ws://" + this.host + ":" + this.port;
-            wx.connectSocket({
+            this.socketTask = wx.connectSocket({
                 url: socketServerUrl
             })
             this._bindEvent();
         }
 
         public connectByUrl(url: string): void {
-            wx.connectSocket({
+            this.socketTask = wx.connectSocket({
                 url: url
             })
             this._bindEvent();
         }
         private _bindEvent(): void {
-            wx.onSocketOpen(() => {
+            this.socketTask.onOpen(()=>{
                 this.onConnect.call(this.thisObject)
-            });
-            wx.onSocketClose(() => {
-                egret.callLater(()=>{
-                    this.onClose.call(this.thisObject)
-                },this)
             })
-            wx.onSocketError(() => {
+            this.socketTask.onClose(()=>{
+                egret.callLater(() => {
+                    this.onClose.call(this.thisObject)
+                }, this)
+            })
+            this.socketTask.onError(()=>{
                 this.onError.call(this.thisObject)
             })
-            wx.onSocketMessage((res) => {
+            this.socketTask.onMessage((res)=>{
                 this.onSocketData.call(this.thisObject, res.data);
             })
         }
         public send(message: any): void {
-            wx.sendSocketMessage({ data: message })
+            this.socketTask.send({
+                data: message
+            })
         }
         public close(): void {
-            wx.closeSocket()
+            this.socketTask.close()
         }
         public disconnect(): void {
             this.close()
