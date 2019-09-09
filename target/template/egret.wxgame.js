@@ -3175,7 +3175,7 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
                 option.entryClassName = options.entryClassName || "Main";
                 option.scaleMode = options.scaleMode || egret.StageScaleMode.FIXED_WIDTH;
                 if (!option.scaleMode || option.scaleMode == egret.StageScaleMode.SHOW_ALL) {
-                    option.scaleMode = egret.StageScaleMode.FIXED_WIDE;
+                    option.scaleMode = egret.StageScaleMode.FIXED_WIDTH;
                     var message = egret.sys.tr(4500, "showAll", "fixedWidth");
                     console.warn(message);
                 }
