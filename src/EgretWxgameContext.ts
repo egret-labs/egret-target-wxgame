@@ -78,7 +78,7 @@ namespace egret.wxgame {
         if (!options) {
             options = {};
         }
-        Html5Capatibility._audioType = options.audioType;
+        
         Html5Capatibility.$init();
 
         // WebGL上下文参数自定义

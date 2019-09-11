@@ -48,16 +48,6 @@ namespace egret.wxgame {
      * @private
      */
     export class Html5Capatibility extends HashObject {
-        //当前浏览器版本是否支持blob
-        public static _canUseBlob: boolean = false;
-
-        //当前浏览器版本是否支持webaudio
-        public static _audioType: number = 0;
-        /**
-         * @private
-         */
-        public static _AudioClass;
-
         /**
          * @private
          */
@@ -67,82 +57,10 @@ namespace egret.wxgame {
 
         /**
          * @private
-         */
-        private static systemInfo: any;
-
-        /**
-         * @private
          *
          */
         public static $init(): void {
-            let systemInfo = wx.getSystemInfoSync();
-            Html5Capatibility.systemInfo = systemInfo;
-
-            Html5Capatibility._canUseBlob = false;
-            let canUseWebAudio = window["AudioContext"] || window["webkitAudioContext"] || window["mozAudioContext"];
-            if (canUseWebAudio) {
-                try {
-                    //防止某些chrome版本创建异常问题
-                    WebAudioDecode.ctx = new (window["AudioContext"] || window["webkitAudioContext"] || window["mozAudioContext"])();
-                }
-                catch (e) {
-                    canUseWebAudio = false;
-                }
-            }
-            let audioType = Html5Capatibility._audioType;
-            let checkAudioType;
-            if ((audioType == AudioType.WEB_AUDIO && canUseWebAudio) || audioType == AudioType.HTML5_AUDIO) {
-                checkAudioType = false;
-                Html5Capatibility.setAudioType(audioType);
-            }
-            else {
-                checkAudioType = true;
-                Html5Capatibility.setAudioType(AudioType.HTML5_AUDIO);
-            }
-
-            var platformStr = systemInfo.platform;
-            if (platformStr.indexOf("android") >= 0) {//android
-                if (checkAudioType && canUseWebAudio) {
-                    Html5Capatibility.setAudioType(AudioType.WEB_AUDIO);
-                }
-            }
-            else if (platformStr.indexOf("iphone") >= 0 || platformStr.indexOf("ipad") >= 0 || platformStr.indexOf("ipod") >= 0) {//ios
-                if (Html5Capatibility.getIOSVersion() >= 7) {
-                    Html5Capatibility._canUseBlob = true;
-                    if (checkAudioType && canUseWebAudio) {
-                        Html5Capatibility.setAudioType(AudioType.WEB_AUDIO);
-                    }
-                }
-            }
-
-            let winURL = window["URL"] || window["webkitURL"];
-            if (!winURL) {
-                Html5Capatibility._canUseBlob = false;
-            }
-
-            egret.Sound = Html5Capatibility._AudioClass;
-        }
-
-        private static setAudioType(type: number): void {
-            Html5Capatibility._audioType = type;
-            switch (type) {
-                case AudioType.WEB_AUDIO:
-                    Html5Capatibility._AudioClass = WebAudioSound;
-                    break;
-                case AudioType.HTML5_AUDIO:
-                    Html5Capatibility._AudioClass = HtmlSound;
-                    break;
-            }
-        }
-
-        /**
-         * @private
-         * 获取ios版本
-         * @returns {string}
-         */
-        private static getIOSVersion(): number {
-            let systemStr = Html5Capatibility.systemInfo.system;
-            return parseInt(systemStr.match(/\d+(_\d)*/)[0]) || 0;
+            egret.Sound = HtmlSound;
         }
     }
 

@@ -4,6 +4,8 @@ declare namespace wx {
     /** 同步获取系统信息 */
     function getSystemInfoSync(): ISysInfo;
 
+    function createInnerAudioContext(): InnerAudioContext;
+
     /** 键盘事件 */
     function showKeyboard(info: any): void;
     function onKeyboardConfirm(callback: Function): void;
@@ -49,13 +51,29 @@ declare namespace wx {
     function stopDeviceMotionListening();
     function onDeviceMotionChange(callback: Function);
 
-    interface socketTask{
-        send(data:any)
-        close(data?:any)
-        onOpen(callback:Function)
-        onClose(callback:Function)
-        onError(callback:Function)
-        onMessage(callback:Function)
+    interface InnerAudioContext {
+        src: string;//音频资源的地址
+        duration: number;//当前音频的长度 单位 s
+        volume: number;//音量。范围 0~1，默认是 1
+        currentTime: number;
+        play();
+        stop();
+        seek(position: number);//跳转的时间，单位 s
+        destroy();
+        onCanplay(callback: Function);
+        offCanplay(callback: Function);
+        onEnded(callback: Function);
+        offEnded(callback: Function);
+        onError(callback: Function);
+        offError(callback: Function);
+    }
+    interface socketTask {
+        send(data: any)
+        close(data?: any)
+        onOpen(callback: Function)
+        onClose(callback: Function)
+        onError(callback: Function)
+        onMessage(callback: Function)
     }
 
     interface IENV {

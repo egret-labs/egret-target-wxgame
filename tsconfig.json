@@ -9,8 +9,6 @@
 		"src/WebLocalStorage.ts",
 		"src/HtmlSound.ts",
 		"src/HtmlSoundChannel.ts",
-		"src/WebAudioSound.ts",
-		"src/WebAudioSoundChannel.ts",
 		"src/WebVideo.ts",
 		"src/WebHttpRequest.ts",
 		"src/WebImageLoader.ts",

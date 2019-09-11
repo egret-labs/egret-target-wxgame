@@ -51,7 +51,7 @@ namespace egret.wxgame {
         /**
          * @private
          */
-        private audio: HTMLAudioElement = null;
+        private audio: wx.InnerAudioContext = null;
 
         //声音是否已经播放完成
         private isStopped: boolean = false;
@@ -59,21 +59,21 @@ namespace egret.wxgame {
         /**
          * @private
          */
-        constructor(audio: HTMLAudioElement) {
+        constructor(audio: wx.InnerAudioContext) {
             super();
-            audio.addEventListener("ended", this.onPlayEnd);
             this.audio = audio;
+            audio.onEnded(this.onPlayEnd.bind(this))
         }
 
         $play(): void {
             if (this.isStopped) {
-                egret.$error(1036);
+                egret.$warn(1036);
                 return;
             }
-            
-            this.audio.volume = this._volume;
-            this.audio.currentTime = this.$startTime;
-            this.audio.play();
+            let audio = this.audio;
+            audio.play();
+            audio.volume = this._volume;
+            audio.seek(this.$startTime);
         }
 
         /**
@@ -90,9 +90,7 @@ namespace egret.wxgame {
             if (this.$loops > 0) {
                 this.$loops--;
             }
-
-            /////////////
-            //this.audio.load();
+            this.audio.stop();
             this.$play();
         };
 
@@ -104,19 +102,14 @@ namespace egret.wxgame {
             if (!this.audio)
                 return;
 
-            if (!this.isStopped) {
-                sys.$popSoundChannel(this);
-            }
             this.isStopped = true;
 
             let audio = this.audio;
-            audio.removeEventListener("ended", this.onPlayEnd);
-            audio.pause();
-            audio.volume = 0;
-            HtmlSound.$recycle(this.$url, audio);
             
-            this._volume = 0;
-            this.audio = null;
+            audio.stop()
+            
+            this.audio = null
+            audio = null;
         }
 
         /**
@@ -137,7 +130,7 @@ namespace egret.wxgame {
          */
         public set volume(value: number) {
             if (this.isStopped) {
-                egret.$error(1036);
+                egret.$warn(1036);
                 return;
             }
             this._volume = value;
