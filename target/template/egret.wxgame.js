@@ -2964,12 +2964,17 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
         /**
          * @private
          */
+        var logText = new egret.TextField();
+        /**
+         * @private
+         */
         var WebFps = (function (_super) {
             __extends(WebFps, _super);
             function WebFps(stage, showFPS, showLog, logFilter, styles) {
                 var _this = _super.call(this) || this;
                 _this.arrFps = [];
                 _this.arrCost = [];
+                _this.arrLog = [];
                 if (!showFPS && !showLog) {
                     return _this;
                 }
@@ -2981,6 +2986,7 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
                 var ty = styles["y"] == undefined ? 0 : parseInt(styles["y"]);
                 var bgAlpha = styles["bgAlpha"] == undefined ? 1 : Number(styles["bgAlpha"]);
                 var fontSize = styles["size"] == undefined ? 12 : parseInt(styles['size']);
+                var fontColor = styles["textColor"] === undefined ? 0x000000 : parseInt(styles['textColor'].replace("#", "0x"));
                 var bg = new egret.Shape();
                 _this.bg = bg;
                 bg.graphics.beginFill(0x000000, bgAlpha);
@@ -2991,10 +2997,26 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
                 if (showFPS) {
                     fpsText.x = tx + 4;
                     fpsText.y = ty + 4;
+                    fpsText.textColor = fontColor;
                     fpsText.size = fontSize;
+                }
+                if (showLog) {
+                    logText.x = tx + 4;
+                    logText.y = ty + 4;
+                    logText.textColor = fontColor;
+                    logText.size = fontSize;
                 }
                 return _this;
             }
+            WebFps.prototype.addText = function () {
+                egret.sys.$TempStage.addChild(this.bg);
+                if (this.showFPS) {
+                    egret.sys.$TempStage.addChild(fpsText);
+                }
+                if (this.showLog) {
+                    egret.sys.$TempStage.addChild(logText);
+                }
+            };
             WebFps.prototype.addFps = function () {
             };
             WebFps.prototype.addLog = function () {
@@ -3039,26 +3061,48 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
                     + ("min:" + fpsMin + " max:" + fpsMax + " avg:" + fpsAvg + "\n")
                     + ("Draw " + this.lastNumDraw + "\n")
                     + ("Cost " + numCostTicker + " " + numCostRender);
-                egret.sys.$TempStage.addChild(this.bg);
-                egret.sys.$TempStage.addChild(fpsText);
                 this.resizeBG();
             };
-            ;
             WebFps.prototype.resizeBG = function () {
+                this.addText();
+                var bgScaleX = 0;
+                var bgScaclY = 0;
                 if (this.showFPS && this.showLog) {
+                    bgScaleX = Math.ceil((Math.max(fpsText.width, logText.width) + 8) / 10);
+                    bgScaclY = Math.ceil((fpsText.height + logText.height + 8) / 10);
+                    logText.y = this.bg.y + 4 + fpsText.height;
                 }
                 else if (this.showFPS) {
+                    bgScaleX = Math.ceil((fpsText.width + 8) / 10);
+                    bgScaclY = Math.ceil((fpsText.height + 8) / 10);
                 }
                 else {
+                    bgScaleX = Math.ceil((logText.width + 8) / 10);
+                    bgScaclY = Math.ceil((logText.height + 8) / 10);
+                    logText.y = this.bg.y + 4;
                 }
-                this.bg.scaleX = Math.ceil((fpsText.width + 8) / 10);
-                this.bg.scaleY = Math.ceil((fpsText.height + 8) / 10);
+                this.bg.scaleX = bgScaleX;
+                this.bg.scaleY = bgScaclY;
             };
             WebFps.prototype.updateInfo = function (info) {
+                this.arrLog.push(info);
+                this.updateLogLayout();
             };
             WebFps.prototype.updateWarn = function (info) {
+                this.arrLog.push("[Warning]" + info);
+                this.updateLogLayout();
             };
             WebFps.prototype.updateError = function (info) {
+                this.arrLog.push("[Error]" + info);
+                this.updateLogLayout();
+            };
+            WebFps.prototype.updateLogLayout = function () {
+                logText.text = this.arrLog.join('\n');
+                if (egret.sys.$TempStage.height < (logText.y + logText.height + logText.size * 2)) {
+                    this.arrLog.shift();
+                    logText.text = this.arrLog.join('\n');
+                }
+                this.resizeBG();
             };
             return WebFps;
         }(egret.DisplayObject));
@@ -3218,7 +3262,7 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
                     styles[tempStyleArr[0]] = tempStyleArr[1];
                 }
                 option.fpsStyles = styles;
-                option.showLog = false;
+                option.showLog = options.showLog;
                 option.logFilter = "";
                 return option;
             };

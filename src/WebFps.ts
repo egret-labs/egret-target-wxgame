@@ -31,6 +31,10 @@ namespace egret.wxgame {
      * @private
      */
     let fpsText = new egret.TextField();
+    /**
+     * @private
+     */
+    let logText = new egret.TextField();
 
 
     /**
@@ -54,6 +58,7 @@ namespace egret.wxgame {
             let ty = styles["y"] == undefined ? 0 : parseInt(styles["y"]);
             let bgAlpha = styles["bgAlpha"] == undefined ? 1 : Number(styles["bgAlpha"]);
             let fontSize = styles["size"] == undefined ? 12 : parseInt(styles['size']);
+            let fontColor = styles["textColor"] === undefined ? 0x000000 : parseInt(styles['textColor'].replace("#", "0x"));
             let bg = new egret.Shape();
             this.bg = bg;
             bg.graphics.beginFill(0x000000, bgAlpha)
@@ -64,7 +69,24 @@ namespace egret.wxgame {
             if (showFPS) {
                 fpsText.x = tx + 4;
                 fpsText.y = ty + 4;
+                fpsText.textColor = fontColor;
                 fpsText.size = fontSize;
+            }
+            if (showLog) {
+                logText.x = tx + 4;
+                logText.y = ty + 4;
+                logText.textColor = fontColor;
+                logText.size = fontSize;
+            }
+        }
+
+        private addText() {
+            egret.sys.$TempStage.addChild(this.bg);
+            if (this.showFPS) {
+                egret.sys.$TempStage.addChild(fpsText);
+            }
+            if (this.showLog) {
+                egret.sys.$TempStage.addChild(logText);
             }
         }
 
@@ -117,27 +139,49 @@ namespace egret.wxgame {
                 + `min:${fpsMin} max:${fpsMax} avg:${fpsAvg}\n`
                 + `Draw ${this.lastNumDraw}\n`
                 + `Cost ${numCostTicker} ${numCostRender}`;
-            egret.sys.$TempStage.addChild(this.bg);
-            egret.sys.$TempStage.addChild(fpsText);
             this.resizeBG()
-        };
-        private resizeBG() {
-            if (this.showFPS && this.showLog) {
-
-            } else if (this.showFPS) {
-
-            } else {
-
-            }
-            this.bg.scaleX = Math.ceil((fpsText.width + 8) / 10);
-            this.bg.scaleY = Math.ceil((fpsText.height + 8) / 10)
         }
 
+        private resizeBG() {
+            this.addText();
+            let bgScaleX: number = 0;
+            let bgScaclY: number = 0;
+            if (this.showFPS && this.showLog) {
+                bgScaleX = Math.ceil((Math.max(fpsText.width, logText.width) + 8) / 10);
+                bgScaclY = Math.ceil((fpsText.height + logText.height + 8) / 10);
+                logText.y = this.bg.y + 4 + fpsText.height;
+            } else if (this.showFPS) {
+                bgScaleX = Math.ceil((fpsText.width + 8) / 10);
+                bgScaclY = Math.ceil((fpsText.height + 8) / 10);
+            } else {
+                bgScaleX = Math.ceil((logText.width + 8) / 10);
+                bgScaclY = Math.ceil((logText.height + 8) / 10);
+                logText.y = this.bg.y + 4;
+            }
+            this.bg.scaleX = bgScaleX;
+            this.bg.scaleY = bgScaclY;
+        }
+
+        private arrLog: string[] = [];
         public updateInfo(info: string) {
+            this.arrLog.push(info);
+            this.updateLogLayout();
         }
         public updateWarn(info: string) {
+            this.arrLog.push("[Warning]" + info);
+            this.updateLogLayout();
         }
         public updateError(info: string) {
+            this.arrLog.push("[Error]" + info);
+            this.updateLogLayout();
+        }
+        private updateLogLayout(): void {
+            logText.text = this.arrLog.join('\n');
+            if (egret.sys.$TempStage.height < (logText.y + logText.height + logText.size * 2)) {
+                this.arrLog.shift();
+                logText.text = this.arrLog.join('\n');
+            }
+            this.resizeBG();
         }
     }
     egret.FPSDisplay = WebFps;
