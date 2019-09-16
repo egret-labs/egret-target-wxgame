@@ -55,6 +55,7 @@ namespace egret.wxgame {
 
         //声音是否已经播放完成
         private isStopped: boolean = false;
+        private isEventdAdded: boolean = false;
 
         /**
          * @private
@@ -62,7 +63,20 @@ namespace egret.wxgame {
         constructor(audio: wx.InnerAudioContext) {
             super();
             this.audio = audio;
-            audio.onEnded(this.onPlayEnd.bind(this))
+        }
+
+        private addEvent() {
+            if (!this.isEventdAdded) {
+                this.isEventdAdded = true;
+                this.audio.onEnded(this.onPlayEnd)
+            }
+        }
+
+        private removeEvent() {
+            if (this.isEventdAdded) {
+                this.isEventdAdded = false;
+                this.audio.offEnded(this.onPlayEnd)
+            }
         }
 
         $play(): void {
@@ -70,10 +84,11 @@ namespace egret.wxgame {
                 egret.$warn(1036);
                 return;
             }
+            this.addEvent();
             let audio = this.audio;
-            audio.play();
             audio.volume = this._volume;
             audio.seek(this.$startTime);
+            audio.play();
         }
 
         /**
@@ -82,7 +97,6 @@ namespace egret.wxgame {
         private onPlayEnd = () => {
             if (this.$loops == 1) {
                 this.stop();
-
                 this.dispatchEventWith(egret.Event.SOUND_COMPLETE);
                 return;
             }
@@ -105,9 +119,10 @@ namespace egret.wxgame {
             this.isStopped = true;
 
             let audio = this.audio;
-            
+
             audio.stop()
-            
+            this.removeEvent();
+
             this.audio = null
             audio = null;
         }

@@ -392,6 +392,7 @@ r.prototype = e.prototype, t.prototype = new r();
                 _this.audio = null;
                 //声音是否已经播放完成
                 _this.isStopped = false;
+                _this.isEventdAdded = false;
                 /**
                  * @private
                  */
@@ -412,18 +413,30 @@ r.prototype = e.prototype, t.prototype = new r();
                  */
                 _this._volume = 1;
                 _this.audio = audio;
-                audio.onEnded(_this.onPlayEnd.bind(_this));
                 return _this;
             }
+            HtmlSoundChannel.prototype.addEvent = function () {
+                if (!this.isEventdAdded) {
+                    this.isEventdAdded = true;
+                    this.audio.onEnded(this.onPlayEnd);
+                }
+            };
+            HtmlSoundChannel.prototype.removeEvent = function () {
+                if (this.isEventdAdded) {
+                    this.isEventdAdded = false;
+                    this.audio.offEnded(this.onPlayEnd);
+                }
+            };
             HtmlSoundChannel.prototype.$play = function () {
                 if (this.isStopped) {
                     egret.$warn(1036);
                     return;
                 }
+                this.addEvent();
                 var audio = this.audio;
-                audio.play();
                 audio.volume = this._volume;
                 audio.seek(this.$startTime);
+                audio.play();
             };
             /**
              * @private
@@ -434,8 +447,8 @@ r.prototype = e.prototype, t.prototype = new r();
                     return;
                 this.isStopped = true;
                 var audio = this.audio;
-                audio.offEnded(this.onPlayEnd.bind(this));
                 audio.stop();
+                this.removeEvent();
                 this.audio = null;
                 audio = null;
             };
@@ -3621,6 +3634,7 @@ if (window['HTMLVideoElement'] == undefined) {
                     this.originAudio.destroy();
                     this.originAudio = null;
                 }
+                this.loaded = false;
             };
             /**
              * Background music

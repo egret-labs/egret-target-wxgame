@@ -46,7 +46,7 @@ namespace egret.wxgame {
          * @platform Web,Native
          * @language zh_CN
          */
-        public static MUSIC:string = "music";
+        public static MUSIC: string = "music";
 
         /**
          * EFFECT
@@ -60,25 +60,25 @@ namespace egret.wxgame {
          * @platform Web,Native
          * @language zh_CN
          */
-        public static EFFECT:string = "effect";
+        public static EFFECT: string = "effect";
 
         /**
          * @private
          */
-        public type:string;
+        public type: string;
 
         /**
          * @private
          */
-        private url:string;
+        private url: string;
         /**
          * @private
          */
-        private originAudio:wx.InnerAudioContext;
+        private originAudio: wx.InnerAudioContext;
         /**
          * @private
          */
-        private loaded:boolean = false;
+        private loaded: boolean = false;
 
         /**
          * @private
@@ -88,12 +88,12 @@ namespace egret.wxgame {
             super();
         }
 
-        public get length():number {
+        public get length(): number {
             if (this.originAudio) {
                 return this.originAudio.duration;
             }
 
-            throw new Error ("sound not loaded!");
+            throw new Error("sound not loaded!");
 
             //return 0;
         }
@@ -101,7 +101,7 @@ namespace egret.wxgame {
         /**
          * @inheritDoc
          */
-        public load(url:string):void {
+        public load(url: string): void {
             let self = this;
 
             this.url = url;
@@ -109,25 +109,25 @@ namespace egret.wxgame {
             if (!url) {
                 egret.$warn(3002);
             }
-            let audio:wx.InnerAudioContext = wx.createInnerAudioContext()
+            let audio: wx.InnerAudioContext = wx.createInnerAudioContext()
             audio.onCanplay(onAudioLoaded);
             audio.onError(onAudioError)
             audio.src = url;
             this.originAudio = audio;
-            
-            function onAudioLoaded():void {
+
+            function onAudioLoaded(): void {
                 removeListeners();
                 self.loaded = true;
                 self.dispatchEventWith(egret.Event.COMPLETE);
-                
+
             }
 
-            function onAudioError():void {
+            function onAudioError(): void {
                 removeListeners();
                 self.dispatchEventWith(egret.IOErrorEvent.IO_ERROR);
             }
 
-            function removeListeners():void {
+            function removeListeners(): void {
                 audio.offCanplay(onAudioLoaded);
                 audio.offError(onAudioError)
             }
@@ -136,7 +136,7 @@ namespace egret.wxgame {
         /**
          * @inheritDoc
          */
-        public play(startTime?:number, loops?:number):SoundChannel {
+        public play(startTime?: number, loops?: number): SoundChannel {
             startTime = +startTime || 0;
             loops = +loops || 0;
 
@@ -157,11 +157,11 @@ namespace egret.wxgame {
          * @inheritDoc
          */
         public close() {
-            if (this.originAudio){
+            if (this.originAudio) {
                 this.originAudio.destroy()
                 this.originAudio = null;
             }
-                
+            this.loaded = false;
         }
     }
 }
