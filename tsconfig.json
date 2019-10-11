@@ -1,6 +1,7 @@
 {
 	"compilerOptions": {
 		"target": "es5",
+		"removeComments":true,
 		"outFile": "./target/template/egret.wxgame.js"
 	},
 	"files": [

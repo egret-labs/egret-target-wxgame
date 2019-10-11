@@ -1,6 +1,6 @@
 {
 	"projectType": "wxgame",
-	"version": "1.2.10",
+	"version": "1.2.11",
 	"args": [
 		{
 			"name": "appid",
