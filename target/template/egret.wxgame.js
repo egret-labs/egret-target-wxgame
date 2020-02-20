@@ -1390,7 +1390,7 @@ r.prototype = e.prototype, t.prototype = new r();
 (function (egret) {
     var wxgame;
     (function (wxgame) {
-        wxgame.version = "1.2.11";
+        wxgame.version = "1.2.12";
         wxgame.isSubContext = false;
         wxgame.preUploadTexture = false;
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
@@ -6193,4 +6193,6 @@ if (window['HTMLVideoElement'] == undefined) {
         egret.Motion = egret.wxgame.WebMotion;
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
-window["sharedCanvas"].isCanvas = true;
+if (window["sharedCanvas"]) {
+    window["sharedCanvas"].isCanvas = true;
+}

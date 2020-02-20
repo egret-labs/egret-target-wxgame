@@ -40,9 +40,9 @@ namespace egret.wxgame {
         UNSIGNED_BYTE = 0x1401,
         UNSIGNED_SHORT = 0x1403
     }
-     /**
-     * @private  
-     */
+    /**
+    * @private  
+    */
     export enum WEBGL_UNIFORM_TYPE {
         FLOAT_VEC2 = 0x8B50,
         FLOAT_VEC3 = 0x8B51,
@@ -312,6 +312,6 @@ namespace egret.wxgame {
     egret.Geolocation = egret.wxgame.WebGeolocation;
     egret.Motion = egret.wxgame.WebMotion;
 }
-
-window["sharedCanvas"].isCanvas = true;
-
+if (window["sharedCanvas"]) {
+    window["sharedCanvas"].isCanvas = true;
+}
