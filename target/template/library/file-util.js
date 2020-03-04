@@ -32,7 +32,7 @@ function walkDir(dirname, callback) {
 
 let fs_cache = {};
 
-export const fs = {
+const fs = {
 
     /**
      * 遍历删除文件夹
@@ -153,7 +153,7 @@ export const fs = {
     }
 }
 
-export const path = {
+const path = {
 
     dirname: (p) => {
         const arr = p.split("/");
@@ -208,3 +208,5 @@ export const path = {
         // 'http://XXXXX/resource/bin/': 'temp_bin/'
     }
 }
+module.exports.fs = fs;
+module.exports.path = path;
