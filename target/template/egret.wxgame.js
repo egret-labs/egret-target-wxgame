@@ -2901,7 +2901,7 @@ if (window['HTMLVideoElement'] == undefined) {
     (function (wxgame) {
         var debugLogCompressedTextureNotSupported = {};
         var WebGLRenderContext = (function () {
-            function WebGLRenderContext(width, height) {
+            function WebGLRenderContext(width, height, context) {
                 this._defaultEmptyTexture = null;
                 this.glID = null;
                 this.projectionX = NaN;
@@ -2910,11 +2910,24 @@ if (window['HTMLVideoElement'] == undefined) {
                 this._supportedCompressedTextureInfo = [];
                 this.$scissorState = false;
                 this.vertSize = 5;
+                this.$beforeRender = function () {
+                    var gl = this.context;
+                    gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+                    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+                    gl.disable(gl.DEPTH_TEST);
+                    gl.disable(gl.CULL_FACE);
+                    gl.enable(gl.BLEND);
+                    gl.disable(gl.STENCIL_TEST);
+                    gl.colorMask(true, true, true, true);
+                    this.setBlendMode("source-over");
+                    gl.activeTexture(gl.TEXTURE0);
+                    this.currentProgram = null;
+                };
                 this.surface = egret.sys.mainCanvas(width, height);
                 if (egret.nativeRender) {
                     return;
                 }
-                this.initWebGL();
+                this.initWebGL(context);
                 this.$bufferStack = [];
                 var gl = this.context;
                 this.vertexBuffer = gl.createBuffer();
@@ -2925,11 +2938,11 @@ if (window['HTMLVideoElement'] == undefined) {
                 this.vao = new wxgame.WebGLVertexArrayObject();
                 this.setGlobalCompositeOperation("source-over");
             }
-            WebGLRenderContext.getInstance = function (width, height) {
+            WebGLRenderContext.getInstance = function (width, height, context) {
                 if (this.instance) {
                     return this.instance;
                 }
-                this.instance = new WebGLRenderContext(width, height);
+                this.instance = new WebGLRenderContext(width, height, context);
                 return this.instance;
             };
             WebGLRenderContext.prototype.pushBuffer = function (buffer) {
@@ -3014,11 +3027,11 @@ if (window['HTMLVideoElement'] == undefined) {
                 }
                 return returnValue;
             };
-            WebGLRenderContext.prototype.initWebGL = function () {
+            WebGLRenderContext.prototype.initWebGL = function (context) {
                 this.onResize();
                 this.surface.addEventListener("webglcontextlost", this.handleContextLost.bind(this), false);
                 this.surface.addEventListener("webglcontextrestored", this.handleContextRestored.bind(this), false);
-                this.getWebGLContext();
+                this.setContext(context ? context : this.getWebGLContext());
                 var gl = this.context;
                 this.$maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
                 this.pvrtc = gl.getExtension('WEBGL_compressed_texture_pvrtc') || gl.getExtension('WEBKIT_WEBGL_compressed_texture_pvrtc');
@@ -3044,6 +3057,7 @@ if (window['HTMLVideoElement'] == undefined) {
             WebGLRenderContext.prototype.getWebGLContext = function () {
                 var gl = egret.sys.getContextWebGL(this.surface);
                 this.setContext(gl);
+                return gl;
             };
             WebGLRenderContext.prototype.setContext = function (gl) {
                 this.context = gl;
