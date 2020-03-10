@@ -11,15 +11,12 @@ const WXFS = wx.getFileSystemManager();
  */
 class ImageProcessor {
 
-
-
     onLoadStart(host, resource) {
         let scale9Grid;
         const {
             root,
             url,
             scale9grid
-
         } = resource;
 
         if (scale9grid) {
@@ -31,32 +28,28 @@ class ImageProcessor {
         if (RES['getVirtualUrl']) {
             imageSrc = RES['getVirtualUrl'](imageSrc);
         }
-        if (path.isRemotePath(imageSrc)) { //判断是本地加载还是网络加载
-            if (!needCache(root, url)) {
-                //无需缓存加载
-                return loadImage(imageSrc, scale9Grid);
-            } else {
-                //通过缓存机制加载
-                const fullname = path.getLocalFilePath(imageSrc);
-                if (fs.existsSync(fullname)) {
-                    // console.log('缓存命中:', url, target)
-                    return loadImage(path.getWxUserPath(fullname), scale9Grid);
-                } else {
-                    return download(imageSrc, fullname).then(
-                        (filePath) => {
-                            fs.setFsCache(fullname, 1);
-                            return loadImage(filePath, scale9Grid);
-                        },
 
-                        (error) => {
-                            console.error(error);
-                            return;
-                        });
-                }
-            }
-        } else {
+        if (!path.isRemotePath(imageSrc)) { //判断是本地加载还是网络加载
             //正常本地加载
             return loadImage(imageSrc, scale9Grid);
+
+        }
+        if (!needCache(root, url)) {
+            //无需缓存加载
+            return loadImage(imageSrc, scale9Grid);
+        }
+        //通过缓存机制加载
+        const fullname = path.getLocalFilePath(imageSrc);
+        if (fs.existsSync(fullname)) {
+            return loadImage(path.getWxUserPath(fullname), scale9Grid);
+        } else {
+            return download(imageSrc, fullname).then((filePath) => {
+                fs.setFsCache(fullname, 1);
+                return loadImage(filePath, scale9Grid);
+            }, (error) => {
+                console.error(error);
+                return;
+            });
         }
     }
 

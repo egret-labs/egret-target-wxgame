@@ -17,45 +17,43 @@ class TextProcessor {
             url
         } = resource;
 
-
         return new Promise((resolve, reject) => {
             let xhrURL = url.indexOf('://') >= 0 ? url : root + url; //获取网络加载url
             if (RES['getVirtualUrl']) {
                 xhrURL = RES['getVirtualUrl'](xhrURL);
             }
-            if (path.isRemotePath(xhrURL)) { //判断是本地加载还是网络加载
-                if (needCache(root, url)) {
-                    //通过缓存机制判断是否本地加载
-                    const targetFilename = path.getLocalFilePath(xhrURL);
-                    if (fs.existsSync(targetFilename)) {
-                        //缓存命中
-                        // console.log('缓存命中');
-                        let data = fs.readSync(targetFilename, 'utf-8');
-                        resolve(data);
-                    } else {
-                        //通过url加载，加载成功后加入本地缓存
-                        loadText(xhrURL).then((content) => {
-                            const dirname = path.dirname(targetFilename);
-                            fs.mkdirsSync(dirname);
-                            fs.writeSync(targetFilename, content);
-                            resolve(content);
-                        }).catch((e) => {
-                            reject(e);
-                        });
-                    }
-
-                } else {
-                    //无需缓存，正常url加载
-                    loadText(xhrURL).then((content) => {
-                        resolve(content);
-                    }).catch((e) => {
-                        reject(e);
-                    })
-                }
-            } else {
+            if (!path.isRemotePath(xhrURL)) { //判断是本地加载还是网络加载
                 //本地加载
                 const content = WXFS.readFileSync(xhrURL, 'utf-8');
                 resolve(content);
+                return;
+            }
+            if (needCache(root, url)) {
+                //通过缓存机制判断是否本地加载
+                const targetFilename = path.getLocalFilePath(xhrURL);
+                if (fs.existsSync(targetFilename)) {
+                    //缓存命中
+                    // console.log('缓存命中');
+                    let data = fs.readSync(targetFilename, 'utf-8');
+                    resolve(data);
+                    return;
+                }
+                //通过url加载，加载成功后加入本地缓存
+                loadText(xhrURL).then((content) => {
+                    const dirname = path.dirname(targetFilename);
+                    fs.mkdirsSync(dirname);
+                    fs.writeSync(targetFilename, content);
+                    resolve(content);
+                }).catch((e) => {
+                    reject(e);
+                });
+            } else {
+                //无需缓存，正常url加载
+                loadText(xhrURL).then((content) => {
+                    resolve(content);
+                }).catch((e) => {
+                    reject(e);
+                })
             }
         });
     }

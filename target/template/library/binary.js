@@ -6,7 +6,6 @@ const WXFS = wx.getFileSystemManager();
 class BinaryProcessor {
 
     onLoadStart(host, resource) {
-
         const {
             root,
             url
@@ -18,44 +17,46 @@ class BinaryProcessor {
             if (RES['getVirtualUrl']) {
                 xhrURL = RES['getVirtualUrl'](xhrURL);
             }
-            if (path.isRemotePath(xhrURL)) {
-                if (needCache(xhrURL)) {
-                    const targetFilename = path.getLocalFilePath(xhrURL);
-                    if (fs.existsSync(targetFilename)) {
-                        //缓存命中
-                        let data = WXFS.readFileSync(path.getWxUserPath(targetFilename));
-                        resolve(data);
-                    } else {
-                        loadBinary(xhrURL).then((content) => {
-                            const dirname = path.dirname(targetFilename);
-                            fs.mkdirsSync(dirname);
-                            fs.writeSync(targetFilename, content);
-                            let needRead = needReadFile();
-                            if (needRead) {
-                                content = WXFS.readFileSync(path.getWxUserPath(targetFilename));
-                            }
-                            resolve(content);
-                        }).catch((e) => {
-                            reject(e);
-                        });
-                    }
-
-                } else {
-                    loadBinary(xhrURL).then((content) => {
-                        resolve(content);
-                    }).catch((e) => {
-                        reject(e);
-                    });
-                }
-            } else {
-                //const content = WXFS.readFileSync(xhrURL);
-                //resolve(content);
+            if (!path.isRemotePath(xhrURL)) {
+                //本地加载
                 try {
                     const content = WXFS.readFileSync(xhrURL);
                     resolve(content);
                 } catch (e) {
                     resolve(null);
                 }
+                return;
+            }
+            if (needCache(xhrURL)) {
+                //缓存加载
+                const targetFilename = path.getLocalFilePath(xhrURL);
+                if (fs.existsSync(targetFilename)) {
+                    //缓存命中
+                    let data = WXFS.readFileSync(path.getWxUserPath(targetFilename));
+                    resolve(data);
+                    return;
+                }
+                loadBinary(xhrURL).then((content) => {
+                    //写入本地
+                    const dirname = path.dirname(targetFilename);
+                    fs.mkdirsSync(dirname);
+                    fs.writeSync(targetFilename, content);
+                    let needRead = needReadFile();
+                    if (needRead) {
+                        content = WXFS.readFileSync(path.getWxUserPath(targetFilename));
+                    }
+                    resolve(content);
+                }).catch((e) => {
+                    reject(e);
+                });
+
+            } else {
+                //不用缓存直接加载
+                loadBinary(xhrURL).then((content) => {
+                    resolve(content);
+                }).catch((e) => {
+                    reject(e);
+                });
             }
         });
     }
@@ -87,7 +88,7 @@ function loadBinary(xhrURL) {
             },
             fail: function fail(_ref2) {
                 const error = new RES.ResourceManagerError(1001, xhrURL);
-                console.error('load binary error',xhrURL);
+                console.error('load binary error', xhrURL);
                 reject(error)
             }
         });
@@ -106,8 +107,6 @@ function needCache(url) {
         return false;
     }
 }
-
-
 
 const processor = new BinaryProcessor();
 RES.processor.map("bin", processor);

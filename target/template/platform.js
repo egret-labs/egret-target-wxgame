@@ -4,8 +4,6 @@
 
 class WxgamePlatform {
 
-    name = 'wxgame'
-
     login() {
         return new Promise((resolve, reject) => {
             wx.login({
@@ -33,9 +31,8 @@ class WxgamePlatform {
             })
         })
     }
-
-    openDataContext = new WxgameOpenDataContext();
 }
+
 
 class WxgameOpenDataContext {
 
@@ -72,5 +69,7 @@ class WxgameOpenDataContext {
     }
 }
 
+WxgamePlatform.prototype.name = 'wxgame';
+WxgamePlatform.prototype.openDataContext = new WxgameOpenDataContext();
 
 window.platform = new WxgamePlatform();

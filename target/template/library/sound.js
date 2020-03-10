@@ -12,7 +12,6 @@ const WXFS = wx.getFileSystemManager();
 class SoundProcessor {
 
     onLoadStart(host, resource) {
-
         const {
             root,
             url
@@ -21,30 +20,28 @@ class SoundProcessor {
         if (RES['getVirtualUrl']) {
             soundSrc = RES['getVirtualUrl'](soundSrc);
         }
-        if (path.isRemotePath(soundSrc)) { //判断是本地加载还是网络加载
-            if (!needCache(root, url)) {
-                //无需缓存加载
-                return loadSound(soundSrc);
-            } else {
-                //通过缓存机制加载
-                const fullname = path.getLocalFilePath(soundSrc);
-                if (fs.existsSync(fullname)) {
-                    return loadSound(path.getWxUserPath(fullname));
-                } else {
-                    return download(soundSrc, fullname)
-                        .then((filePath) => {
-                            fs.setFsCache(fullname, 1);
-                            return loadSound(filePath);
-                        },
-                        (error) => {
-                            console.error(error);
-                            return;
-                        });
-                }
-            }
-        } else {
+        if (!path.isRemotePath(soundSrc)) { //判断是本地加载还是网络加载
             //正常本地加载
             return loadSound(soundSrc);
+        }
+        if (!needCache(root, url)) {
+            //无需缓存加载
+            return loadSound(soundSrc);
+        } else {
+            //通过缓存机制加载
+            const fullname = path.getLocalFilePath(soundSrc);
+            if (fs.existsSync(fullname)) {
+                //缓存命中
+                return loadSound(path.getWxUserPath(fullname));
+            }
+            return download(soundSrc, fullname)
+                .then((filePath) => {
+                    fs.setFsCache(fullname, 1);
+                    return loadSound(filePath);
+                }, (error) => {
+                    console.error(error);
+                    return;
+                });
         }
     }
 
@@ -52,8 +49,6 @@ class SoundProcessor {
         return Promise.resolve();
     }
 }
-
-
 
 function loadSound(soundURL) {
     return new Promise((resolve, reject) => {
