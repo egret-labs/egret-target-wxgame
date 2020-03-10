@@ -1304,4 +1304,6 @@ namespace egret.wxgame {
 
     WebGLRenderContext.initBlendMode();
 
+    egret.sys.WebGLRenderContext = WebGLRenderContext;
+
 }

@@ -1479,6 +1479,7 @@ r.prototype = e.prototype, t.prototype = new r();
                 egret.sys.canvasHitTestBuffer = egret.sys.customHitTestBuffer;
             }
         }
+        egret.sys.setRenderMode = setRenderMode;
         function startTicker(ticker) {
             var requestAnimationFrame = window["requestAnimationFrame"] ||
                 window["webkitRequestAnimationFrame"] ||
@@ -3697,6 +3698,7 @@ if (window['HTMLVideoElement'] == undefined) {
         wxgame.WebGLRenderContext = WebGLRenderContext;
         __reflect(WebGLRenderContext.prototype, "egret.wxgame.WebGLRenderContext", ["egret.sys.RenderContext"]);
         WebGLRenderContext.initBlendMode();
+        egret.sys.WebGLRenderContext = WebGLRenderContext;
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
 

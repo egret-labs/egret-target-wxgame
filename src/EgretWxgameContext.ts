@@ -78,7 +78,7 @@ namespace egret.wxgame {
         if (!options) {
             options = {};
         }
-        
+
         Html5Capatibility.$init();
 
         // WebGL上下文参数自定义
@@ -172,6 +172,8 @@ namespace egret.wxgame {
             sys.canvasHitTestBuffer = sys.customHitTestBuffer;
         }
     }
+
+    sys.setRenderMode = setRenderMode;
 
     /**
      * @private
