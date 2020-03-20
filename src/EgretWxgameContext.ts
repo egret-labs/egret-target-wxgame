@@ -149,7 +149,7 @@ namespace egret.wxgame {
         if (renderMode === "webgl") {
             //模拟器上不存在该方法
             let wxiOS10 = false;
-            if (window['canvas'].getContext('webgl').wxBindCanvasTexture) {
+            if ((wx.createCanvas().getContext('webgl') as any).wxBindCanvasTexture) {
                 //ios10 系统上需要做特殊处理，不断创建 canvas,其他版本不需要
                 let systemInfo = window['wx'].getSystemInfoSync();
                 wxiOS10 = systemInfo.system.indexOf('iOS 10') > -1 ? true : false;
