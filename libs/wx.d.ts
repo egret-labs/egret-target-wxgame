@@ -6,6 +6,8 @@ declare namespace wx {
 
     function createInnerAudioContext(): InnerAudioContext;
 
+    function createCanvas(): HTMLCanvasElement;
+
     /** 键盘事件 */
     function showKeyboard(info: any): void;
     function onKeyboardConfirm(callback: Function): void;

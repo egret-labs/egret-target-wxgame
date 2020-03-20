@@ -1458,7 +1458,7 @@ r.prototype = e.prototype, t.prototype = new r();
         function setRenderMode(renderMode) {
             if (renderMode === "webgl") {
                 var wxiOS10 = false;
-                if (window['canvas'].getContext('webgl').wxBindCanvasTexture) {
+                if (wx.createCanvas().getContext('webgl').wxBindCanvasTexture) {
                     var systemInfo = window['wx'].getSystemInfoSync();
                     wxiOS10 = systemInfo.system.indexOf('iOS 10') > -1 ? true : false;
                 }
@@ -6068,7 +6068,11 @@ if (window['HTMLVideoElement'] == undefined) {
         wxgame.resizeContext = resizeContext;
         egret.sys.resizeContext = resizeContext;
         function getContextWebGL(surface) {
-            return surface ? surface.getContext('webgl') : null;
+            var options = {
+                antialias: wxgame.WebGLRenderContext.antialias,
+                stencil: true
+            };
+            return surface ? surface.getContext('webgl', options) : null;
         }
         egret.sys.getContextWebGL = getContextWebGL;
         function getContext2d(surface) {

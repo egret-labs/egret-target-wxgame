@@ -133,7 +133,11 @@ namespace egret.wxgame {
      * sys.getContextWebGL
      */
     function getContextWebGL(surface: HTMLCanvasElement): WebGLRenderingContext {
-        return surface ? surface.getContext('webgl') : null;
+        const options = {
+            antialias: WebGLRenderContext.antialias,
+            stencil: true//设置可以使用模板（用于不规则遮罩）
+        };
+        return surface ? surface.getContext('webgl', options) as WebGLRenderingContext : null;
     }
     egret.sys.getContextWebGL = getContextWebGL;
     /**
