@@ -1731,6 +1731,7 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
                 console.log("Egret Engine Version:", egret.Capabilities.engineVersion);
                 var option = this.readOption(container, options);
                 var stage = new egret.Stage();
+                egret.sys['stage2d'] = stage;
                 stage.$screen = this;
                 stage.$scaleMode = option.scaleMode;
                 stage.$orientation = option.orientation;
@@ -2929,6 +2930,7 @@ if (window['HTMLVideoElement'] == undefined) {
                     return;
                 }
                 this.initWebGL(context);
+                this.getSupportedCompressedTexture();
                 this.$bufferStack = [];
                 var gl = this.context;
                 this.vertexBuffer = gl.createBuffer();
@@ -3032,9 +3034,12 @@ if (window['HTMLVideoElement'] == undefined) {
                 this.onResize();
                 this.surface.addEventListener("webglcontextlost", this.handleContextLost.bind(this), false);
                 this.surface.addEventListener("webglcontextrestored", this.handleContextRestored.bind(this), false);
-                this.setContext(context ? context : this.getWebGLContext());
+                context ? this.setContext(context) : this.getWebGLContext();
                 var gl = this.context;
                 this.$maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+            };
+            WebGLRenderContext.prototype.getSupportedCompressedTexture = function () {
+                var gl = this.context ? this.context : egret.sys.getContextWebGL(this.surface);
                 this.pvrtc = gl.getExtension('WEBGL_compressed_texture_pvrtc') || gl.getExtension('WEBKIT_WEBGL_compressed_texture_pvrtc');
                 if (this.pvrtc) {
                     this.pvrtc.name = 'WEBGL_compressed_texture_pvrtc';

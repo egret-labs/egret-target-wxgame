@@ -43,6 +43,7 @@ namespace egret.wxgame {
             console.log("Egret Engine Version:", egret.Capabilities.engineVersion)
             let option = this.readOption(container, options);
             let stage = new egret.Stage();
+            (egret.sys as any)['stage2d'] = stage;
             stage.$screen = this;
             stage.$scaleMode = option.scaleMode;
             stage.$orientation = option.orientation;
