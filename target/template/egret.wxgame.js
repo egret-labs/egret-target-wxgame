@@ -1391,7 +1391,7 @@ r.prototype = e.prototype, t.prototype = new r();
 (function (egret) {
     var wxgame;
     (function (wxgame) {
-        wxgame.version = "1.3";
+        wxgame.version = "1.3.1";
         wxgame.isSubContext = false;
         wxgame.preUploadTexture = false;
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
