@@ -1008,6 +1008,7 @@ r.prototype = e.prototype, t.prototype = new r();
             HTML5StageText.prototype.$show = function () {
                 var info = {
                     defaultValue: this.$textfield.text,
+                    maxLength: 9999,
                     multiple: this.$textfield.multiline,
                     confirmHold: true,
                     confirmType: 'done',

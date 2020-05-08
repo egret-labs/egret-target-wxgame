@@ -73,6 +73,7 @@ namespace egret.wxgame {
         $show(): void {
             let info: any = {
                 defaultValue: this.$textfield.text,
+                maxLength: 9999,
                 multiple: this.$textfield.multiline,
                 confirmHold: true,
                 confirmType: 'done',
