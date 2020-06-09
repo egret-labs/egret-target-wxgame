@@ -1391,7 +1391,7 @@ r.prototype = e.prototype, t.prototype = new r();
 (function (egret) {
     var wxgame;
     (function (wxgame) {
-        wxgame.version = "1.3.1";
+        wxgame.version = "1.3.2";
         wxgame.isSubContext = false;
         wxgame.preUploadTexture = false;
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
@@ -3049,9 +3049,16 @@ if (window['HTMLVideoElement'] == undefined) {
                 if (this.etc1) {
                     this.etc1.name = 'WEBGL_compressed_texture_etc1';
                 }
-                egret.Capabilities.supportedCompressedTexture = egret.Capabilities.supportedCompressedTexture || {};
-                egret.Capabilities.supportedCompressedTexture.pvrtc = !!this.pvrtc;
-                egret.Capabilities.supportedCompressedTexture.etc1 = !!this.etc1;
+                if (egret.Capabilities._supportedCompressedTexture) {
+                    egret.Capabilities._supportedCompressedTexture = egret.Capabilities._supportedCompressedTexture || {};
+                    egret.Capabilities._supportedCompressedTexture.pvrtc = !!this.pvrtc;
+                    egret.Capabilities._supportedCompressedTexture.etc1 = !!this.etc1;
+                }
+                else {
+                    egret.Capabilities['supportedCompressedTexture'] = egret.Capabilities._supportedCompressedTexture || {};
+                    egret.Capabilities['supportedCompressedTexture'].pvrtc = !!this.pvrtc;
+                    egret.Capabilities['supportedCompressedTexture'].etc1 = !!this.etc1;
+                }
                 this._supportedCompressedTextureInfo = this._buildSupportedCompressedTextureInfo([this.etc1, this.pvrtc]);
             };
             WebGLRenderContext.prototype.handleContextLost = function () {
@@ -3559,6 +3566,9 @@ if (window['HTMLVideoElement'] == undefined) {
                     else {
                         var value = filter.$uniforms[key];
                         if (value !== undefined) {
+                            if (filter instanceof egret.GlowFilter && (key == "blurX" || key == "blurY" || key == "dist")) {
+                                value = value * filter.$filterScale;
+                            }
                             uniforms[key].setValue(value);
                         }
                         else {
@@ -3636,7 +3646,8 @@ if (window['HTMLVideoElement'] == undefined) {
                         var width = input.rootRenderTarget.width;
                         var height = input.rootRenderTarget.height;
                         output = wxgame.WebGLRenderBuffer.create(width, height);
-                        output.setTransform(1, 0, 0, 1, 0, 0);
+                        var scale = Math.max(egret.sys.DisplayList.$canvasScaleFactor, 2);
+                        output.setTransform(scale, 0, 0, scale, 0, 0);
                         output.globalAlpha = 1;
                         this.drawToRenderTarget(filter_1, input, output);
                         if (input != originInput) {
@@ -3679,6 +3690,8 @@ if (window['HTMLVideoElement'] == undefined) {
                     }
                 }
                 output.saveTransform();
+                var scale = Math.max(egret.sys.DisplayList.$canvasScaleFactor, 2);
+                output.transform(1 / scale, 0, 0, 1 / scale, 0, 0);
                 output.transform(1, 0, 0, -1, 0, height);
                 output.currentTexture = input.rootRenderTarget.texture;
                 this.vao.cacheArrays(output, 0, 0, width, height, 0, 0, width, height, width, height);
@@ -4223,7 +4236,15 @@ if (window['HTMLVideoElement'] == undefined) {
                         return drawCalls;
                     }
                 }
-                var displayBuffer = this.createRenderBuffer(displayBoundsWidth, displayBoundsHeight);
+                var scale = Math.max(egret.sys.DisplayList.$canvasScaleFactor, 2);
+                filters.forEach(function (filter) {
+                    if (filter instanceof egret.GlowFilter) {
+                        filter.$filterScale = scale;
+                    }
+                });
+                var displayBuffer = this.createRenderBuffer(scale * displayBoundsWidth, scale * displayBoundsHeight);
+                displayBuffer.saveTransform();
+                displayBuffer.transform(scale, 0, 0, scale, 0, 0);
                 displayBuffer.context.pushBuffer(displayBuffer);
                 if (displayObject.$mask) {
                     drawCalls += this.drawWithClip(displayObject, displayBuffer, -displayBoundsX, -displayBoundsY);
@@ -4235,6 +4256,7 @@ if (window['HTMLVideoElement'] == undefined) {
                     drawCalls += this.drawDisplayObject(displayObject, displayBuffer, -displayBoundsX, -displayBoundsY);
                 }
                 displayBuffer.context.popBuffer();
+                displayBuffer.restoreTransform();
                 if (drawCalls > 0) {
                     if (hasBlendMode) {
                         buffer.context.setGlobalCompositeOperation(compositeOp);
@@ -5013,6 +5035,7 @@ if (window['HTMLVideoElement'] == undefined) {
                 var buffer = renderBufferPool.pop();
                 if (buffer) {
                     buffer.resize(width, height);
+                    buffer.setTransform(1, 0, 0, 1, 0, 0);
                 }
                 else {
                     buffer = new wxgame.WebGLRenderBuffer(width, height);

@@ -349,9 +349,15 @@ namespace egret.wxgame {
                 this.etc1.name = 'WEBGL_compressed_texture_etc1';
             }
             //
-            egret.Capabilities.supportedCompressedTexture = egret.Capabilities.supportedCompressedTexture || {} as SupportedCompressedTexture;
-            egret.Capabilities.supportedCompressedTexture.pvrtc = !!this.pvrtc;
-            egret.Capabilities.supportedCompressedTexture.etc1 = !!this.etc1;
+            if (egret.Capabilities._supportedCompressedTexture) {
+                egret.Capabilities._supportedCompressedTexture = egret.Capabilities._supportedCompressedTexture || {} as SupportedCompressedTexture;
+                egret.Capabilities._supportedCompressedTexture.pvrtc = !!this.pvrtc;
+                egret.Capabilities._supportedCompressedTexture.etc1 = !!this.etc1;
+            } else {
+                (egret.Capabilities as any)['supportedCompressedTexture'] = egret.Capabilities._supportedCompressedTexture || {} as SupportedCompressedTexture;
+                (egret.Capabilities as any)['supportedCompressedTexture'].pvrtc = !!this.pvrtc;
+                (egret.Capabilities as any)['supportedCompressedTexture'].etc1 = !!this.etc1;
+            }
             //
             this._supportedCompressedTextureInfo = this._buildSupportedCompressedTextureInfo(/*this.context, compressedTextureExNames,*/[this.etc1, this.pvrtc]);
         }
@@ -1049,6 +1055,9 @@ namespace egret.wxgame {
                 else {
                     let value = filter.$uniforms[key];
                     if (value !== undefined) {
+                        if (filter instanceof GlowFilter && (key == "blurX" || key == "blurY" || key == "dist")) {
+                            value = value * filter.$filterScale;
+                        }
                         uniforms[key].setValue(value);
                     } else {
                         // egret.warn("filter custom: uniform " + key + " not defined!");
@@ -1186,7 +1195,8 @@ namespace egret.wxgame {
                     let width: number = input.rootRenderTarget.width;
                     let height: number = input.rootRenderTarget.height;
                     output = WebGLRenderBuffer.create(width, height);
-                    output.setTransform(1, 0, 0, 1, 0, 0);
+                    const scale = Math.max(egret.sys.DisplayList.$canvasScaleFactor, 2);
+                    output.setTransform(scale, 0, 0, scale, 0, 0);
                     output.globalAlpha = 1;
                     this.drawToRenderTarget(filter, input, output);
                     if (input != originInput) {
@@ -1248,13 +1258,13 @@ namespace egret.wxgame {
 
             // 绘制input结果到舞台
             output.saveTransform();
+            const scale = Math.max(egret.sys.DisplayList.$canvasScaleFactor, 2);
+            output.transform(1 / scale, 0, 0, 1 / scale, 0, 0);
             output.transform(1, 0, 0, -1, 0, height);
             output.currentTexture = input.rootRenderTarget.texture;
             this.vao.cacheArrays(output, 0, 0, width, height, 0, 0, width, height, width, height);
             output.restoreTransform();
-
             this.drawCmdManager.pushDrawTexture(input.rootRenderTarget.texture, 2, filter, width, height);
-
             // 释放掉input
             if (input != originInput) {
                 WebGLRenderBuffer.release(input);
