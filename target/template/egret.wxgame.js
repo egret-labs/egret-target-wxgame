@@ -1414,6 +1414,20 @@ r.prototype = e.prototype, t.prototype = new r();
             if (!options) {
                 options = {};
             }
+            if (options.pro) {
+                egret.pro.egret2dDriveMode = true;
+                try {
+                    if (window['startup']) {
+                        window['startup']();
+                    }
+                    else {
+                        console.error("EgretPro.js don't has function:window.startup");
+                    }
+                }
+                catch (e) {
+                    console.error(e);
+                }
+            }
             wxgame.Html5Capatibility.$init();
             if (options.renderMode == "webgl") {
                 var antialias = options.antialias;
@@ -5042,6 +5056,12 @@ if (window['HTMLVideoElement'] == undefined) {
                     buffer.$computeDrawCall = false;
                 }
                 return buffer;
+            };
+            WebGLRenderer.prototype.renderClear = function () {
+                var renderContext = wxgame.WebGLRenderContext.getInstance();
+                var gl = renderContext.context;
+                renderContext.$beforeRender();
+                gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
             };
             return WebGLRenderer;
         }());
