@@ -1391,7 +1391,7 @@ r.prototype = e.prototype, t.prototype = new r();
 (function (egret) {
     var wxgame;
     (function (wxgame) {
-        wxgame.version = "1.3.4";
+        wxgame.version = "1.3.5";
         wxgame.isSubContext = false;
         wxgame.preUploadTexture = false;
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
@@ -5081,7 +5081,9 @@ if (window['HTMLVideoElement'] == undefined) {
                 var renderContext = wxgame.WebGLRenderContext.getInstance();
                 var gl = renderContext.context;
                 renderContext.$beforeRender();
-                gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+                var width = renderContext.surface.width;
+                var height = renderContext.surface.height;
+                gl.viewport(0, 0, width, height);
             };
             return WebGLRenderer;
         }());
