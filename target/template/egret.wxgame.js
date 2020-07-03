@@ -1937,6 +1937,9 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
             if (egret.Capabilities.renderMode == "webgl") {
                 var renderTexture = void 0;
                 if (!texture.$renderBuffer) {
+                    if (egret.sys.systemRenderer.renderClear) {
+                        egret.sys.systemRenderer.renderClear();
+                    }
                     renderTexture = new egret.RenderTexture();
                     renderTexture.drawToTexture(new egret.Bitmap(texture));
                 }
