@@ -1937,6 +1937,9 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
             if (egret.Capabilities.renderMode == "webgl") {
                 var renderTexture = void 0;
                 if (!texture.$renderBuffer) {
+                    if (egret.sys.systemRenderer.renderClear) {
+                        egret.sys.systemRenderer.renderClear();
+                    }
                     renderTexture = new egret.RenderTexture();
                     renderTexture.drawToTexture(new egret.Bitmap(texture));
                 }
@@ -5081,7 +5084,9 @@ if (window['HTMLVideoElement'] == undefined) {
                 var renderContext = wxgame.WebGLRenderContext.getInstance();
                 var gl = renderContext.context;
                 renderContext.$beforeRender();
-                gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+                var width = renderContext.surface.width;
+                var height = renderContext.surface.height;
+                gl.viewport(0, 0, width, height);
             };
             return WebGLRenderer;
         }());
