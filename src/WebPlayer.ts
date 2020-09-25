@@ -237,7 +237,10 @@ namespace egret.wxgame {
                 scaley = displayHeight / stageHeight;
             let canvasScaleX = scalex * sys.DisplayList.$canvasScaleFactor;
             let canvasScaleY = scaley * sys.DisplayList.$canvasScaleFactor;
-            
+
+            canvasScaleX = Math.ceil(canvasScaleX);
+            canvasScaleY = Math.ceil(canvasScaleY);
+
             sys.DisplayList.$setCanvasScale(canvasScaleX, canvasScaleY);
             this.webTouchHandler.updateScaleMode(scalex, scaley, rotation);
             this.player.updateStageSize(stageWidth, stageHeight);//不要在这个方法后面修改属性

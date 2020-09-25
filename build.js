@@ -9,8 +9,8 @@ var commands = process.argv.slice(2);
 var version
 if (commands.length != 1) {
     version = targetJson.version;
-    console.log("没有输入版本号，使用默认版本号:",version);
-}else{
+    console.log("没有输入版本号，使用默认版本号:", version);
+} else {
     version = commands[0];
 }
 

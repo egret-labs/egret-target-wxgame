@@ -739,25 +739,43 @@ namespace egret.wxgame {
                 return;
             }
 
-            if (meshVertices && meshIndices) {
-                if (this.vao.reachMaxSize(meshVertices.length / 2, meshIndices.length)) {
-                    this.$drawWebGL();
+
+            let count: number;
+
+            if (isIOS14Device()) {
+
+                let meshNum = meshIndices && (meshIndices.length / 3) || 0;
+                if (meshIndices) {
+                    if (this.vao.reachMaxSize(meshNum * 4, meshNum * 6)) {
+                        this.$drawWebGL();
+                    }
+                } else {
+                    if (this.vao.reachMaxSize()) {
+                        this.$drawWebGL();
+                    }
                 }
+                if (smoothing != undefined && texture["smoothing"] != smoothing) {
+                    this.drawCmdManager.pushChangeSmoothing(texture, smoothing);
+                }
+                count = meshIndices ? meshNum * 2 : 2;
             } else {
-                if (this.vao.reachMaxSize()) {
-                    this.$drawWebGL();
+                if (meshVertices && meshIndices) {
+                    if (this.vao.reachMaxSize(meshVertices.length / 2, meshIndices.length)) {
+                        this.$drawWebGL();
+                    }
+                } else {
+                    if (this.vao.reachMaxSize()) {
+                        this.$drawWebGL();
+                    }
                 }
+                if (smoothing != undefined && texture["smoothing"] != smoothing) {
+                    this.drawCmdManager.pushChangeSmoothing(texture, smoothing);
+                }
+                if (meshUVs) {
+                    this.vao.changeToMeshIndices();
+                }
+                count = meshIndices ? meshIndices.length / 3 : 2;
             }
-
-            if (smoothing != undefined && texture["smoothing"] != smoothing) {
-                this.drawCmdManager.pushChangeSmoothing(texture, smoothing);
-            }
-
-            if (meshUVs) {
-                this.vao.changeToMeshIndices();
-            }
-
-            let count = meshIndices ? meshIndices.length / 3 : 2;
             // 应用$filter，因为只可能是colorMatrixFilter，最后两个参数可不传
             this.drawCmdManager.pushDrawTexture(texture, count, this.$filter, textureWidth, textureHeight);
             buffer.currentTexture = texture;
@@ -1016,7 +1034,7 @@ namespace egret.wxgame {
 
         public currentProgram: EgretWebGLProgram;
         private activeProgram(gl: WebGLRenderingContext, program: EgretWebGLProgram): void {
-            if (program != this.currentProgram) {
+            if (egret.pro.egret2dDriveMode || program != this.currentProgram) {
                 gl.useProgram(program.id);
 
                 // 目前所有attribute buffer的绑定方法都是一致的

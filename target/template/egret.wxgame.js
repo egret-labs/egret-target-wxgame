@@ -1884,6 +1884,8 @@ egret.Capabilities["runtimeType" + ""] = egret.RuntimeType.WXGAME;
                 var scalex = displayWidth / stageWidth, scaley = displayHeight / stageHeight;
                 var canvasScaleX = scalex * egret.sys.DisplayList.$canvasScaleFactor;
                 var canvasScaleY = scaley * egret.sys.DisplayList.$canvasScaleFactor;
+                canvasScaleX = Math.ceil(canvasScaleX);
+                canvasScaleY = Math.ceil(canvasScaleY);
                 egret.sys.DisplayList.$setCanvasScale(canvasScaleX, canvasScaleY);
                 this.webTouchHandler.updateScaleMode(scalex, scaley, rotation);
                 this.player.updateStageSize(stageWidth, stageHeight);
@@ -2705,36 +2707,98 @@ if (window['HTMLVideoElement'] == undefined) {
                     }
                 }
                 if (meshVertices) {
-                    var vertices = this.vertices;
-                    var verticesUint32View = this._verticesUint32View;
-                    var index = this.vertexIndex * this.vertSize;
-                    var i = 0, iD = 0, l = 0;
-                    var u = 0, v = 0, x = 0, y = 0;
-                    for (i = 0, l = meshUVs.length; i < l; i += 2) {
-                        iD = index + i * 5 / 2;
-                        x = meshVertices[i];
-                        y = meshVertices[i + 1];
-                        u = meshUVs[i];
-                        v = meshUVs[i + 1];
-                        vertices[iD + 0] = a * x + c * y + tx;
-                        vertices[iD + 1] = b * x + d * y + ty;
-                        if (rotated) {
-                            vertices[iD + 2] = (sourceX + (1.0 - v) * sourceHeight) / textureSourceWidth;
-                            vertices[iD + 3] = (sourceY + u * sourceWidth) / textureSourceHeight;
+                    if (isIOS14Device()) {
+                        var vertData = [];
+                        var vertices = this.vertices;
+                        var verticesUint32View = this._verticesUint32View;
+                        var index = this.vertexIndex * this.vertSize;
+                        var i = 0, iD = 0, l = 0;
+                        var u = 0, v = 0, x = 0, y = 0;
+                        for (i = 0, l = meshUVs.length; i < l; i += 2) {
+                            iD = index + i * 5 / 2;
+                            x = meshVertices[i];
+                            y = meshVertices[i + 1];
+                            u = meshUVs[i];
+                            v = meshUVs[i + 1];
+                            if (rotated) {
+                                vertData.push([
+                                    a * x + c * y + tx,
+                                    b * x + d * y + ty,
+                                    (sourceX + (1.0 - v) * sourceHeight) / textureSourceWidth,
+                                    (sourceY + u * sourceWidth) / textureSourceHeight,
+                                ]);
+                            }
+                            else {
+                                vertData.push([
+                                    a * x + c * y + tx,
+                                    b * x + d * y + ty,
+                                    (sourceX + u * sourceWidth) / textureSourceWidth,
+                                    (sourceY + v * sourceHeight) / textureSourceHeight,
+                                ]);
+                            }
+                            verticesUint32View[iD + 4] = alpha;
                         }
-                        else {
-                            vertices[iD + 2] = (sourceX + u * sourceWidth) / textureSourceWidth;
-                            vertices[iD + 3] = (sourceY + v * sourceHeight) / textureSourceHeight;
+                        for (var i_1 = 0; i_1 < meshIndices.length; i_1 += 3) {
+                            var data0 = vertData[meshIndices[i_1]];
+                            vertices[index++] = data0[0];
+                            vertices[index++] = data0[1];
+                            vertices[index++] = data0[2];
+                            vertices[index++] = data0[3];
+                            verticesUint32View[index++] = alpha;
+                            var data1 = vertData[meshIndices[i_1 + 1]];
+                            vertices[index++] = data1[0];
+                            vertices[index++] = data1[1];
+                            vertices[index++] = data1[2];
+                            vertices[index++] = data1[3];
+                            verticesUint32View[index++] = alpha;
+                            var data2 = vertData[meshIndices[i_1 + 2]];
+                            vertices[index++] = data2[0];
+                            vertices[index++] = data2[1];
+                            vertices[index++] = data2[2];
+                            vertices[index++] = data2[3];
+                            verticesUint32View[index++] = alpha;
+                            vertices[index++] = data2[0];
+                            vertices[index++] = data2[1];
+                            vertices[index++] = data2[2];
+                            vertices[index++] = data2[3];
+                            verticesUint32View[index++] = alpha;
                         }
-                        verticesUint32View[iD + 4] = alpha;
+                        var meshNum = meshIndices.length / 3;
+                        this.vertexIndex += 4 * meshNum;
+                        this.indexIndex += 6 * meshNum;
                     }
-                    if (this.hasMesh) {
-                        for (var i_1 = 0, l_1 = meshIndices.length; i_1 < l_1; ++i_1) {
-                            this.indicesForMesh[this.indexIndex + i_1] = meshIndices[i_1] + this.vertexIndex;
+                    else {
+                        var vertices = this.vertices;
+                        var verticesUint32View = this._verticesUint32View;
+                        var index = this.vertexIndex * this.vertSize;
+                        var i = 0, iD = 0, l = 0;
+                        var u = 0, v = 0, x = 0, y = 0;
+                        for (i = 0, l = meshUVs.length; i < l; i += 2) {
+                            iD = index + i * 5 / 2;
+                            x = meshVertices[i];
+                            y = meshVertices[i + 1];
+                            u = meshUVs[i];
+                            v = meshUVs[i + 1];
+                            vertices[iD + 0] = a * x + c * y + tx;
+                            vertices[iD + 1] = b * x + d * y + ty;
+                            if (rotated) {
+                                vertices[iD + 2] = (sourceX + (1.0 - v) * sourceHeight) / textureSourceWidth;
+                                vertices[iD + 3] = (sourceY + u * sourceWidth) / textureSourceHeight;
+                            }
+                            else {
+                                vertices[iD + 2] = (sourceX + u * sourceWidth) / textureSourceWidth;
+                                vertices[iD + 3] = (sourceY + v * sourceHeight) / textureSourceHeight;
+                            }
+                            verticesUint32View[iD + 4] = alpha;
                         }
+                        if (this.hasMesh) {
+                            for (var i_2 = 0, l_1 = meshIndices.length; i_2 < l_1; ++i_2) {
+                                this.indicesForMesh[this.indexIndex + i_2] = meshIndices[i_2] + this.vertexIndex;
+                            }
+                        }
+                        this.vertexIndex += meshUVs.length / 2;
+                        this.indexIndex += meshIndices.length;
                     }
-                    this.vertexIndex += meshUVs.length / 2;
-                    this.indexIndex += meshIndices.length;
                 }
                 else {
                     var width = textureSourceWidth;
@@ -2817,6 +2881,13 @@ if (window['HTMLVideoElement'] == undefined) {
         }());
         wxgame.WebGLVertexArrayObject = WebGLVertexArrayObject;
         __reflect(WebGLVertexArrayObject.prototype, "egret.wxgame.WebGLVertexArrayObject");
+        function isIOS14Device() {
+            return egret.Capabilities.runtimeType == egret.RuntimeType.WEB
+                && egret.Capabilities.os == "iOS"
+                && egret.Capabilities.isMobile
+                && /iPhone OS 14/.test(window.navigator.userAgent);
+        }
+        wxgame.isIOS14Device = isIOS14Device;
     })(wxgame = egret.wxgame || (egret.wxgame = {}));
 })(egret || (egret = {}));
 
@@ -3330,23 +3401,43 @@ if (window['HTMLVideoElement'] == undefined) {
                 if (this.contextLost || !texture || !buffer) {
                     return;
                 }
-                if (meshVertices && meshIndices) {
-                    if (this.vao.reachMaxSize(meshVertices.length / 2, meshIndices.length)) {
-                        this.$drawWebGL();
+                var count;
+                if (wxgame.isIOS14Device()) {
+                    var meshNum = meshIndices && (meshIndices.length / 3) || 0;
+                    if (meshIndices) {
+                        if (this.vao.reachMaxSize(meshNum * 4, meshNum * 6)) {
+                            this.$drawWebGL();
+                        }
                     }
+                    else {
+                        if (this.vao.reachMaxSize()) {
+                            this.$drawWebGL();
+                        }
+                    }
+                    if (smoothing != undefined && texture["smoothing"] != smoothing) {
+                        this.drawCmdManager.pushChangeSmoothing(texture, smoothing);
+                    }
+                    count = meshIndices ? meshNum * 2 : 2;
                 }
                 else {
-                    if (this.vao.reachMaxSize()) {
-                        this.$drawWebGL();
+                    if (meshVertices && meshIndices) {
+                        if (this.vao.reachMaxSize(meshVertices.length / 2, meshIndices.length)) {
+                            this.$drawWebGL();
+                        }
                     }
+                    else {
+                        if (this.vao.reachMaxSize()) {
+                            this.$drawWebGL();
+                        }
+                    }
+                    if (smoothing != undefined && texture["smoothing"] != smoothing) {
+                        this.drawCmdManager.pushChangeSmoothing(texture, smoothing);
+                    }
+                    if (meshUVs) {
+                        this.vao.changeToMeshIndices();
+                    }
+                    count = meshIndices ? meshIndices.length / 3 : 2;
                 }
-                if (smoothing != undefined && texture["smoothing"] != smoothing) {
-                    this.drawCmdManager.pushChangeSmoothing(texture, smoothing);
-                }
-                if (meshUVs) {
-                    this.vao.changeToMeshIndices();
-                }
-                var count = meshIndices ? meshIndices.length / 3 : 2;
                 this.drawCmdManager.pushDrawTexture(texture, count, this.$filter, textureWidth, textureHeight);
                 buffer.currentTexture = texture;
                 this.vao.cacheArrays(buffer, sourceX, sourceY, sourceWidth, sourceHeight, destX, destY, destWidth, destHeight, textureWidth, textureHeight, meshUVs, meshVertices, meshIndices, rotated);
@@ -3545,7 +3636,7 @@ if (window['HTMLVideoElement'] == undefined) {
                 return offset;
             };
             WebGLRenderContext.prototype.activeProgram = function (gl, program) {
-                if (program != this.currentProgram) {
+                if (egret.pro.egret2dDriveMode || program != this.currentProgram) {
                     gl.useProgram(program.id);
                     var attribute = program.attributes;
                     for (var key in attribute) {
