@@ -74,9 +74,7 @@ function loadImage(imageURL, scale9grid) {
             if (scale9grid) {
                 texture["scale9Grid"] = scale9grid;
             }
-            setTimeout(() => {
-                resolve(texture);
-            }, 0);
+            resolve(texture);
 
         }
         image.onerror = (e) => {
