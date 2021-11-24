@@ -60,7 +60,7 @@ class ImageProcessor {
     }
 }
 
-
+let systemInfo;
 
 function loadImage(imageURL, scale9grid) {
     return new Promise((resolve, reject) => {
@@ -74,7 +74,16 @@ function loadImage(imageURL, scale9grid) {
             if (scale9grid) {
                 texture["scale9Grid"] = scale9grid;
             }
-            resolve(texture);
+            if (systemInfo == null) {
+                systemInfo = wx.getSystemInfoSync();
+            }
+            if (systemInfo.platform == "ios") {
+                setTimeout(() => {
+                    resolve(texture);
+                }, 0);
+            } else {
+                resolve(texture);
+            }
 
         }
         image.onerror = (e) => {
