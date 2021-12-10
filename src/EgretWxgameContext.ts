@@ -80,7 +80,9 @@ namespace egret.wxgame {
         }
         // 是否启动3d环境
         if (options.pro) {
-            egret.pro.egret2dDriveMode = true;
+            if(egret.pro!=undefined){
+                egret.pro.egret2dDriveMode = true;
+            }
             try {
                 if (window['startup']) {
                     window['startup']();

@@ -1415,7 +1415,9 @@ r.prototype = e.prototype, t.prototype = new r();
                 options = {};
             }
             if (options.pro) {
-                egret.pro.egret2dDriveMode = true;
+                if (egret.pro != undefined) {
+                    egret.pro.egret2dDriveMode = true;
+                }
                 try {
                     if (window['startup']) {
                         window['startup']();
@@ -3099,19 +3101,19 @@ if (window['HTMLVideoElement'] == undefined) {
                     }
                     var info = {
                         extensionName: extension.name,
-                        supportedFormats: []
+                        supportedFormats: [],
                     };
                     for (var key in extension) {
                         info.supportedFormats.push([key, extension[key]]);
                     }
                     if (true) {
                         if (info.supportedFormats.length === 0) {
-                            console.error('buildSupportedCompressedTextureInfo failed = ' + extension.name);
+                            console.error("buildSupportedCompressedTextureInfo failed = " + extension.name);
                         }
                         else {
-                            egret.log('support: ' + extension.name);
+                            egret.log("support: " + extension.name);
                             for (var key in extension) {
-                                egret.log(key, extension[key], '0x' + extension[key].toString(16));
+                                egret.log(key, extension[key], "0x" + extension[key].toString(16));
                             }
                         }
                     }
@@ -3128,26 +3130,39 @@ if (window['HTMLVideoElement'] == undefined) {
                 this.$maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
             };
             WebGLRenderContext.prototype.getSupportedCompressedTexture = function () {
-                var gl = this.context ? this.context : egret.sys.getContextWebGL(this.surface);
-                this.pvrtc = gl.getExtension('WEBGL_compressed_texture_pvrtc') || gl.getExtension('WEBKIT_WEBGL_compressed_texture_pvrtc');
+                var gl = this.context
+                    ? this.context
+                    : egret.sys.getContextWebGL(this.surface);
+                this.pvrtc =
+                    gl.getExtension("WEBGL_compressed_texture_pvrtc") ||
+                        gl.getExtension("WEBKIT_WEBGL_compressed_texture_pvrtc");
                 if (this.pvrtc) {
-                    this.pvrtc.name = 'WEBGL_compressed_texture_pvrtc';
+                    this.pvrtc.name = "WEBGL_compressed_texture_pvrtc";
                 }
-                this.etc1 = gl.getExtension('WEBGL_compressed_texture_etc1') || gl.getExtension('WEBKIT_WEBGL_compressed_texture_etc1');
+                this.etc1 =
+                    gl.getExtension("WEBGL_compressed_texture_etc1") ||
+                        gl.getExtension("WEBKIT_WEBGL_compressed_texture_etc1");
                 if (this.etc1) {
-                    this.etc1.name = 'WEBGL_compressed_texture_etc1';
+                    this.etc1.name = "WEBGL_compressed_texture_etc1";
                 }
                 if (egret.Capabilities._supportedCompressedTexture) {
-                    egret.Capabilities._supportedCompressedTexture = egret.Capabilities._supportedCompressedTexture || {};
+                    egret.Capabilities._supportedCompressedTexture =
+                        egret.Capabilities._supportedCompressedTexture ||
+                            {};
                     egret.Capabilities._supportedCompressedTexture.pvrtc = !!this.pvrtc;
                     egret.Capabilities._supportedCompressedTexture.etc1 = !!this.etc1;
                 }
                 else {
-                    egret.Capabilities['supportedCompressedTexture'] = egret.Capabilities._supportedCompressedTexture || {};
-                    egret.Capabilities['supportedCompressedTexture'].pvrtc = !!this.pvrtc;
-                    egret.Capabilities['supportedCompressedTexture'].etc1 = !!this.etc1;
+                    egret.Capabilities["supportedCompressedTexture"] =
+                        egret.Capabilities._supportedCompressedTexture ||
+                            {};
+                    egret.Capabilities["supportedCompressedTexture"].pvrtc =
+                        !!this.pvrtc;
+                    egret.Capabilities["supportedCompressedTexture"].etc1 =
+                        !!this.etc1;
                 }
-                this._supportedCompressedTextureInfo = this._buildSupportedCompressedTextureInfo([this.etc1, this.pvrtc]);
+                this._supportedCompressedTextureInfo =
+                    this._buildSupportedCompressedTextureInfo([this.etc1, this.pvrtc]);
             };
             WebGLRenderContext.prototype.handleContextLost = function () {
                 this.contextLost = true;
@@ -3210,14 +3225,18 @@ if (window['HTMLVideoElement'] == undefined) {
             WebGLRenderContext.prototype.$debugLogCompressedTextureNotSupported = function (supportedCompressedTextureInfo, internalFormat) {
                 if (!debugLogCompressedTextureNotSupported[internalFormat]) {
                     debugLogCompressedTextureNotSupported[internalFormat] = true;
-                    egret.log('internalFormat = ' + internalFormat + ':' + ('0x' + internalFormat.toString(16)) + ', the current hardware does not support the corresponding compression format.');
+                    egret.log("internalFormat = " +
+                        internalFormat +
+                        ":" +
+                        ("0x" + internalFormat.toString(16)) +
+                        ", the current hardware does not support the corresponding compression format.");
                     for (var i = 0, length_3 = supportedCompressedTextureInfo.length; i < length_3; ++i) {
                         var ss = supportedCompressedTextureInfo[i];
                         if (ss.supportedFormats.length > 0) {
-                            egret.log('support = ' + ss.extensionName);
+                            egret.log("support = " + ss.extensionName);
                             for (var j = 0, length_4 = ss.supportedFormats.length; j < length_4; ++j) {
                                 var tp = ss.supportedFormats[j];
-                                egret.log(tp[0] + ' : ' + tp[1] + ' : ' + ('0x' + tp[1].toString(16)));
+                                egret.log(tp[0] + " : " + tp[1] + " : " + ("0x" + tp[1].toString(16)));
                             }
                         }
                     }
@@ -3260,7 +3279,7 @@ if (window['HTMLVideoElement'] == undefined) {
                         var size = 16;
                         var canvas = egret.sys.createCanvas(size, size);
                         var context = egret.sys.getContext2d(canvas);
-                        context.fillStyle = 'white';
+                        context.fillStyle = "white";
                         context.fillRect(0, 0, size, size);
                         this._defaultEmptyTexture = this.createTexture(canvas);
                         this._defaultEmptyTexture[egret.engine_default_empty_texture] = true;
@@ -3288,7 +3307,7 @@ if (window['HTMLVideoElement'] == undefined) {
                     }
                     if (bitmapData.$deleteSource && bitmapData.webGLTexture) {
                         if (bitmapData.source) {
-                            bitmapData.source.src = '';
+                            bitmapData.source.src = "";
                             bitmapData.source = null;
                         }
                         bitmapData.clearCompressedTextureData();
@@ -3300,7 +3319,10 @@ if (window['HTMLVideoElement'] == undefined) {
                 return bitmapData.webGLTexture;
             };
             WebGLRenderContext.prototype.clearRect = function (x, y, width, height) {
-                if (x != 0 || y != 0 || width != this.surface.width || height != this.surface.height) {
+                if (x != 0 ||
+                    y != 0 ||
+                    width != this.surface.width ||
+                    height != this.surface.height) {
                     var buffer = this.currentBuffer;
                     if (buffer.$hasScissor) {
                         this.setGlobalCompositeOperation("destination-out");
@@ -3403,7 +3425,7 @@ if (window['HTMLVideoElement'] == undefined) {
                 }
                 var count;
                 if (wxgame.isIOS14Device()) {
-                    var meshNum = meshIndices && (meshIndices.length / 3) || 0;
+                    var meshNum = (meshIndices && meshIndices.length / 3) || 0;
                     if (meshIndices) {
                         if (this.vao.reachMaxSize(meshNum * 4, meshNum * 6)) {
                             this.$drawWebGL();
@@ -3509,7 +3531,10 @@ if (window['HTMLVideoElement'] == undefined) {
                     if (data.type == 7) {
                         this.activatedBuffer = data.buffer;
                     }
-                    if (data.type == 0 || data.type == 1 || data.type == 2 || data.type == 3) {
+                    if (data.type == 0 ||
+                        data.type == 1 ||
+                        data.type == 2 ||
+                        data.type == 3) {
                         if (this.activatedBuffer && this.activatedBuffer.$computeDrawCall) {
                             this.activatedBuffer.$drawCalls++;
                         }
@@ -3636,7 +3661,8 @@ if (window['HTMLVideoElement'] == undefined) {
                 return offset;
             };
             WebGLRenderContext.prototype.activeProgram = function (gl, program) {
-                if (egret.pro.egret2dDriveMode || program != this.currentProgram) {
+                if ((egret.pro && egret.pro.egret2dDriveMode) ||
+                    program != this.currentProgram) {
                     gl.useProgram(program.id);
                     var attribute = program.attributes;
                     for (var key in attribute) {
@@ -3678,14 +3704,24 @@ if (window['HTMLVideoElement'] == undefined) {
                     else {
                         var value = filter.$uniforms[key];
                         if (value !== undefined) {
-                            if ((filter.type == "glow" || filter.type.indexOf("blur") == 0)) {
-                                if ((key == "blurX" || key == "blurY" || key == "dist")) {
+                            if (filter.type == "glow" || filter.type.indexOf("blur") == 0) {
+                                if (key == "blurX" || key == "blurY" || key == "dist") {
                                     value = value * (filter.$uniforms.$filterScale || 1);
                                 }
-                                else if (key == "blur" && value.x != undefined && value.y != undefined) {
+                                else if (key == "blur" &&
+                                    value.x != undefined &&
+                                    value.y != undefined) {
                                     var newValue = { x: 0, y: 0 };
-                                    newValue.x = value.x * (filter.$uniforms.$filterScale != undefined ? filter.$uniforms.$filterScale : 1);
-                                    newValue.y = value.y * (filter.$uniforms.$filterScale != undefined ? filter.$uniforms.$filterScale : 1);
+                                    newValue.x =
+                                        value.x *
+                                            (filter.$uniforms.$filterScale != undefined
+                                                ? filter.$uniforms.$filterScale
+                                                : 1);
+                                    newValue.y =
+                                        value.y *
+                                            (filter.$uniforms.$filterScale != undefined
+                                                ? filter.$uniforms.$filterScale
+                                                : 1);
                                     uniforms[key].setValue(newValue);
                                     continue;
                                 }
@@ -3721,10 +3757,10 @@ if (window['HTMLVideoElement'] == undefined) {
                     var level = buffer.stencilHandleCount;
                     buffer.stencilHandleCount++;
                     gl.colorMask(false, false, false, false);
-                    gl.stencilFunc(gl.EQUAL, level, 0xFF);
+                    gl.stencilFunc(gl.EQUAL, level, 0xff);
                     gl.stencilOp(gl.KEEP, gl.KEEP, gl.INCR);
                     gl.drawElements(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, offset * 2);
-                    gl.stencilFunc(gl.EQUAL, level + 1, 0xFF);
+                    gl.stencilFunc(gl.EQUAL, level + 1, 0xff);
                     gl.colorMask(true, true, true, true);
                     gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
                 }
@@ -3742,10 +3778,10 @@ if (window['HTMLVideoElement'] == undefined) {
                     else {
                         var level = buffer.stencilHandleCount;
                         gl.colorMask(false, false, false, false);
-                        gl.stencilFunc(gl.EQUAL, level + 1, 0xFF);
+                        gl.stencilFunc(gl.EQUAL, level + 1, 0xff);
                         gl.stencilOp(gl.KEEP, gl.KEEP, gl.DECR);
                         gl.drawElements(gl.TRIANGLES, size, gl.UNSIGNED_SHORT, offset * 2);
-                        gl.stencilFunc(gl.EQUAL, level, 0xFF);
+                        gl.stencilFunc(gl.EQUAL, level, 0xff);
                         gl.colorMask(true, true, true, true);
                         gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
                     }
